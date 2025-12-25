@@ -60,11 +60,26 @@ async function importLeads() {
         // 'A1' -> age (assuming Q1 is age question)
         // 'A3' -> dilemma
 
+        // regex to extract email
+        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
+
+        let extractedEmail = null;
+        // Search in all fields for an email
+        Object.values(row).forEach(val => {
+            if (typeof val === 'string') {
+                const match = val.match(emailRegex);
+                if (match) {
+                    extractedEmail = match[0];
+                }
+            }
+        });
+
         const lead = {
             facebook_user_id: row['User ID'] || row['UserLink'] || `manual_${Date.now()}_${Math.random()}`, // Fallback
             full_name: row['Full Name'],
             age: row['A1'],
             dilemma: row['A3'], // The crucial field
+            email: extractedEmail, // We found it!
             profile_link: (row['User ID'] && row['User ID'].includes('http')) ? row['User ID'] : null,
             joined_group_at: row['Date Added'], // Mapping "Date Added" to joined_at
             city: row['Location'],

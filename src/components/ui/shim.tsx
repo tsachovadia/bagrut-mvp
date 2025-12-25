@@ -66,35 +66,30 @@ export const TableCell = ({ children, className = '' }: any) => (
     <td className={`px-6 py-4 whitespace-nowrap ${className}`}>{children}</td>
 );
 
-// Tabs Shim
+// Tabs Shim using Context
+const TabsContext = React.createContext<{ activeTab: string; setActiveTab: (v: string) => void } | null>(null);
+
 export const Tabs = ({ defaultValue, children, className = '' }: any) => {
     const [activeTab, setActiveTab] = React.useState(defaultValue);
-
     return (
-        <div className={className}>
-            {React.Children.map(children, child => {
-                if (React.isValidElement(child)) {
-                    return React.cloneElement(child, { activeTab, setActiveTab } as any);
-                }
-                return child;
-            })}
-        </div>
+        <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+            <div className={className}>{children}</div>
+        </TabsContext.Provider>
     );
 };
 
-export const TabsList = ({ children, className = '', activeTab, setActiveTab }: any) => (
+export const TabsList = ({ children, className = '' }: any) => (
     <div className={`flex space-x-1 rounded-xl bg-gray-100 p-1 ${className}`}>
-        {React.Children.map(children, child => {
-            if (React.isValidElement(child)) {
-                return React.cloneElement(child, { activeTab, setActiveTab } as any);
-            }
-            return child;
-        })}
+        {children}
     </div>
 );
 
-export const TabsTrigger = ({ value, children, className = '', activeTab, setActiveTab }: any) => {
+export const TabsTrigger = ({ value, children, className = '' }: any) => {
+    const context = React.useContext(TabsContext);
+    if (!context) throw new Error("TabsTrigger must be used within Tabs");
+    const { activeTab, setActiveTab } = context;
     const isActive = activeTab === value;
+
     return (
         <button
             className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 ${isActive
@@ -108,7 +103,11 @@ export const TabsTrigger = ({ value, children, className = '', activeTab, setAct
     );
 };
 
-export const TabsContent = ({ value, children, className = '', activeTab }: any) => {
+export const TabsContent = ({ value, children, className = '' }: any) => {
+    const context = React.useContext(TabsContext);
+    if (!context) throw new Error("TabsContent must be used within Tabs");
+    const { activeTab } = context;
+
     if (value !== activeTab) return null;
     return <div className={`mt-2 ${className}`}>{children}</div>;
 };
