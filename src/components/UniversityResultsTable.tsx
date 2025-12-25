@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Progress, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/shim';
-import { CheckCircle, AlertTriangle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Clock, MessageCircle } from "lucide-react";
 import { getDegree } from '../utils/degrees';
 
 interface UniversityAverage {
@@ -84,6 +84,16 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                     </Table>
                 </div>
             </CardContent>
+            {/* Conversion Button */}
+            <div className="p-6 pt-0 flex justify-center">
+                <Button
+                    onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')}
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-6 px-8 rounded-full shadow-xl transition-all hover:scale-105 flex items-center gap-3 text-lg"
+                >
+                    <MessageCircle className="h-6 w-6" />
+                    মבולבל מהתוצאות? בוא להתייעץ איתנו בקבוצה השקטה
+                </Button>
+            </div>
         </Card>
     );
 };
