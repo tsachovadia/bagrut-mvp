@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Lead } from '../types/supabase';
-import { Card, CardContent, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge } from './ui/shim';
-import { Loader2, MessageSquare, Send, RefreshCw, Wand2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Tabs, TabsList, TabsTrigger, TabsContent } from './ui/shim';
+import { Loader2, MessageSquare, Send, RefreshCw, Wand2, ChevronDown, ChevronUp } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
     const [leads, setLeads] = useState<Lead[]>([]);
@@ -50,14 +50,30 @@ export const AdminDashboard: React.FC = () => {
         }, 1500);
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'new': return 'bg-blue-100 text-blue-800';
-            case 'draft_generated': return 'bg-purple-100 text-purple-800';
-            case 'sent': return 'bg-green-100 text-green-800';
-            case 'replied': return 'bg-yellow-100 text-yellow-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
+    const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null);
+
+    const toggleRow = (id: string) => {
+        setExpandedLeadId(expandedLeadId === id ? null : id);
+    };
+
+    const StatusBadge = ({ status }: { status: string }) => {
+        const colors: Record<string, string> = {
+            new: 'bg-blue-100 text-blue-800',
+            draft_generated: 'bg-purple-100 text-purple-800',
+            sent: 'bg-green-100 text-green-800',
+            replied: 'bg-yellow-100 text-yellow-800'
+        };
+        const labels: Record<string, string> = {
+            new: 'חדש',
+            draft_generated: 'טיוטה מוכנה',
+            sent: 'נשלח',
+            replied: 'השיב'
+        };
+        return (
+            <Badge className={`${colors[status] || 'bg-gray-100'} px-2 py-0.5`}>
+                {labels[status] || status}
+            </Badge>
+        );
     };
 
     return (
@@ -75,128 +91,138 @@ export const AdminDashboard: React.FC = () => {
                             <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
                         </div>
                     ) : (
-                        <div className="overflow-hidden border rounded-lg">
-                            <Table className="table-fixed w-full text-xs">
+                        <div className="overflow-hidden border rounded-lg bg-white">
+                            <Table className="w-full">
                                 <TableHeader>
-                                    <TableRow className="bg-gray-100">
-                                        <TableHead className="w-[18%] text-right font-bold">פרטים אישיים</TableHead>
-                                        <TableHead className="w-[12%] text-right font-bold">מיקום/תואר</TableHead>
-                                        <TableHead className="w-[30%] text-right font-bold">דילמה</TableHead>
-                                        <TableHead className="w-[10%] text-right font-bold">סטטוס</TableHead>
-                                        <TableHead className="w-[10%] text-right font-bold">יצירת קשר</TableHead>
-                                        <TableHead className="w-[12%] text-right font-bold">טיוטה</TableHead>
-                                        <TableHead className="w-[8%] text-right font-bold">פעולות</TableHead>
+                                    <TableRow className="bg-gray-50 text-sm">
+                                        <TableHead className="w-[5%]"></TableHead>
+                                        <TableHead className="w-[20%] text-right">שם מלא</TableHead>
+                                        <TableHead className="w-[15%] text-right bg-blue-50/50">סטטוס</TableHead>
+                                        <TableHead className="w-[20%] text-right">דואר אלקטרוני</TableHead>
+                                        <TableHead className="w-[20%] text-right">תאריך יצירה</TableHead>
+                                        <TableHead className="w-[20%] text-right">פעולות מהירות</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {leads.map((lead) => {
-                                        // Calculate Age
-                                        let displayAge = lead.age;
-                                        if (lead.age && lead.joined_group_at) {
-                                            const joinedDate = new Date(lead.joined_group_at);
-                                            const now = new Date();
-                                            const yearsDiff = now.getFullYear() - joinedDate.getFullYear();
-                                            const numericAge = parseInt(lead.age);
-                                            if (!isNaN(numericAge)) {
-                                                displayAge = `${numericAge + yearsDiff}`;
-                                            }
-                                        }
-
-                                        const dateStr = lead.joined_group_at ? new Date(lead.joined_group_at).toLocaleDateString('he-IL') : '';
-                                        const createdStr = new Date(lead.created_at).toLocaleDateString('he-IL');
-
-                                        return (
-                                            <TableRow key={lead.id} className="hover:bg-gray-50 transition-colors border-b">
-                                                <TableCell className="align-top py-3 pr-4">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="font-bold text-sm text-gray-900">{lead.full_name}</span>
-                                                        <div className="flex items-center gap-2 text-gray-600">
-                                                            <span>גיל: {displayAge}</span>
-                                                            <span>•</span>
-                                                            <span>{dateStr}</span>
-                                                        </div>
-                                                        <div className="flex flex-col gap-0.5 mt-1">
-                                                            <span className="text-[10px] text-gray-400 font-mono" title="Facebook User ID">
-                                                                ID: {lead.facebook_user_id.slice(0, 10)}...
-                                                            </span>
-                                                            <span className="text-[10px] text-gray-400">
-                                                                נוצר: {createdStr}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                    {leads.map((lead) => (
+                                        <React.Fragment key={lead.id}>
+                                            <TableRow
+                                                className={`cursor-pointer transition-colors ${expandedLeadId === lead.id ? 'bg-blue-50/50' : 'hover:bg-gray-50'}`}
+                                                onClick={() => toggleRow(lead.id)}
+                                            >
+                                                <TableCell>
+                                                    {expandedLeadId === lead.id ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                                                 </TableCell>
-                                                <TableCell className="align-top py-3">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="font-medium text-gray-800">{lead.city || '-'}</span>
-                                                        <span className="text-blue-600 font-medium text-[11px] leading-tight">{lead.target_degree || '-'}</span>
-                                                    </div>
+                                                <TableCell className="font-medium text-gray-900">{lead.full_name}</TableCell>
+                                                <TableCell className="bg-blue-50/30"><StatusBadge status={lead.status} /></TableCell>
+                                                <TableCell className="text-gray-600">{lead.email || '-'}</TableCell>
+                                                <TableCell className="text-gray-500 text-sm">
+                                                    {new Date(lead.created_at).toLocaleDateString('he-IL')}
                                                 </TableCell>
-                                                <TableCell className="align-top py-3">
-                                                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                                                        {lead.dilemma || '-'}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="align-top py-3">
-                                                    <Badge className={`${getStatusColor(lead.status)} text-[10px] px-2 py-0.5 whitespace-nowrap`}>
-                                                        {lead.status === 'new' ? 'חדש' :
-                                                            lead.status === 'draft_generated' ? 'טיוטה' :
-                                                                lead.status === 'sent' ? 'נשלח' : lead.status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="align-top py-3">
-                                                    <div className="flex flex-col gap-2 items-start">
+                                                <TableCell>
+                                                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                                                         {lead.profile_link && (
-                                                            <button onClick={() => window.open(lead.profile_link!, '_blank')} className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors">
-                                                                <MessageSquare className="w-3.5 h-3.5" />
-                                                                <span className="underline">פרופיל</span>
-                                                            </button>
-                                                        )}
-                                                        {lead.email && (
-                                                            <span className="text-gray-500 break-all">{lead.email}</span>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="align-top py-3">
-                                                    {lead.ai_draft ? (
-                                                        <div className="bg-white p-2 border rounded shadow-sm max-h-24 overflow-y-auto text-gray-600 text-[11px] leading-relaxed custom-scrollbar">
-                                                            {lead.ai_draft}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-gray-400 italic">---</span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="align-top py-3">
-                                                    <div className="flex flex-col gap-2">
-                                                        {!lead.ai_draft && (
-                                                            <Button
-                                                                size="sm"
-                                                                className="bg-purple-600 hover:bg-purple-700 w-full h-8 flex items-center justify-center gap-1.5 text-white shadow-sm"
-                                                                onClick={() => handleGenerateDraft(lead)}
-                                                                disabled={!!generatingId}
-                                                            >
-                                                                {generatingId === lead.id ? <Loader2 className="animate-spin w-3 h-3" /> : <Wand2 className="w-3.5 h-3.5" />}
-                                                                <span>AI</span>
+                                                            <Button variant="ghost" size="sm" onClick={() => window.open(lead.profile_link!, '_blank')}>
+                                                                <MessageSquare className="w-4 h-4 text-blue-600" />
                                                             </Button>
                                                         )}
                                                         {lead.ai_draft && (
-                                                            <Button
-                                                                size="sm"
-                                                                className="bg-green-600 hover:bg-green-700 w-full h-8 flex items-center justify-center gap-1.5 text-white shadow-sm"
-                                                                onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(lead.ai_draft || '')}`, '_blank')}
-                                                            >
-                                                                <Send className="w-3.5 h-3.5" />
-                                                                <span>שלח</span>
+                                                            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8 w-8 p-0 rounded-full" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(lead.ai_draft || '')}`, '_blank')}>
+                                                                <Send className="w-4 h-4" />
                                                             </Button>
                                                         )}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
-                                        );
-                                    })}
+                                            {expandedLeadId === lead.id && (
+                                                <TableRow className="bg-gray-50/50">
+                                                    <TableCell colSpan={6} className="p-4">
+                                                        <div className="bg-white border rounded-lg p-6 shadow-sm" onClick={(e) => e.stopPropagation()}>
+                                                            <Tabs defaultValue="overview" className="w-full">
+                                                                <TabsList className="grid w-full grid-cols-4 mb-4">
+                                                                    <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
+                                                                    <TabsTrigger value="dilemma">הדילמה</TabsTrigger>
+                                                                    <TabsTrigger value="ai">AI Assistant</TabsTrigger>
+                                                                    <TabsTrigger value="communication">תקשורת ולוגים</TabsTrigger>
+                                                                </TabsList>
+
+                                                                <TabsContent value="overview">
+                                                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                                                        <div className="space-y-2">
+                                                                            <p><span className="font-bold">גיל:</span> {lead.age || '-'}</p>
+                                                                            <p><span className="font-bold">עיר מגורים:</span> {lead.city || '-'}</p>
+                                                                            <p><span className="font-bold">תואר מבוקש:</span> {lead.target_degree || '-'}</p>
+                                                                        </div>
+                                                                        <div className="space-y-2">
+                                                                            <p><span className="font-bold">הצטרף לקבוצה:</span> {lead.joined_group_at ? new Date(lead.joined_group_at).toLocaleDateString('he-IL') : '-'}</p>
+                                                                            <p><span className="font-bold">Facebook ID:</span> <span className="font-mono text-xs bg-gray-100 p-1 rounded">{lead.facebook_user_id}</span></p>
+                                                                        </div>
+                                                                    </div>
+                                                                </TabsContent>
+
+                                                                <TabsContent value="dilemma">
+                                                                    <div className="bg-yellow-50 p-4 rounded-md border border-yellow-100 text-gray-800 whitespace-pre-wrap leading-relaxed">
+                                                                        {lead.dilemma || 'אין מידע על הדילמה.'}
+                                                                    </div>
+                                                                </TabsContent>
+
+                                                                <TabsContent value="ai">
+                                                                    <div className="space-y-4">
+                                                                        <div className="flex justify-between items-center">
+                                                                            <h4 className="font-bold text-gray-700">טיוטת הודעה (Generator)</h4>
+                                                                            {!lead.ai_draft && (
+                                                                                <Button
+                                                                                    onClick={() => handleGenerateDraft(lead)}
+                                                                                    disabled={!!generatingId}
+                                                                                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                                                                                >
+                                                                                    {generatingId === lead.id ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
+                                                                                    צור טיוטה חדשה
+                                                                                </Button>
+                                                                            )}
+                                                                        </div>
+                                                                        {lead.ai_draft ? (
+                                                                            <div className="border rounded-md p-4 bg-gray-50">
+                                                                                <textarea
+                                                                                    className="w-full bg-transparent border-none resize-none focus:ring-0 text-gray-700"
+                                                                                    rows={4}
+                                                                                    readOnly
+                                                                                    value={lead.ai_draft}
+                                                                                />
+                                                                                <div className="mt-2 flex justify-end">
+                                                                                    <Button
+                                                                                        className="bg-green-600 hover:bg-green-700 text-white"
+                                                                                        onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(lead.ai_draft || '')}`, '_blank')}
+                                                                                    >
+                                                                                        <Send className="w-4 h-4 mr-2" /> שלח לוואטסאפ
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-md border border-dashed">
+                                                                                טרם נוצרה טיוטה עבור ליד זה.
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </TabsContent>
+
+                                                                <TabsContent value="communication">
+                                                                    <div className="text-center py-8 text-gray-500">
+                                                                        <p>אין היסטוריית תקשורת זמינה (Email/SMS).</p>
+                                                                        {/* Placeholder for future EmailLogs integration */}
+                                                                    </div>
+                                                                </TabsContent>
+                                                            </Tabs>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
                                     {leads.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={7} className="text-center py-12 text-gray-500 text-lg">
-                                                אין לידים להצגה. הרץ את סקריפט הייבוא.
+                                            <TableCell colSpan={6} className="text-center py-12 text-gray-500">
+                                                אין לידים להצגה.
                                             </TableCell>
                                         </TableRow>
                                     )}

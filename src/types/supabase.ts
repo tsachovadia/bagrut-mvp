@@ -16,3 +16,17 @@ export interface Lead {
     created_at: string;
     updated_at?: string;
 }
+
+export type EmailStatus = 'sent' | 'delivered' | 'opened' | 'clicked' | 'failed';
+
+export interface EmailLog {
+    id: string; // uuid
+    lead_id?: string | null;
+    resend_email_id?: string | null;
+    status: EmailStatus;
+    subject?: string | null;
+    recipient_email?: string | null;
+    opened_at?: string | null;
+    clicked_at?: string | null;
+    created_at: string;
+}
