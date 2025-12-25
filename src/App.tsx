@@ -3,6 +3,7 @@ import './App.css';
 import { PsychometricForm } from './components/PsychometricForm';
 import { BagrutForm } from './components/BagrutForm';
 import { UniversityResultsTable } from './components/UniversityResultsTable';
+import { AdminDashboard } from './components/AdminDashboard';
 import { DebugTools } from './components/DebugTools';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
@@ -39,8 +40,18 @@ function App() {
     performCalculation(scenario.bagrut, scenario.psychometric);
   };
 
+  const [showAdmin, setShowAdmin] = useState(() => {
+    const isAdminParam = window.location.search.includes('admin=true');
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isAdminParam && isLocal;
+  });
+
+  if (showAdmin) {
+    return <AdminDashboard />;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 font-sans" dir="rtl">
+    <div className="min-h-screen bg-gray-50 pb-12" dir="rtl">
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="text-center py-6">
           <h1 className="text-4xl font-extrabold text-blue-900 tracking-tight">Bagrut MVP</h1>
