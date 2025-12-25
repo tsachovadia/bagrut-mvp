@@ -59,16 +59,17 @@ async function importLeads() {
         // 'Full Name' -> full_name
         // 'A1' -> age (assuming Q1 is age question)
         // 'A3' -> dilemma
-        // comments -> email (optional, regex?)
 
         const lead = {
-            facebook_user_id: row['User ID'],
+            facebook_user_id: row['User ID'] || row['UserLink'] || `manual_${Date.now()}_${Math.random()}`, // Fallback
             full_name: row['Full Name'],
             age: row['A1'],
             dilemma: row['A3'], // The crucial field
-            profile_link: row['Profile Link'] || null, // Assuming might exist
+            profile_link: (row['User ID'] && row['User ID'].includes('http')) ? row['User ID'] : null,
+            joined_group_at: row['Date Added'], // Mapping "Date Added" to joined_at
+            city: row['Location'],
+            target_degree: row['A2'], // Mapping A2 to intended degree
             status: 'new',
-            // Try to extract email from anywhere if possible, mostly logic needed here if data has it
         };
 
         if (lead.facebook_user_id && lead.dilemma) {

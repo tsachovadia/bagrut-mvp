@@ -79,66 +79,101 @@ export const AdminDashboard: React.FC = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-right">שם מלא</TableHead>
-                                        <TableHead className="text-right w-1/3">דילמה</TableHead>
-                                        <TableHead className="text-right">סטטוס</TableHead>
-                                        <TableHead className="text-right">טיוטה (AI)</TableHead>
+                                        <TableHead className="text-right">שם + גיל</TableHead>
+                                        <TableHead className="text-right">ערים ותואר</TableHead>
+                                        <TableHead className="text-right w-1/4">דילמה</TableHead>
+                                        <TableHead className="text-right">צ'אט</TableHead>
+                                        <TableHead className="text-right">טיוטה</TableHead>
                                         <TableHead className="text-right">פעולות</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {leads.map((lead) => (
-                                        <TableRow key={lead.id} className="hover:bg-gray-50 transition-colors">
-                                            <TableCell className="font-medium">{lead.full_name}</TableCell>
-                                            <TableCell>
-                                                <div className="max-w-xs truncate" title={lead.dilemma || ''}>
-                                                    {lead.dilemma || '---'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge className={getStatusColor(lead.status)}>
-                                                    {lead.status === 'new' ? 'חדש' :
-                                                        lead.status === 'draft_generated' ? 'טיוטה מוכנה' :
-                                                            lead.status === 'sent' ? 'נשלח' : lead.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                {lead.ai_draft ? (
-                                                    <div className="text-sm bg-white p-2 border rounded shadow-sm max-w-xs">
-                                                        {lead.ai_draft}
+                                    {leads.map((lead) => {
+                                        // Calculate Age
+                                        let displayAge = lead.age;
+                                        if (lead.age && lead.joined_group_at) {
+                                            const joinedDate = new Date(lead.joined_group_at);
+                                            const now = new Date();
+                                            const yearsDiff = now.getFullYear() - joinedDate.getFullYear();
+                                            // Simple addition: Original Age + Years passed since joining
+                                            const numericAge = parseInt(lead.age);
+                                            if (!isNaN(numericAge)) {
+                                                displayAge = `${numericAge + yearsDiff}`;
+                                            }
+                                        }
+
+                                        // Format Date for tooltip
+                                        const dateStr = lead.joined_group_at ? new Date(lead.joined_group_at).toLocaleDateString('he-IL') : '';
+
+                                        return (
+                                            <TableRow key={lead.id} className="hover:bg-gray-50 transition-colors">
+                                                <TableCell className="font-medium">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-base font-bold">{lead.full_name}</span>
+                                                        <span className="text-xs text-gray-500">
+                                                            גיל: {displayAge} • הצטרף: {dateStr}
+                                                        </span>
                                                     </div>
-                                                ) : (
-                                                    <span className="text-gray-400 text-xs italic">טרם ג'ונרט</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-2">
-                                                    {!lead.ai_draft && (
-                                                        <Button
-                                                            size="sm"
-                                                            className="bg-purple-600 hover:bg-purple-700 text-white"
-                                                            onClick={() => handleGenerateDraft(lead)}
-                                                            disabled={!!generatingId}
-                                                        >
-                                                            {generatingId === lead.id ? <Loader2 className="animate-spin w-4 h-4" /> : <Wand2 className="w-4 h-4" />}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col text-sm">
+                                                        <span>{lead.city || '---'}</span>
+                                                        <span className="text-blue-600 font-medium text-xs">{lead.target_degree || ''}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="max-w-xs truncate text-sm" title={lead.dilemma || ''}>
+                                                        {lead.dilemma || '---'}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {lead.profile_link && (
+                                                        <Button variant="ghost" size="sm" onClick={() => window.open(lead.profile_link!, '_blank')}>
+                                                            <MessageSquare className="w-4 h-4 text-blue-600" />
                                                         </Button>
                                                     )}
-                                                    {lead.ai_draft && (
-                                                        <Button
-                                                            size="sm"
-                                                            className="bg-green-600 hover:bg-green-700 text-white"
-                                                            onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(lead.ai_draft || '')}`, '_blank')}
-                                                        >
-                                                            <Send className="w-4 h-4" />
-                                                        </Button>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {lead.ai_draft ? (
+                                                        <div className="text-xs bg-white p-2 border rounded shadow-sm max-w-[200px] max-h-20 overflow-y-auto">
+                                                            {lead.ai_draft}
+                                                        </div>
+                                                    ) : (
+                                                        <Badge variant="outline" className="text-gray-400 border-dashed">טרם</Badge>
                                                     )}
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-2">
+                                                        {!lead.ai_draft && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="default"
+                                                                className="bg-purple-600 hover:bg-purple-700 h-8 w-8 p-0 rounded-full"
+                                                                title="ג'נרט הודעה"
+                                                                onClick={() => handleGenerateDraft(lead)}
+                                                                disabled={!!generatingId}
+                                                            >
+                                                                {generatingId === lead.id ? <Loader2 className="animate-spin w-3 h-3" /> : <Wand2 className="w-4 h-4" />}
+                                                            </Button>
+                                                        )}
+                                                        {lead.ai_draft && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-green-600 hover:bg-green-700 h-8 w-8 p-0 rounded-full"
+                                                                title="שלח בוואטסאפ"
+                                                                onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(lead.ai_draft || '')}`, '_blank')}
+                                                            >
+                                                                <Send className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                                     {leads.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                            <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                                                 אין לידים להצגה. הרץ את סקריפט הייבוא.
                                             </TableCell>
                                         </TableRow>

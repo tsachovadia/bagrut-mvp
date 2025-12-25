@@ -10,6 +10,9 @@ export interface Lead {
     email?: string | null;
     status: LeadStatus;
     ai_draft?: string | null;
+    joined_group_at?: string | null;
+    city?: string | null;
+    target_degree?: string | null;
     created_at: string;
     updated_at?: string;
 }
