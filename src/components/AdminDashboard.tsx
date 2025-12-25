@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Lead } from '../types/supabase';
-import { Card, CardContent, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Tabs, TabsList, TabsTrigger, TabsContent } from './ui/shim';
-import { Loader2, MessageSquare, Send, RefreshCw, Wand2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Tabs, TabsList, TabsTrigger, TabsContent, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Input, Textarea } from './ui/shim';
+import { Loader2, MessageSquare, Send, RefreshCw, Wand2, ChevronDown, ChevronUp, Mail, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import type { EmailLog } from '../types/supabase';
+import { sendEmail } from '../utils/email-service';
 
 export const AdminDashboard: React.FC = () => {
     const [leads, setLeads] = useState<Lead[]>([]);
@@ -50,10 +52,67 @@ export const AdminDashboard: React.FC = () => {
         }, 1500);
     };
 
-    const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null);
 
-    const toggleRow = (id: string) => {
-        setExpandedLeadId(expandedLeadId === id ? null : id);
+    const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null);
+    const [emailLogs, setEmailLogs] = useState<Record<string, EmailLog[]>>({});
+    const [sendingEmail, setSendingEmail] = useState(false);
+    const [emailSubject, setEmailSubject] = useState('');
+    const [emailBody, setEmailBody] = useState('');
+    const [activeEmailLead, setActiveEmailLead] = useState<Lead | null>(null);
+
+    const toggleRow = async (id: string) => {
+        if (expandedLeadId === id) {
+            setExpandedLeadId(null);
+        } else {
+            setExpandedLeadId(id);
+            if (!emailLogs[id]) {
+                await fetchEmailLogs(id);
+            }
+        }
+    };
+
+    const fetchEmailLogs = async (leadId: string) => {
+        const { data, error } = await supabase
+            .from('email_logs')
+            .select('*')
+            .eq('lead_id', leadId)
+            .order('created_at', { ascending: false });
+
+        if (!error && data) {
+            setEmailLogs(prev => ({ ...prev, [leadId]: data as EmailLog[] }));
+        }
+    };
+
+    const handleSendEmail = async () => {
+        if (!activeEmailLead || !activeEmailLead.email) return;
+
+        setSendingEmail(true);
+        try {
+            await sendEmail({
+                to: activeEmailLead.email,
+                subject: emailSubject,
+                html: emailBody.replace(/\n/g, '<br>'), // Simple newline to BR
+                leadId: activeEmailLead.id
+            });
+
+            // Refresh logs
+            await fetchEmailLogs(activeEmailLead.id);
+            setActiveEmailLead(null);
+            setEmailSubject('');
+            setEmailBody('');
+            alert('המייל נשלח בהצלחה!');
+        } catch (error) {
+            console.error('Failed to send email:', error);
+            alert('שגיאה בשליחת המייל');
+        } finally {
+            setSendingEmail(false);
+        }
+    };
+
+    const openEmailDialog = (lead: Lead) => {
+        setActiveEmailLead(lead);
+        setEmailSubject(`היי ${lead.full_name}, בקשר להתעניינותך בלימודים`);
+        setEmailBody(lead.ai_draft || `היי ${lead.full_name},\n\nהמשך לשיחתנו...`);
     };
 
     const StatusBadge = ({ status }: { status: string }) => {
@@ -207,9 +266,76 @@ export const AdminDashboard: React.FC = () => {
                                                                 </TabsContent>
 
                                                                 <TabsContent value="communication">
-                                                                    <div className="text-center py-8 text-gray-500">
-                                                                        <p>אין היסטוריית תקשורת זמינה (Email/SMS).</p>
-                                                                        {/* Placeholder for future EmailLogs integration */}
+                                                                    <div className="space-y-4">
+                                                                        <div className="flex justify-between items-center">
+                                                                            <h4 className="font-bold text-gray-700">היסטוריית מיילים</h4>
+                                                                            <Dialog open={!!activeEmailLead} onOpenChange={(open: boolean) => !open && setActiveEmailLead(null)}>
+                                                                                <DialogTrigger asChild>
+                                                                                    <Button variant="outline" size="sm" onClick={() => openEmailDialog(lead)} disabled={!lead.email}>
+                                                                                        <Mail className="w-4 h-4 mr-2" />
+                                                                                        שלח מייל
+                                                                                    </Button>
+                                                                                </DialogTrigger>
+                                                                                <DialogContent>
+                                                                                    <DialogHeader>
+                                                                                        <DialogTitle>שליחת מייל ל-{activeEmailLead?.full_name}</DialogTitle>
+                                                                                    </DialogHeader>
+                                                                                    <div className="space-y-4 py-4">
+                                                                                        <div className="space-y-2">
+                                                                                            <label className="text-sm font-medium">נושא</label>
+                                                                                            <Input value={emailSubject} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailSubject(e.target.value)} />
+                                                                                        </div>
+                                                                                        <div className="space-y-2">
+                                                                                            <label className="text-sm font-medium">תוכן ההודעה</label>
+                                                                                            <Textarea
+                                                                                                value={emailBody}
+                                                                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEmailBody(e.target.value)}
+                                                                                                rows={10}
+                                                                                            />
+                                                                                        </div>
+                                                                                        <div className="flex justify-end gap-2">
+                                                                                            <Button variant="outline" onClick={() => setActiveEmailLead(null)}>ביטול</Button>
+                                                                                            <Button onClick={handleSendEmail} disabled={sendingEmail}>
+                                                                                                {sendingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                                                                שלח
+                                                                                            </Button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </DialogContent>
+                                                                            </Dialog>
+                                                                        </div>
+
+                                                                        {emailLogs[lead.id]?.length > 0 ? (
+                                                                            <div className="space-y-3">
+                                                                                {emailLogs[lead.id].map(log => (
+                                                                                    <div key={log.id} className="border rounded-md p-3 text-sm bg-gray-50 flex items-start justify-between">
+                                                                                        <div>
+                                                                                            <p className="font-bold">{log.subject}</p>
+                                                                                            <p className="text-xs text-gray-500">{new Date(log.created_at).toLocaleString('he-IL')}</p>
+                                                                                        </div>
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <Badge variant={log.status === 'opened' || log.status === 'clicked' ? 'success' : 'secondary'}>
+                                                                                                {log.status === 'opened' ? <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> נפתח</div> :
+                                                                                                    log.status === 'clicked' ? <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> הוקלק</div> :
+                                                                                                        log.status === 'sent' ? <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> נשלח</div> :
+                                                                                                            log.status === 'failed' ? <div className="flex items-center gap-1"><AlertCircle className="w-3 h-3" /> נכשל</div> :
+                                                                                                                log.status}
+                                                                                            </Badge>
+                                                                                            {(log.opened_at || log.clicked_at) && (
+                                                                                                <span className="text-[10px] text-gray-500" title="זמן פתיחה אחרון">
+                                                                                                    {new Date(log.opened_at || log.clicked_at || '').toLocaleTimeString()}
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-md border border-dashed">
+                                                                                <Mail className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                                                                                עדיין לא נשלחו מיילים לליד זה.
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 </TabsContent>
                                                             </Tabs>

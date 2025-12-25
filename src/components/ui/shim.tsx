@@ -55,15 +55,15 @@ export const Progress = ({ value = 0, className = '' }: any) => (
     </div>
 );
 
-export const Table = ({ children }: any) => <table className="min-w-full divide-y divide-gray-200">{children}</table>;
-export const TableHeader = ({ children }: any) => <thead className="bg-gray-50">{children}</thead>;
-export const TableBody = ({ children }: any) => <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>;
-export const TableRow = ({ children, className = '' }: any) => <tr className={className}>{children}</tr>;
-export const TableHead = ({ children, className = '' }: any) => (
-    <th scope="col" className={`px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider ${className}`}>{children}</th>
+export const Table = ({ children, ...props }: any) => <table className="min-w-full divide-y divide-gray-200" {...props}>{children}</table>;
+export const TableHeader = ({ children, ...props }: any) => <thead className="bg-gray-50" {...props}>{children}</thead>;
+export const TableBody = ({ children, ...props }: any) => <tbody className="bg-white divide-y divide-gray-200" {...props}>{children}</tbody>;
+export const TableRow = ({ children, className = '', ...props }: any) => <tr className={className} {...props}>{children}</tr>;
+export const TableHead = ({ children, className = '', ...props }: any) => (
+    <th scope="col" className={`px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider ${className}`} {...props}>{children}</th>
 );
-export const TableCell = ({ children, className = '' }: any) => (
-    <td className={`px-6 py-4 whitespace-nowrap ${className}`}>{children}</td>
+export const TableCell = ({ children, className = '', ...props }: any) => (
+    <td className={`px-6 py-4 whitespace-nowrap ${className}`} {...props}>{children}</td>
 );
 
 // Tabs Shim using Context
@@ -93,8 +93,8 @@ export const TabsTrigger = ({ value, children, className = '' }: any) => {
     return (
         <button
             className={`w-full rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 ${isActive
-                    ? 'bg-white text-blue-700 shadow'
-                    : 'text-gray-500 hover:bg-white/[0.12] hover:text-blue-600'
+                ? 'bg-white text-blue-700 shadow'
+                : 'text-gray-500 hover:bg-white/[0.12] hover:text-blue-600'
                 } ${className}`}
             onClick={() => setActiveTab(value)}
         >
@@ -111,3 +111,67 @@ export const TabsContent = ({ value, children, className = '' }: any) => {
     if (value !== activeTab) return null;
     return <div className={`mt-2 ${className}`}>{children}</div>;
 };
+
+export const Textarea = ({ className = '', ...props }: any) => (
+    <textarea className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`} {...props} />
+);
+
+// Dialog Shim using Context
+const DialogContext = React.createContext<{ open: boolean; setOpen: (v: boolean) => void } | null>(null);
+
+export const Dialog = ({ open, onOpenChange, children }: any) => {
+    const [internalOpen, setInternalOpen] = React.useState(false);
+    const isControlled = open !== undefined;
+    const isOpen = isControlled ? open : internalOpen;
+    const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
+
+    return (
+        <DialogContext.Provider value={{ open: isOpen, setOpen: setIsOpen }}>
+            {children}
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+                    {/* Overlay handled by wrapper for simplicity */}
+                </div>
+            )}
+        </DialogContext.Provider>
+    );
+};
+
+export const DialogTrigger = ({ asChild, children, onClick, ...props }: any) => {
+    const context = React.useContext(DialogContext);
+    if (!context) throw new Error("DialogTrigger must be used within Dialog");
+    const { setOpen } = context;
+
+    const child = asChild ? React.Children.only(children) : <button {...props}>{children}</button>;
+    return React.cloneElement(child, {
+        onClick: (e: any) => {
+            child.props.onClick?.(e);
+            setOpen(true);
+        }
+    });
+};
+
+export const DialogContent = ({ children, className = '' }: any) => {
+    const context = React.useContext(DialogContext);
+    if (!context) throw new Error("DialogContent must be used within Dialog");
+    const { open, setOpen } = context;
+
+    if (!open) return null;
+
+    return (
+        <div className={`fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg border p-6 w-full max-w-lg ${className}`} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                ✕
+            </button>
+            {children}
+        </div>
+    );
+};
+
+export const DialogHeader = ({ children, className = '' }: any) => (
+    <div className={`mb-4 space-y-1.5 text-center sm:text-right ${className}`}>{children}</div>
+);
+
+export const DialogTitle = ({ children, className = '' }: any) => (
+    <h3 className={`text-lg font-semibold leading-none tracking-tight ${className}`}>{children}</h3>
+);
