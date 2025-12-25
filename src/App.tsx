@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import { Button } from './components/ui/shim';
 import { PsychometricForm } from './components/PsychometricForm';
 import { BagrutForm } from './components/BagrutForm';
 import { UniversityResultsTable } from './components/UniversityResultsTable';
@@ -50,10 +51,22 @@ function App() {
     return <AdminDashboard />;
   }
 
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
   return (
     <div className="min-h-screen bg-gray-50 pb-12" dir="rtl">
       <div className="max-w-4xl mx-auto space-y-8">
-        <header className="text-center py-6">
+        <header className="text-center py-6 relative">
+          {isLocal && (
+            <div className="absolute top-0 right-0 p-4">
+              <Button
+                onClick={() => window.location.href = '/?admin=true'}
+                className="bg-gray-900 text-white hover:bg-black text-xs"
+              >
+                CRM (Local) 💼
+              </Button>
+            </div>
+          )}
           <h1 className="text-4xl font-extrabold text-blue-900 tracking-tight">Bagrut MVP</h1>
           <p className="text-lg text-blue-600 mt-2">סימולטור קבלה לאוניברסיטה (Frankenstein Edition)</p>
         </header>

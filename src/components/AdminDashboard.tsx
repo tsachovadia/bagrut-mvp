@@ -79,10 +79,11 @@ export const AdminDashboard: React.FC = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-right">שם + גיל</TableHead>
-                                        <TableHead className="text-right">ערים ותואר</TableHead>
+                                        <TableHead className="text-right">פרטים אישיים</TableHead>
+                                        <TableHead className="text-right">מיקום ותואר</TableHead>
                                         <TableHead className="text-right w-1/4">דילמה</TableHead>
-                                        <TableHead className="text-right">צ'אט</TableHead>
+                                        <TableHead className="text-right">סטטוס</TableHead>
+                                        <TableHead className="text-right">יצירת קשר</TableHead>
                                         <TableHead className="text-right">טיוטה</TableHead>
                                         <TableHead className="text-right">פעולות</TableHead>
                                     </TableRow>
@@ -95,54 +96,73 @@ export const AdminDashboard: React.FC = () => {
                                             const joinedDate = new Date(lead.joined_group_at);
                                             const now = new Date();
                                             const yearsDiff = now.getFullYear() - joinedDate.getFullYear();
-                                            // Simple addition: Original Age + Years passed since joining
                                             const numericAge = parseInt(lead.age);
                                             if (!isNaN(numericAge)) {
                                                 displayAge = `${numericAge + yearsDiff}`;
                                             }
                                         }
 
-                                        // Format Date for tooltip
                                         const dateStr = lead.joined_group_at ? new Date(lead.joined_group_at).toLocaleDateString('he-IL') : '';
+                                        const createdStr = new Date(lead.created_at).toLocaleDateString('he-IL');
 
                                         return (
                                             <TableRow key={lead.id} className="hover:bg-gray-50 transition-colors">
-                                                <TableCell className="font-medium">
-                                                    <div className="flex flex-col">
+                                                <TableCell className="font-medium align-top">
+                                                    <div className="flex flex-col gap-1">
                                                         <span className="text-base font-bold">{lead.full_name}</span>
                                                         <span className="text-xs text-gray-500">
                                                             גיל: {displayAge} • הצטרף: {dateStr}
                                                         </span>
+                                                        <span className="text-[10px] text-gray-400 font-mono" title="Facebook User ID">
+                                                            ID: {lead.facebook_user_id}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400">
+                                                            נוצר: {createdStr}
+                                                        </span>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col text-sm">
+                                                <TableCell className="align-top">
+                                                    <div className="flex flex-col text-sm gap-1">
                                                         <span>{lead.city || '---'}</span>
                                                         <span className="text-blue-600 font-medium text-xs">{lead.target_degree || ''}</span>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>
-                                                    <div className="max-w-xs truncate text-sm" title={lead.dilemma || ''}>
+                                                <TableCell className="align-top">
+                                                    <div className="max-w-xs text-sm whitespace-pre-wrap" title={lead.dilemma || ''}>
                                                         {lead.dilemma || '---'}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>
-                                                    {lead.profile_link && (
-                                                        <Button variant="ghost" size="sm" onClick={() => window.open(lead.profile_link!, '_blank')}>
-                                                            <MessageSquare className="w-4 h-4 text-blue-600" />
-                                                        </Button>
-                                                    )}
+                                                <TableCell className="align-top">
+                                                    <Badge className={getStatusColor(lead.status)}>
+                                                        {lead.status === 'new' ? 'חדש' :
+                                                            lead.status === 'draft_generated' ? 'טיוטה' :
+                                                                lead.status === 'sent' ? 'נשלח' : lead.status}
+                                                    </Badge>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="align-top">
+                                                    <div className="flex flex-col gap-2">
+                                                        {lead.profile_link && (
+                                                            <Button variant="ghost" size="sm" className="justify-start h-auto p-0 hover:bg-transparent" onClick={() => window.open(lead.profile_link!, '_blank')}>
+                                                                <span className="flex items-center gap-1 text-blue-600 hover:underline">
+                                                                    <MessageSquare className="w-4 h-4" /> פרופיל
+                                                                </span>
+                                                            </Button>
+                                                        )}
+                                                        {lead.email && (
+                                                            <span className="text-xs text-gray-600">{lead.email}</span>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="align-top">
                                                     {lead.ai_draft ? (
-                                                        <div className="text-xs bg-white p-2 border rounded shadow-sm max-w-[200px] max-h-20 overflow-y-auto">
+                                                        <div className="text-xs bg-white p-2 border rounded shadow-sm max-w-[200px] max-h-32 overflow-y-auto">
                                                             {lead.ai_draft}
                                                         </div>
                                                     ) : (
                                                         <Badge variant="outline" className="text-gray-400 border-dashed">טרם</Badge>
                                                     )}
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="align-top">
                                                     <div className="flex gap-2">
                                                         {!lead.ai_draft && (
                                                             <Button
@@ -173,7 +193,7 @@ export const AdminDashboard: React.FC = () => {
                                     })}
                                     {leads.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                                            <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                                                 אין לידים להצגה. הרץ את סקריפט הייבוא.
                                             </TableCell>
                                         </TableRow>
