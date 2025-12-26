@@ -16,6 +16,11 @@ export const sendEmail = async ({ to, subject, html, leadId }: SendEmailParams) 
             body: JSON.stringify({ to, subject, html, leadId }),
         });
 
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") === -1) {
+            throw new Error("API Endpoint not found or returned HTML. Are you running 'vercel dev'?");
+        }
+
         const data = await response.json();
 
         if (!response.ok) {

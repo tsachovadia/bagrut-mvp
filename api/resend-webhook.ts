@@ -29,9 +29,21 @@ export default async function handler(request, response) {
     let updateData = {};
 
     if (type === 'email.opened') {
-        updateData = { status: 'opened', opened_at: new Date().toISOString() };
+        updateData = {
+            status: 'opened',
+            opened_at: new Date().toISOString(),
+            user_agent: data.user_agent,
+            ip_address: data.ip_address,
+            location: data.region ? `${data.city}, ${data.region}, ${data.country}` : data.country
+        };
     } else if (type === 'email.clicked') {
-        updateData = { status: 'clicked', clicked_at: new Date().toISOString() };
+        updateData = {
+            status: 'clicked',
+            clicked_at: new Date().toISOString(),
+            user_agent: data.user_agent,
+            ip_address: data.ip_address,
+            location: data.region ? `${data.city}, ${data.region}, ${data.country}` : data.country
+        };
     } else if (type === 'email.delivered') {
         updateData = { status: 'delivered' };
     } else if (type === 'email.bounced' || type === 'email.delivery_delayed') {

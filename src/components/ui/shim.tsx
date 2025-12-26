@@ -129,8 +129,20 @@ export const Dialog = ({ open, onOpenChange, children }: any) => {
         <DialogContext.Provider value={{ open: isOpen, setOpen: setIsOpen }}>
             {children}
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
-                    {/* Overlay handled by wrapper for simplicity */}
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+                    <div
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                        onClick={() => setIsOpen(false)}
+                    />
+                    <div className="relative transform overflow-hidden rounded-lg bg-white text-right shadow-xl transition-all sm:w-full sm:max-w-lg z-[10000]">
+                        {/* Determine which child is the content and render it here */}
+                        {React.Children.map(children, child => {
+                            if (React.isValidElement(child) && (child.type as any).displayName === 'DialogContent') {
+                                return React.cloneElement(child as any, { __isInPortal: true });
+                            }
+                            return null;
+                        })}
+                    </div>
                 </div>
             )}
         </DialogContext.Provider>
@@ -151,22 +163,37 @@ export const DialogTrigger = ({ asChild, children, onClick, ...props }: any) => 
     });
 };
 
-export const DialogContent = ({ children, className = '' }: any) => {
+export const DialogContent = ({ children, className = '', __isInPortal }: any) => {
+    if (__isInPortal) {
+        return (
+            <div className={`bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 ${className}`} onClick={e => e.stopPropagation()}>
+                <CloseButton />
+                {children}
+            </div>
+        );
+    }
+    return null;
+};
+
+// Helper for closing
+const CloseButton = () => {
     const context = React.useContext(DialogContext);
-    if (!context) throw new Error("DialogContent must be used within Dialog");
-    const { open, setOpen } = context;
-
-    if (!open) return null;
-
     return (
-        <div className={`fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg border p-6 w-full max-w-lg ${className}`} onClick={e => e.stopPropagation()}>
-            <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-                ✕
-            </button>
-            {children}
-        </div>
+        <button
+            type="button"
+            className="absolute top-4 right-4 rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            onClick={() => context?.setOpen(false)}
+        >
+            <span className="sr-only">Close</span>
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     );
 };
+
+// Start: Fix - explicit displayName for detection
+(DialogContent as any).displayName = 'DialogContent';
 
 export const DialogHeader = ({ children, className = '' }: any) => (
     <div className={`mb-4 space-y-1.5 text-center sm:text-right ${className}`}>{children}</div>

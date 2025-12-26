@@ -20,7 +20,7 @@ export default async function handler(request, response) {
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Acme <onboarding@resend.dev>', // TODO: Update with your verified domain
+            from: 'Bagrut Team <info@mitlabtim.co.il>',
             to: [to],
             subject: subject,
             html: html,
@@ -41,6 +41,7 @@ export default async function handler(request, response) {
                     status: 'sent',
                     subject: subject,
                     recipient_email: to,
+                    body: html // Save the email content
                 });
 
             if (dbError) {
