@@ -14,6 +14,29 @@ export const AdminDashboard: React.FC = () => {
 
     useEffect(() => {
         fetchLeads();
+
+        // Subscribe to Realtime updates for leads and email_logs
+        const leadsSubscription = supabase
+            .channel('leads_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {
+                fetchLeads();
+            })
+            .subscribe();
+
+        const logsSubscription = supabase
+            .channel('email_logs_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'email_logs' }, (payload) => {
+                const leadId = (payload.new as any)?.lead_id;
+                if (leadId) {
+                    fetchEmailLogs(leadId);
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(leadsSubscription);
+            supabase.removeChannel(logsSubscription);
+        };
     }, []);
 
     const fetchLeads = async () => {
@@ -122,16 +145,17 @@ export const AdminDashboard: React.FC = () => {
             new: 'bg-blue-100 text-blue-800',
             draft_generated: 'bg-purple-100 text-purple-800',
             sent: 'bg-green-100 text-green-800',
-            replied: 'bg-yellow-100 text-yellow-800'
+            replied: 'bg-orange-500 text-white animate-pulse shadow-sm border-orange-600'
         };
         const labels: Record<string, string> = {
             new: 'חדש',
             draft_generated: 'טיוטה מוכנה',
             sent: 'נשלח',
-            replied: 'השיב'
+            replied: 'השיב - לבדוק!'
         };
         return (
-            <Badge className={`${colors[status] || 'bg-gray-100'} px-2 py-0.5`}>
+            <Badge className={`${colors[status] || 'bg-gray-100'} px-2 py-1 flex items-center gap-1 font-bold`}>
+                {status === 'replied' && <MessageSquare className="w-3 h-3 text-white" />}
                 {labels[status] || status}
             </Badge>
         );
