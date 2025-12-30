@@ -49,83 +49,82 @@ export const PsychometricForm = ({ onDataUpdate, initialData, onSkip }: Psychome
     const isFormValid = (formData.general > 0) || (formData.quantitative > 0 && formData.verbal > 0);
 
     return (
-        <div className="space-y-6">
-            <Alert className="border-blue-200 bg-blue-50">
+        <div className="space-y-4">
+            <h3 className="font-semibold text-lg text-gray-700 pb-2 border-b flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-blue-600" />
+                ציוני פסיכומטרי
+            </h3>
+
+            <Alert className="border-blue-200 bg-blue-50 py-2">
                 <Info className="h-4 w-4 text-blue-600 inline mr-2" />
-                <AlertDescription className="text-blue-800 inline">
+                <AlertDescription className="text-blue-800 inline text-sm">
                     הזן את ציוני הפסיכומטרי שלך לחישוב סיכויי קבלה
                 </AlertDescription>
             </Alert>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <Calculator className="h-5 w-5 text-blue-600" />
-                        ציוני פסיכומטרי
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="psychometric-general">ציון כללי</Label>
-                            <Input
-                                id="psychometric-general"
-                                type="number"
-                                min="200"
-                                max="800"
-                                value={formData.general || ''}
-                                onChange={(e: any) => updateField('general', parseInt(e.target.value) || 0)}
-                                placeholder="לדוגמה: 650"
-                            />
-                        </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                <div className="space-y-1">
+                    <Label htmlFor="psychometric-general" className="text-sm">ציון כללי</Label>
+                    <Input
+                        id="psychometric-general"
+                        type="number"
+                        className="h-9"
+                        min="200"
+                        max="800"
+                        value={formData.general || ''}
+                        onChange={(e: any) => updateField('general', parseInt(e.target.value) || 0)}
+                        placeholder="650"
+                    />
+                </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="psychometric-quantitative">חשיבה כמותית</Label>
-                            <Input
-                                id="psychometric-quantitative"
-                                type="number"
-                                min="50"
-                                max="150"
-                                value={formData.quantitative || ''}
-                                onChange={(e: any) => updateField('quantitative', parseInt(e.target.value) || 0)}
-                                placeholder="לדוגמה: 120"
-                            />
-                        </div>
+                <div className="space-y-1">
+                    <Label htmlFor="psychometric-quantitative" className="text-sm">כמותי</Label>
+                    <Input
+                        id="psychometric-quantitative"
+                        type="number"
+                        className="h-9"
+                        min="50"
+                        max="150"
+                        value={formData.quantitative || ''}
+                        onChange={(e: any) => updateField('quantitative', parseInt(e.target.value) || 0)}
+                        placeholder="120"
+                    />
+                </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="psychometric-verbal">חשיבה מילולית</Label>
-                            <Input
-                                id="psychometric-verbal"
-                                type="number"
-                                min="50"
-                                max="150"
-                                value={formData.verbal || ''}
-                                onChange={(e: any) => updateField('verbal', parseInt(e.target.value) || 0)}
-                                placeholder="לדוגמה: 120"
-                            />
-                        </div>
+                <div className="space-y-1">
+                    <Label htmlFor="psychometric-verbal" className="text-sm">מילולי</Label>
+                    <Input
+                        id="psychometric-verbal"
+                        type="number"
+                        className="h-9"
+                        min="50"
+                        max="150"
+                        value={formData.verbal || ''}
+                        onChange={(e: any) => updateField('verbal', parseInt(e.target.value) || 0)}
+                        placeholder="120"
+                    />
+                </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="psychometric-english">אנגלית</Label>
-                            <Input
-                                id="psychometric-english"
-                                type="number"
-                                min="50"
-                                max="150"
-                                value={formData.english || ''}
-                                onChange={(e: any) => updateField('english', parseInt(e.target.value) || 0)}
-                                placeholder="לדוגמה: 120"
-                            />
-                        </div>
-                    </div>
+                <div className="space-y-1">
+                    <Label htmlFor="psychometric-english" className="text-sm">אנגלית</Label>
+                    <Input
+                        id="psychometric-english"
+                        type="number"
+                        className="h-9"
+                        min="50"
+                        max="150"
+                        value={formData.english || ''}
+                        onChange={(e: any) => updateField('english', parseInt(e.target.value) || 0)}
+                        placeholder="120"
+                    />
+                </div>
+            </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                        <Button onClick={handleSubmit} className="w-full">
-                            חשב סיכויי קבלה
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="pt-2">
+                <Button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white h-10">
+                    עדכן ציונים לחשבון
+                </Button>
+            </div>
         </div>
     );
 };

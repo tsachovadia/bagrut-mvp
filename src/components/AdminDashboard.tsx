@@ -145,12 +145,16 @@ export const AdminDashboard: React.FC = () => {
             new: 'bg-blue-100 text-blue-800',
             draft_generated: 'bg-purple-100 text-purple-800',
             sent: 'bg-green-100 text-green-800',
+            opened: 'bg-blue-500 text-white shadow-sm',
+            clicked: 'bg-indigo-600 text-white shadow-sm',
             replied: 'bg-orange-500 text-white animate-pulse shadow-sm border-orange-600'
         };
         const labels: Record<string, string> = {
             new: 'חדש',
             draft_generated: 'טיוטה מוכנה',
             sent: 'נשלח',
+            opened: 'נפתח',
+            clicked: 'הוקלק',
             replied: 'השיב - לבדוק!'
         };
         return (
@@ -165,10 +169,32 @@ export const AdminDashboard: React.FC = () => {
         <div className="p-8 bg-gray-50 min-h-screen">
             <Card className="w-full max-w-7xl mx-auto">
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="text-3xl font-bold">Launch Pad CRM</CardTitle>
-                    <Button onClick={fetchLeads} className="bg-gray-200 text-gray-800 hover:bg-gray-300">
-                        <RefreshCw className="w-4 h-4 mr-2" /> רענן
-                    </Button>
+                    <CardTitle className="text-3xl font-bold font-serif text-blue-900">Launch Pad CRM</CardTitle>
+                    <div className="flex gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                                setLoading(true);
+                                try {
+                                    const res = await fetch('/api/cron/sync-email-status');
+                                    const data = await res.json();
+                                    await fetchLeads();
+                                    console.log('סנכרון הושלם:', data);
+                                } catch (err) {
+                                    console.error('Sync failed:', err);
+                                }
+                                setLoading(false);
+                            }}
+                            className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50 transition-all font-bold"
+                        >
+                            <RefreshCw className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} />
+                            סנכרן סטטוס מיילים
+                        </Button>
+                        <Button onClick={fetchLeads} variant="ghost" size="sm" className="text-gray-500">
+                            <RefreshCw className="w-4 h-4" />
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="leads" className="w-full">

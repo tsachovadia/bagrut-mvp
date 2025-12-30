@@ -70,6 +70,27 @@ export default async function handler(request, response) {
                     if (updateError) {
                         console.error(`Error updating status for ${email.id}:`, updateError);
                     } else {
+                        // 4. Update the main Lead status if it's an advancement (sent -> opened -> clicked)
+                        // We check if the current lead status is not already 'replied' or 'clicked' before downgrading/changing
+                        const { data: lead } = await supabase.from('leads').select('status').eq('id', email.lead_id).single();
+
+                        const statusWeights: Record<string, number> = {
+                            'new': 0,
+                            'draft_generated': 1,
+                            'sent': 2,
+                            'delivered': 3,
+                            'opened': 4,
+                            'clicked': 5,
+                            'replied': 6
+                        };
+
+                        if (lead && statusWeights[newStatus] > (statusWeights[lead.status] || 0)) {
+                            await supabase
+                                .from('leads')
+                                .update({ status: newStatus })
+                                .eq('id', email.lead_id);
+                        }
+
                         updates.push({ id: email.id, status: newStatus });
                     }
                 }

@@ -17,6 +17,8 @@ interface UniversityResultsTableProps {
 }
 
 export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ averages }) => {
+    const [showAll, setShowAll] = React.useState(false);
+    const displayedAverages = showAll ? averages : averages.slice(0, 5);
 
     // Helper to determine pass/fail based on degree thresholds (Mocking check against a hardcoded degree for MVP)
     // In real app, we would match against selected degree.
@@ -49,7 +51,7 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {averages.map((avg, index) => {
+                            {displayedAverages.map((avg, index) => {
                                 // Determine status based on generic threshold vs calculated sechem
                                 // Note: Each uni formula is different, but for MVP we compare raw score vs random threshold
                                 // Actually, UniversityAverage.status should have been calculated in App.tsx?
@@ -83,6 +85,19 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                         </TableBody>
                     </Table>
                 </div>
+
+                {averages.length > 5 && (
+                    <div className="flex justify-center mt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowAll(!showAll)}
+                            className="bg-gray-50 hover:bg-gray-100 text-gray-600 font-medium"
+                        >
+                            {showAll ? 'הצג פחות' : `הצג עוד ${averages.length - 5} תוצאות`}
+                        </Button>
+                    </div>
+                )}
+
             </CardContent>
             {/* Conversion Button */}
             <div className="p-6 pt-0 flex justify-center">
@@ -91,7 +106,7 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                     className="bg-green-500 hover:bg-green-600 text-white font-bold py-6 px-8 rounded-full shadow-xl transition-all hover:scale-105 flex items-center gap-3 text-lg"
                 >
                     <MessageCircle className="h-6 w-6" />
-                    মבולבל מהתוצאות? בוא להתייעץ איתנו בקבוצה השקטה
+                    מבולבל מהתוצאות? בוא להתייעץ איתנו בקבוצה השקטה
                 </Button>
             </div>
         </Card>

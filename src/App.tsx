@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
-import { Button } from './components/ui/shim';
-import { PsychometricForm } from './components/PsychometricForm';
-import { BagrutForm } from './components/BagrutForm';
-import { UniversityResultsTable } from './components/UniversityResultsTable';
-import { AdminDashboard } from './components/AdminDashboard';
+import { Header } from './components/Header';
+import { HeroOverlay } from './components/HeroOverlay';
+import { WizardContainer } from './components/Wizard/WizardContainer';
+// import { Button } from './components/ui/shim'; // Unused
+// import { PsychometricForm } from './components/PsychometricForm'; // Moved to Wizard
+// import { BagrutForm } from './components/BagrutForm'; // Moved to Wizard
+// import { UniversityResultsTable } from './components/UniversityResultsTable'; // Moved to Wizard
 import { DebugTools } from './components/DebugTools';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
@@ -17,131 +19,86 @@ function App() {
   const [bagrutGrades, setBagrutGrades] = useState<SubjectGrade[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [formKey, setFormKey] = useState(0);
+  const [wizardStarted, setWizardStarted] = useState(false);
 
-  const handleCalculate = (psychoData: PsychometricScores) => {
+  const handlePsychometricUpdate = (psychoData: PsychometricScores) => {
     setPsychometric(psychoData);
-    performCalculation(bagrutGrades, psychoData);
   };
 
   const handleBagrutUpdate = (grades: SubjectGrade[]) => {
     setBagrutGrades(grades);
   };
 
-  const performCalculation = (grades: SubjectGrade[], psycho: PsychometricScores) => {
-    // USE THE BRIDGE
-    const stats = calculateAdmissionStats(grades, psycho);
-    // Bridge now returns mapped degrees ready for the table
-    setResults(stats.degrees);
-  };
+  // Auto-calculate whenever data changes
+  useEffect(() => {
+    if (bagrutGrades.length > 0 || psychometric.general > 0) {
+      // Debounce could be added here if needed, but calculation is fast
+      const stats = calculateAdmissionStats(bagrutGrades, psychometric);
+      setResults(stats.degrees);
+    }
+  }, [bagrutGrades, psychometric]);
 
   const loadScenario = (scenario: any) => {
     setPsychometric(scenario.psychometric);
     setBagrutGrades(scenario.bagrut);
     setFormKey(prev => prev + 1);
-    performCalculation(scenario.bagrut, scenario.psychometric);
+    // Calculation handled by effect
   };
-
-  // Admin Logic
-  const isAdminParam = window.location.search.includes('admin=true');
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('admin_auth') === 'true'; // Simple persistent login
-  });
-  const [passwordInput, setPasswordInput] = useState('');
-  const [loginError, setLoginError] = useState(false);
-
-  const handleLogin = () => {
-    if (passwordInput === 'Bagrut2025') { // Hardcoded password as agreed
-      setIsAuthenticated(true);
-      localStorage.setItem('admin_auth', 'true');
-      setLoginError(false);
-    } else {
-      setLoginError(true);
-    }
-  };
-
-  if (isAdminParam) {
-    if (!isAuthenticated) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4" dir="rtl">
-          <div className="bg-white p-8 rounded-xl shadow-lg max-w-sm w-full space-y-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-800">🔒 כניסת מנהלים</h2>
-            <p className="text-gray-500 text-sm">המערכת מוגנת. נא להזין סיסמה.</p>
-
-            <div className="space-y-4">
-              <input
-                type="password"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="סיסמה"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 text-left ltr"
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              />
-
-              {loginError && <p className="text-red-500 text-xs font-medium">סיסמה שגויה. נסה שנית.</p>}
-
-              <Button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium shadow-sm transition-all">
-                כניסה למערכת
-              </Button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return <AdminDashboard />;
-  }
-
-  // Determine if we show the "CRM" button (now available on Prod too if explicit)
-  // const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'; // No longer needed
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12" dir="rtl">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <header className="text-center py-6 relative">
-          <div className="absolute top-0 right-0 p-4">
-            <Button
-              onClick={() => window.location.href = '/?admin=true'}
-              className="bg-gray-900 text-white hover:bg-black text-xs"
-            >
-              ניהול CRM 💼
-            </Button>
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans" dir="rtl">
+      <Header />
+
+      <main className="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+
+        {/* Powered By Section - Top of Page */}
+        <div className="flex flex-col items-center justify-center space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
+          <p className="text-gray-500 font-medium">מבית</p>
+          <a
+            href="https://www.facebook.com/groups/mlimudim"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-[#1877F2]/5 hover:bg-[#1877F2]/10 transition-colors px-6 py-3 rounded-xl border border-[#1877F2]/10 group"
+          >
+            <svg className="w-8 h-8 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </svg>
+            <div className="text-right">
+              <div className="font-bold text-gray-900 group-hover:text-[#1877F2] transition-colors">מתלבטים בלימודים</div>
+              <div className="text-sm text-gray-500">קהילת הלימודים הגדולה בישראל (50,000+ חברים)</div>
+            </div>
+          </a>
+        </div>
+
+        {/* Hero Overlay - Only shown when wizard hasn't started */}
+        {!wizardStarted && (
+          <section className="animate-in fade-in zoom-in-95 duration-500">
+            <HeroOverlay onStart={() => setWizardStarted(true)} />
+          </section>
+        )}
+
+        {/* Wizard Content */}
+        {wizardStarted && (
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <WizardContainer
+              bagrutData={bagrutGrades}
+              onBagrutUpdate={handleBagrutUpdate}
+              psychometricData={psychometric}
+              onPsychometricUpdate={handlePsychometricUpdate}
+              results={results}
+            />
           </div>
-          <h1 className="text-4xl font-extrabold text-blue-900 tracking-tight">Bagrut MVP</h1>
-          <p className="text-lg text-blue-600 mt-2">סימולטור קבלה לאוניברסיטה (Frankenstein Edition)</p>
-        </header>
+        )}
 
-        {isAuthenticated && <DebugTools onLoadScenario={loadScenario} />}
+        {/* Debug Tools (keep hidden or optional) */}
+        {/* <DebugTools onLoadScenario={loadScenario} /> */}
+      </main>
 
-        <main className="space-y-8">
-          {/* Section 1: Bagrut Input */}
-          <section>
-            <BagrutForm
-              key={`bagrut-${formKey}`}
-              onDataUpdate={handleBagrutUpdate}
-              initialData={bagrutGrades}
-            />
-          </section>
-
-          {/* Section 2: Psychometric Input */}
-          <section>
-            <PsychometricForm
-              key={`psycho-${formKey}`}
-              onDataUpdate={handleCalculate}
-              initialData={psychometric}
-            />
-          </section>
-
-          {/* Section 3: Results */}
-          {results.length > 0 && (
-            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <UniversityResultsTable averages={results} />
-            </section>
-          )}
-        </main>
-
-        <footer className="text-center text-gray-400 text-sm py-8">
-          נבנה ב-90 דקות. תפקודיות לפני יופי.
-        </footer>
-      </div>
+      <footer className="bg-white border-t border-gray-100 mt-auto py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center text-gray-400 text-sm">
+          <p>© 2025 Bagrut++. נבנה לתלמידים, על ידי סטודנטים.</p>
+        </div>
+      </footer>
     </div>
   );
 }
