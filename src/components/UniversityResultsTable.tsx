@@ -87,13 +87,22 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                 </div>
 
                 {averages.length > 5 && (
-                    <div className="flex justify-center mt-4">
+                    <div className="relative pt-2">
+                        {!showAll && (
+                            <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+                        )}
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             onClick={() => setShowAll(!showAll)}
-                            className="bg-gray-50 hover:bg-gray-100 text-gray-600 font-medium"
+                            className="w-full border border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-all group h-12"
                         >
-                            {showAll ? 'הצג פחות' : `הצג עוד ${averages.length - 5} תוצאות`}
+                            {showAll ? (
+                                <span className="flex items-center gap-2">הצג פחות</span>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    הצג עוד {averages.length - 5} אפשרויות
+                                </span>
+                            )}
                         </Button>
                     </div>
                 )}
