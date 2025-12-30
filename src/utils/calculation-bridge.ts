@@ -1,5 +1,6 @@
 import { calculateOptimalAverage, type SubjectGrade, type UniversityConfig, type PsychometricScores } from './calculator';
 import { degrees, type Degree } from './degrees';
+import { SECTOR_MANDATORY_SUBJECTS } from './subjects';
 
 // 1. Define Default Config (The "University of Default" Logic)
 export const DEFAULT_UNIV_CONFIG: UniversityConfig = {
@@ -44,6 +45,21 @@ function applyAcademicBonuses(subjects: SubjectGrade[]) {
     });
 }
 
+function getMandatorySubjectsForStudent(grades: SubjectGrade[]): string[] {
+    const subjectNames = new Set(grades.map(g => g.subject));
+
+    if (subjectNames.has('עברית לדוברי ערבית')) {
+        if (subjectNames.has('מורשת דרוזית')) return SECTOR_MANDATORY_SUBJECTS.druze;
+        return SECTOR_MANDATORY_SUBJECTS.arab;
+    }
+
+    if (subjectNames.has('תלמוד / תושב״ע') || subjectNames.has('מחשבת ישראל')) {
+        return SECTOR_MANDATORY_SUBJECTS.mamlachti_dati;
+    }
+
+    return SECTOR_MANDATORY_SUBJECTS.mamlachti;
+}
+
 export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore: PsychometricScores) {
     if (!bagrutData || bagrutData.length === 0) {
         return {
@@ -54,7 +70,17 @@ export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore:
     }
 
     const subjectsWithBonuses = applyAcademicBonuses(bagrutData);
-    const optimal = calculateOptimalAverage(subjectsWithBonuses, DEFAULT_UNIV_CONFIG);
+
+    // Dynamic config based on student's sector
+    const dynamicConfig = {
+        ...DEFAULT_UNIV_CONFIG,
+        average_calculation: {
+            ...DEFAULT_UNIV_CONFIG.average_calculation,
+            mandatory_subjects: getMandatorySubjectsForStudent(bagrutData)
+        }
+    };
+
+    const optimal = calculateOptimalAverage(subjectsWithBonuses, dynamicConfig);
     const psychoTotal = psychoScore.total || 550;
     const baseScore = (optimal.average * 4) + (psychoTotal * 0.4);
 

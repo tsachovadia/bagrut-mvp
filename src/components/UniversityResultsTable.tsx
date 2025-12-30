@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Badge, Progress, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/shim';
-import { CheckCircle, AlertTriangle, XCircle, Clock, MessageCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/shim';
+import { CheckCircle, XCircle, ArrowUp, MessageCircle } from "lucide-react";
 import { getDegree } from '../utils/degrees';
 
 interface UniversityAverage {
@@ -8,76 +8,101 @@ interface UniversityAverage {
     average: number;
     description: string;
     calculation: string;
-    status: 'accepted' | 'rejected' | 'pending'; // Simplified
     sechem: any[];
 }
 
 interface UniversityResultsTableProps {
     averages: UniversityAverage[];
+    originalAverages?: UniversityAverage[] | null;
 }
 
-export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ averages }) => {
+export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ averages, originalAverages }) => {
     const [showAll, setShowAll] = React.useState(false);
+
+    // Sort so "Accepted" comes first if not simulated, otherwise stick to stable sort
     const displayedAverages = showAll ? averages : averages.slice(0, 5);
 
-    // Helper to determine pass/fail based on degree thresholds (Mocking check against a hardcoded degree for MVP)
-    // In real app, we would match against selected degree.
-    // For MVP: We show pass/fail for "Computer Science" (id 1) as an example? 
-    // OR we list multiple degrees?
-    // The user prompt said: "Use degrees.json to show ... for EACH degree".
-    // Note: "For each degree" implies a big table.
-    // I'll assume we show results for **Computer Science** (Degree ID 1) as the default target.
-
+    // Hardcoded target for MVP context
     const targetDegree = getDegree(1); // CS
 
     return (
-        <Card className="w-full mt-8">
-            <CardHeader>
-                <CardTitle className="text-2xl font-bold text-center">
-                    תוצאות קבלה (כלל האוניברסיטאות)
+
+        <Card className="w-full mt-10">
+            <CardHeader className="bg-white/50 border-b border-gray-100/50 pb-2 pt-4">
+                <CardTitle className="text-xl font-bold text-center text-[#1d1d1f] tracking-tight">
+                    תוצאות קבלה
                 </CardTitle>
-                <p className="text-center text-gray-500">
-                    סף קבלה משוער: {targetDegree?.threshold}
-                </p>
+                <div className="text-center text-gray-500 font-medium mt-1 text-xs">
+                    עבור: <span className="text-[#0071E3]">{targetDegree?.degree_name || "מדעי המחשב"}</span> (סף משוער: {targetDegree?.threshold})
+                </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead className="text-right">אוניברסיטה</TableHead>
-                                <TableHead className="text-right">סכם שחושב</TableHead>
-                                <TableHead className="text-right">סטטוס</TableHead>
+                            <TableRow className="border-b border-gray-100/50 hover:bg-transparent">
+                                <TableHead className="text-right py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">אוניברסיטה</TableHead>
+                                <TableHead className="text-right py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">סכם שחושב</TableHead>
+                                <TableHead className="text-right py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">סטטוס קבלה</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {displayedAverages.map((avg, index) => {
-                                // Determine status based on generic threshold vs calculated sechem
-                                // Note: Each uni formula is different, but for MVP we compare raw score vs random threshold
-                                // Actually, UniversityAverage.status should have been calculated in App.tsx?
-                                // Or we calculate here.
+                                // Find original for diff
+                                const original = originalAverages ? originalAverages.find(o => o.university === avg.university) : null;
+                                const currentScore = avg.sechem[0]?.score || 0;
+                                const originalScore = original?.sechem[0]?.score || 0;
 
-                                // Let's rely on what was passed or calculate simple relation
-                                const score = avg.sechem[0]?.score || 0;
-                                const isPass = score >= (targetDegree?.threshold || 600);
+                                const isImprovement = original && currentScore > originalScore;
+                                const diff = original ? (currentScore - originalScore).toFixed(0) : 0;
+
+                                const currentStatus = currentScore >= (targetDegree?.threshold || 600) ? 'accepted' : 'rejected';
+                                const statusChanged = original && (originalScore >= (targetDegree?.threshold || 600) ? 'accepted' : 'rejected') !== currentStatus;
 
                                 return (
-                                    <TableRow key={index} className={isPass ? 'bg-green-50' : 'bg-red-50'}>
-                                        <TableCell className="font-medium">
-                                            <div className="font-semibold text-lg">{avg.university}</div>
-                                            <div className="text-xs text-gray-500">{avg.sechem[0]?.name}</div>
+                                    <TableRow key={index} className="group hover:bg-white/60 transition-colors border-b border-gray-50/50 last:border-0">
+                                        <TableCell className="py-2 font-medium">
+                                            <div className="font-bold text-sm text-[#1d1d1f] mb-0.5">{avg.university}</div>
+                                            <div className="text-[10px] text-gray-500 font-normal">{avg.sechem[0]?.name}</div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-2">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-2xl font-bold text-blue-600">
-                                                    {score.toFixed(0)}
+                                                <span className="font-mono text-lg font-bold tracking-tight text-[#0071E3]">
+                                                    {currentScore.toFixed(0)}
                                                 </span>
+                                                {isImprovement && (
+                                                    <span className="flex items-center text-xs font-bold text-green-600 bg-green-50/80 backdrop-blur-sm px-2.5 py-1 rounded-full animate-in fade-in zoom-in duration-300 shadow-sm border border-green-100/50">
+                                                        <ArrowUp className="w-3 h-3 mr-0.5" />
+                                                        {diff}+
+                                                    </span>
+                                                )}
+                                                {original && !isImprovement && Math.abs(currentScore - originalScore) < 1 && (
+                                                    <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                                                        -
+                                                    </span>
+                                                )}
                                             </div>
                                         </TableCell>
-                                        <TableCell>
-                                            <Badge className={isPass ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                                                {isPass ? 'קבלה' : 'דחייה'}
-                                            </Badge>
+                                        <TableCell className="py-2">
+                                            <div className="flex items-center gap-2">
+                                                {currentStatus === 'accepted' ? (
+                                                    <Badge className={`bg-green-100/80 text-green-800 border-0 hover:bg-green-200/80 transition-colors backdrop-blur-md flex items-center gap-1 py-1 px-2 text-xs font-medium rounded-full shadow-sm ${statusChanged ? 'ring-2 ring-green-400/50 ring-offset-2 animate-bounce-subtle' : ''}`}>
+                                                        <CheckCircle className="w-3 h-3" />
+                                                        קבלה
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="destructive" className="bg-red-50/80 text-red-700 border-0 hover:bg-red-100/80 backdrop-blur-md flex items-center gap-1 py-1 px-2 text-xs font-medium rounded-full shadow-sm">
+                                                        <XCircle className="w-3 h-3" />
+                                                        דחייה
+                                                    </Badge>
+                                                )}
+
+                                                {statusChanged && currentStatus === 'accepted' && (
+                                                    <span className="text-[10px] uppercase tracking-wider font-bold text-white bg-[#0071E3] px-1.5 py-0 rounded-full animate-pulse shadow-md shadow-blue-500/30">
+                                                        חדש!
+                                                    </span>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -87,35 +112,32 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                 </div>
 
                 {averages.length > 5 && (
-                    <div className="relative pt-2">
+                    <div className="relative pt-6 pb-6 px-4">
                         {!showAll && (
-                            <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+                            <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white/80 pointer-events-none" />
                         )}
                         <Button
                             variant="ghost"
                             onClick={() => setShowAll(!showAll)}
-                            className="w-full border border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-all group h-12"
+                            className="w-full text-[#0071E3] hover:text-[#0077ED] hover:bg-blue-50/50 font-medium transition-all text-sm rounded-xl py-6"
                         >
-                            {showAll ? (
-                                <span className="flex items-center gap-2">הצג פחות</span>
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    הצג עוד {averages.length - 5} אפשרויות
-                                </span>
-                            )}
+                            {showAll ? "הצג פחות" : `הצג עוד ${averages.length - 5} אוניברסיטאות`}
                         </Button>
                     </div>
                 )}
-
             </CardContent>
+
             {/* Conversion Button */}
-            <div className="p-6 pt-0 flex justify-center">
+            <div className="p-4 pt-0 flex justify-center pb-6">
                 <Button
                     onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-6 px-8 rounded-full shadow-xl transition-all hover:scale-105 flex items-center gap-3 text-lg"
+                    className="bg-[#25D366] hover:bg-[#128C7E] text-white font-semibold py-3 px-6 rounded-full shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 text-sm w-full sm:w-auto"
                 >
-                    <MessageCircle className="h-6 w-6" />
-                    מבולבל מהתוצאות? בוא להתייעץ איתנו בקבוצה השקטה
+                    <MessageCircle className="h-5 w-5" />
+                    <div className="flex flex-col items-start leading-tight sm:flex-row sm:items-center sm:gap-1">
+                        <span className="opacity-90 font-normal">מבולבל? בא להתייעץ ב</span>
+                        <span className="font-bold">קבוצה הווצאפ השקטה</span>
+                    </div>
                 </Button>
             </div>
         </Card>

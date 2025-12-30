@@ -1,0 +1,26 @@
+[
+  {
+    "institution": "אוניברסיטת תל אביב",
+    "program": "מדעי המחשב",
+    "status": "pending",
+    "search_url": "https://go.tau.ac.il/b.a/requirements/comp-science/2024"
+  },
+  {
+    "institution": "הטכניון",
+    "program": "מדעי המחשב",
+    "status": "pending",
+    "search_url": "https://admissions.technion.ac.il/engineering-natural-sciences/computer-science/"
+  },
+  {
+    "institution": "האוניברסיטה העברית",
+    "program": "מדעי המחשב",
+    "status": "pending",
+    "search_url": "https://info.huji.ac.il/bachelor/Computer-Science"
+  },
+  {
+    "institution": "אוניברסיטת בר אילן",
+    "program": "מדעי המחשב",
+    "status": "pending",
+    "search_url": "https://www.biu.ac.il/degree/115"
+  }
+]
