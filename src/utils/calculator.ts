@@ -1,3 +1,5 @@
+import { calculateBonus } from './bonuses';
+
 export interface SubjectGrade {
     id: string;
     subject: string;
@@ -153,16 +155,16 @@ export const MOCK_UNIV_CONFIG: UniversityConfig = {
     ]
 };
 
+// Helper to get bonus value for a single subject
+export function getSubjectBonus(subjectName: string, units: number, grade: number = 60): number {
+    return calculateBonus(subjectName, units, grade);
+}
+
 // Helper to apply bonuses (Simple MVP version)
 export function applyBonuses(subjects: SubjectGrade[]): SubjectWithBonus[] {
     return subjects.map(s => {
-        let bonus = 0;
-        let adjusted = s.grade;
-        if (s.subject === 'מתמטיקה' && s.units === 5) { bonus = 35; adjusted += 35; }
-        else if (s.subject === 'מתמטיקה' && s.units === 4) { bonus = 15; adjusted += 15; }
-        else if (s.subject === 'אנגלית' && s.units === 5) { bonus = 25; adjusted += 25; }
-        else if (s.subject === 'אנגלית' && s.units === 4) { bonus = 12.5; adjusted += 12.5; }
-        else if (s.units === 5) { bonus = 20; adjusted += 20; } // General bonus for 5 units
+        const bonus = getSubjectBonus(s.subject, s.units);
+        const adjusted = s.grade + bonus;
 
         return {
             ...s,

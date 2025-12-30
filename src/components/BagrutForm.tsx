@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label } from './ui/shim';
-import { Plus, Trash2, GraduationCap, UploadCloud, FileText, ExternalLink, BookOpen } from 'lucide-react';
+import { Plus, Trash2, GraduationCap, UploadCloud, FileText, ExternalLink, BookOpen, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';
 import { SECTOR_MANDATORY_SUBJECTS, SECTOR_NAMES, type Sector, getSubjectByName, ELECTIVE_SUBJECTS, type BagrutSubject } from '../utils/subjects';
 import type { SubjectGrade } from '../utils/calculator';
 import { InfoBox } from './ui/InfoBox';
+import { InfoTooltip } from './ui/InfoTooltip';
+import { calculateBonus } from '../utils/bonuses';
+import { BagrutSubjectRow } from './BagrutSubjectRow';
 
 interface BagrutFormProps {
     onDataUpdate: (grades: SubjectGrade[]) => void;
@@ -81,16 +84,36 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill }: BagrutForm
         setGrades(prev => prev.filter(g => g.id !== id));
     };
 
+    const handleGradeChange = (subjectName: string, field: keyof SubjectGrade, value: any) => {
+        setGrades(prev => prev.map(g => {
+            if (g.subject === subjectName) {
+                return { ...g, [field]: value };
+            }
+            return g;
+        }));
+    };
+
+    const handleRemoveSubject = (id: string) => {
+        setGrades(prev => prev.filter(g => g.id !== id));
+    };
+
     const renderManualInput = () => {
         const mandatoryForSector = SECTOR_MANDATORY_SUBJECTS[sector];
-        const mandatoryGrades = grades.filter(g => mandatoryForSector.includes(g.subject));
-        mandatoryGrades.sort((a, b) => mandatoryForSector.indexOf(a.subject) - mandatoryForSector.indexOf(b.subject));
-        const otherGrades = grades.filter(g => !mandatoryForSector.includes(g.subject));
+        const mandatorySubjectsList = mandatoryForSector.map(name => {
+            const def = getSubjectByName(name);
+            return { name: name, category: 'mandatory', units: def?.defaultUnits || 3 };
+        });
 
         return (
             <div className="space-y-4 animate-in fade-in duration-500">
                 {/* Sector Selector */}
-                {/* Sector Selector */}
+                <div className="flex items-center justify-between mb-1.5 px-1">
+                    <div className="flex items-center gap-1.5">
+                        <Label className="text-sm font-semibold text-[#1d1d1f]">מגזר לימוד</Label>
+                        <InfoTooltip contentKey="sector" />
+                    </div>
+                </div>
+
                 <div className="bg-white/40 backdrop-blur-md p-1.5 rounded-2xl border border-white/60 shadow-sm inline-flex w-full relative overflow-hidden">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full relative z-10">
                         {(Object.entries(SECTOR_NAMES) as [Sector, string][]).map(([key, label]) => (
@@ -120,46 +143,21 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill }: BagrutForm
                         מקצועות חובה
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {mandatoryGrades.map(grade => {
-                            const def = getSubjectByName(grade.subject);
+                        {mandatorySubjectsList.map((subject, index) => {
+                            // Find existing grade for this subject
+                            const existing = grades.find((s: SubjectGrade) => s.subject === subject.name);
+                            const grade = existing?.grade || 0;
+                            const units = existing?.units || subject.units;
+
                             return (
-                                <div key={grade.id} className="bg-white/60 backdrop-blur-sm p-3 rounded-2xl border border-white/60 shadow-sm hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <Label className="text-sm font-semibold text-[#1d1d1f]">{grade.subject}</Label>
-                                        <span className="text-[10px] bg-gray-100/80 text-gray-500 px-2 py-0.5 rounded-full font-medium">חובה</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <Label className="text-[10px] font-medium text-gray-400 mb-1 block px-1">יחידות</Label>
-                                            <div className="relative">
-                                                <select
-                                                    className="w-full h-8 pl-2 pr-6 bg-white/50 border border-gray-200 rounded-xl text-xs appearance-none focus:outline-none focus:ring-2 focus:ring-[#0071E3] focus:border-transparent transition-all"
-                                                    value={grade.units}
-                                                    onChange={(e) => updateGrade(grade.id, 'units', parseInt(e.target.value))}
-                                                >
-                                                    {def?.units.map((u: number) => (
-                                                        <option key={u} value={u}>{u} יח״ל</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none text-gray-400">
-                                                    <BookOpen className="w-3 h-3" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <Label className="text-[10px] font-medium text-gray-400 mb-1 block px-1">ציון סופי</Label>
-                                            <Input
-                                                type="number"
-                                                className="h-8 bg-white/50 border-gray-200 text-xs"
-                                                min="0"
-                                                max="100"
-                                                value={grade.grade || ''}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateGrade(grade.id, 'grade', parseInt(e.target.value) || 0)}
-                                                placeholder="0-100"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                <BagrutSubjectRow
+                                    key={subject.name}
+                                    subjectName={subject.name}
+                                    grade={grade}
+                                    units={units}
+                                    isMandatory={true}
+                                    onChange={(name, field, value) => handleGradeChange(name, field, value)}
+                                />
                             );
                         })}
                     </div>
@@ -173,50 +171,23 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill }: BagrutForm
                     </h3>
 
                     <div className="space-y-3">
-                        {otherGrades.map(grade => {
-                            const def = getSubjectByName(grade.subject);
-                            return (
-                                <div key={grade.id} className="flex flex-col sm:flex-row gap-2 items-end p-2 bg-white/40 backdrop-blur-sm rounded-xl border border-white/60 shadow-sm transition-all hover:bg-white/60">
-                                    <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-12 gap-2">
-                                        <div className="sm:col-span-4 self-center">
-                                            <Label className="text-sm font-semibold text-[#1d1d1f] mb-1 sm:mb-0 block">{grade.subject}</Label>
-                                        </div>
-                                        <div className="sm:col-span-8 flex gap-2">
-                                            <div className="w-1/3">
-                                                <Label className="text-[10px] font-medium text-gray-400 mb-1 block px-1 sm:hidden">יחידות</Label>
-                                                <select
-                                                    className="w-full h-8 px-2 bg-white/50 border border-gray-200 rounded-xl text-xs appearance-none focus:outline-none focus:ring-2 focus:ring-[#0071E3] focus:border-transparent transition-all"
-                                                    value={grade.units}
-                                                    onChange={(e) => updateGrade(grade.id, 'units', parseInt(e.target.value))}
-                                                >
-                                                    {def?.units.map((u: number) => (
-                                                        <option key={u} value={u}>{u} יח״ל</option>
-                                                    ))}
-                                                    {!def && <option value={5}>5 יח"ל</option>}
-                                                </select>
-                                            </div>
-                                            <div className="flex-1">
-                                                <Label className="text-[10px] font-medium text-gray-400 mb-1 block px-1 sm:hidden">ציון</Label>
-                                                <Input
-                                                    className="h-8 bg-white/50 border-gray-200 text-xs"
-                                                    type="number"
-                                                    min="0"
-                                                    max="100"
-                                                    value={grade.grade || ''}
-                                                    onChange={(e: any) => updateGrade(grade.id, 'grade', parseInt(e.target.value) || 0)}
-                                                    placeholder="ציון"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" className="h-8 w-8 rounded-full text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors p-0 flex items-center justify-center shrink-0" onClick={() => removeGrade(grade.id)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            );
-                        })}
+                        {/* Only render subjects that are NOT in mandatory list to avoid dupes if any overlap */}
+                        {grades
+                            .filter((s: SubjectGrade) => !mandatorySubjectsList.find(m => m.name === s.subject))
+                            .map((subjectGrade: SubjectGrade) => (
+                                <BagrutSubjectRow
+                                    key={subjectGrade.id}
+                                    subjectName={subjectGrade.subject}
+                                    grade={subjectGrade.grade}
+                                    units={subjectGrade.units}
+                                    isMandatory={false}
+                                    onChange={(name, field, value) => handleGradeChange(name, field, value)}
+                                    onRemove={() => handleRemoveSubject(subjectGrade.id)}
+                                />
+                            ))
+                        }
 
-                        {otherGrades.length === 0 && (
+                        {grades.filter((s: SubjectGrade) => !mandatorySubjectsList.find(m => m.name === s.subject)).length === 0 && (
                             <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-lg border border-dashed text-sm">
                                 לא הוזנו מקצועות בחירה
                             </div>

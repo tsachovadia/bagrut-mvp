@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Alert, 
 import { Info, Calculator, Target, ExternalLink, HelpCircle } from 'lucide-react';
 import type { PsychometricScores } from '../utils/calculator';
 import { InfoBox } from './ui/InfoBox';
+import { InfoTooltip } from './ui/InfoTooltip';
 
 interface PsychometricFormProps {
     onDataUpdate: (data: PsychometricScores) => void;
@@ -93,6 +94,7 @@ export const PsychometricForm = ({ onDataUpdate, initialData, onSkip }: Psychome
                     <Label htmlFor="psychometric-general" className="text-xs font-medium text-[#1d1d1f] flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500 block"></span>
                         ציון כללי
+                        <InfoTooltip contentKey="psychometric_general" />
                     </Label>
                     <Input
                         id="psychometric-general"
@@ -107,7 +109,10 @@ export const PsychometricForm = ({ onDataUpdate, initialData, onSkip }: Psychome
                 </div>
 
                 <div className="space-y-1">
-                    <Label htmlFor="psychometric-quantitative" className="text-xs font-medium text-gray-500">כמותי</Label>
+                    <div className="flex items-center gap-1.5">
+                        <Label htmlFor="psychometric-quantitative" className="text-xs font-medium text-gray-500">כמותי</Label>
+                        <InfoTooltip contentKey="psychometric_quant" />
+                    </div>
                     <Input
                         id="psychometric-quantitative"
                         type="number"

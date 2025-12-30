@@ -3,7 +3,10 @@ import { Menu, X, GraduationCap, Users, HelpCircle, TrendingUp, ShoppingBag, Mes
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export function Header({ onViewChange }: { onViewChange: (view: 'home' | 'programs') => void }) {
+import { useNavigate } from 'react-router-dom';
+
+export function Header() {
+    const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
 
@@ -42,18 +45,16 @@ export function Header({ onViewChange }: { onViewChange: (view: 'home' | 'progra
                 <div className="flex justify-between h-14 items-center">
 
                     {/* Logo / Brand */}
-                    <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onClick={() => onViewChange('home')}>
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#0071E3] to-[#0077ED] rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-all duration-300">
-                            B
-                        </div>
+                    <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
+                        <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-all duration-300 object-cover" />
                         <span className="text-xl font-bold text-gray-900 tracking-tight">מתלבטים בלימודים</span>
                     </div>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex flex-1 items-center justify-center space-x-1 space-x-reverse">
-                        <NavItem onClick={() => onViewChange('home')} icon={<GraduationCap className="w-4 h-4" />} text="לאן אני מתקבל" />
-                        <NavItem onClick={() => onViewChange('programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
-                        <NavItem icon={<TrendingUp className="w-4 h-4" />} text="איך לשפר את הסכם" />
+                        <NavItem onClick={() => navigate('/')} icon={<GraduationCap className="w-4 h-4" />} text="לאן אני מתקבל" />
+                        <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
+                        <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="הקוקפיט (סימולטור)" />
                         <NavItem icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />
                     </nav>
 
@@ -136,8 +137,8 @@ export function Header({ onViewChange }: { onViewChange: (view: 'home' | 'progra
             {isMenuOpen && (
                 <div className="md:hidden bg-white border-t border-gray-100">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        <MobileNavItem onClick={() => { onViewChange('home'); setIsMenuOpen(false); }} text="לאן אני מתקבל" />
-                        <MobileNavItem onClick={() => { onViewChange('programs'); setIsMenuOpen(false); }} text="חיפוש תארים" />
+                        <MobileNavItem onClick={() => { navigate('/'); setIsMenuOpen(false); }} text="לאן אני מתקבל" />
+                        <MobileNavItem onClick={() => { navigate('/programs'); setIsMenuOpen(false); }} text="חיפוש תארים" />
                         <MobileNavItem text="איך לשפר את הסכם" />
                         <MobileNavItem text="דעות אמיתיות של סטודנטים" />
                         <MobileNavItem text="קהילה בוואטסאפ" />

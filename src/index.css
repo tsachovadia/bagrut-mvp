@@ -53,3 +53,28 @@
     text-wrap: balance;
   }
 }
+
+/* Accessibility Modes */
+.grayscale-mode {
+  filter: grayscale(100%);
+}
+
+.high-contrast-mode {
+  filter: contrast(125%) brightness(110%);
+}
+
+.high-contrast-mode * {
+  border-color: #000 !important;
+}
+
+.highlight-links-mode a {
+  text-decoration: underline !important;
+  font-weight: 700 !important;
+  color: #0000EE !important;
+  /* Standard link blue for max contrast */
+}
+
+.highlight-links-mode button {
+  outline: 2px solid #0000EE !important;
+  outline-offset: 2px;
+}
