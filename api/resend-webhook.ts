@@ -8,14 +8,16 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export default async function handler(request, response) {
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(request: VercelRequest, response: VercelResponse) {
     if (request.method !== 'POST') {
         return response.status(405).json({ error: 'Method not allowed' });
     }
 
     const payload = request.body;
     const { type, data } = payload;
-    const { __event_data, email_id, created_at } = data; // event_data relies on Resend API version, check payload structure
+    // const { __event_data, email_id, created_at } = data; // Unused
 
     // Resend webhook payload structure:
     // { type: 'email.opened', created_at: '...', data: { email_id: '...', ... } }

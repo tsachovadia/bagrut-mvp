@@ -118,6 +118,8 @@ const LogicRenderer = ({ node, level = 0 }: { node: LogicGroup | LogicCondition;
 };
 
 export const ProgramDetailsCard: React.FC<ProgramDetailsCardProps> = ({ program, admission }) => {
+    const [imageError, setImageError] = React.useState(false);
+
     return (
         <div className="bg-white min-h-full">
             {/* Compact Header */}
@@ -128,8 +130,13 @@ export const ProgramDetailsCard: React.FC<ProgramDetailsCardProps> = ({ program,
                     <div className="flex items-center gap-4">
                         {/* Logo Box */}
                         <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center p-1.5 shrink-0">
-                            {program.institution?.logo_url ? (
-                                <img src={program.institution.logo_url} alt="Logo" className="w-full h-full object-contain" />
+                            {program.institution?.logo_url && !imageError ? (
+                                <img
+                                    src={program.institution.logo_url}
+                                    alt="Logo"
+                                    className="w-full h-full object-contain"
+                                    onError={() => setImageError(true)}
+                                />
                             ) : (
                                 <School className="w-8 h-8 text-indigo-600" />
                             )}

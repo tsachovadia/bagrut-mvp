@@ -19,6 +19,7 @@ interface BagrutSubjectRowProps {
     onChange: (id: string, field: 'grade' | 'units', value: number) => void;
     onRemove?: (id: string) => void;
     isMandatory?: boolean;
+    variant?: 'default' | 'compact';
 }
 
 export const BagrutSubjectRow: React.FC<BagrutSubjectRowProps> = ({
@@ -27,73 +28,75 @@ export const BagrutSubjectRow: React.FC<BagrutSubjectRowProps> = ({
     units,
     onChange,
     onRemove,
-    isMandatory
+    isMandatory,
+    variant = 'default'
 }) => {
 
     // Calculate bonuses
     const currentBonus = calculateBonus(subjectName, units, grade);
 
     return (
-        <div className={`p-4 rounded-xl border transition-all duration-300 bg-white border-gray-100`}>
-            <div className="flex flex-col gap-3">
+        <div className={`rounded-xl border transition-all duration-300 bg-white border-gray-100 ${variant === 'compact' ? 'p-1' : 'p-3'}`}>
+            <div className="flex flex-col gap-1.5 w-full">
                 {/* Header Row */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-800">{subjectName}</span>
-                        {currentBonus > 0 && (
-                            <TooltipProvider>
-                                <Tooltip delayDuration={0}>
-                                    <TooltipTrigger asChild>
-                                        <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full cursor-help hover:bg-green-100 transition-colors flex items-center gap-1">
-                                            +{currentBonus} בונוס
-                                        </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" className="max-w-[200px] text-xs">
-                                        <p>מקצוע זה מזכה בבונוס של {currentBonus} נקודות בחישוב הממוצע האוניברסיטאי.</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        )}
-                    </div>
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-bold text-gray-800 text-sm truncate">{subjectName}</span>
+                    {currentBonus > 0 && (
+                        <TooltipProvider>
+                            <Tooltip delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                    <span className={`font-bold text-green-600 bg-green-50 rounded-full cursor-help hover:bg-green-100 transition-colors flex items-center gap-1 whitespace-nowrap ${variant === 'compact' ? 'text-[9px] px-1 py-0' : 'text-[10px] px-1.5 py-0.5'}`}>
+                                        +{currentBonus}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-[200px] text-xs">
+                                    <p>מקצוע זה מזכה בבונוס של {currentBonus} נקודות</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
                 </div>
 
                 {/* Controls Row */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-end gap-3 w-full">
                     {/* Units Input */}
-                    <div className="w-20">
-                        <Label className="text-xs text-gray-400 mb-1 block">יחידות</Label>
+                    <div className="w-16">
+                        <Label className="text-[10px] text-gray-400 mb-1 block text-center">יח"ל</Label>
                         <Input
                             type="number"
                             min={1}
                             max={10}
                             value={units}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(subjectName, 'units', parseInt(e.target.value) || 0)}
-                            className="h-9 text-center font-medium"
+                            className={`text-center font-medium text-xs px-1 ${variant === 'compact' ? 'h-7' : 'h-8'}`}
                         />
                     </div>
 
                     {/* Grade Input */}
-                    <div className="flex flex-col gap-1.5 min-w-[80px] flex-1">
-                        <Label className="text-xs text-gray-500 font-medium">ציון סופי</Label>
+                    <div className="w-20">
+                        <Label className="text-[10px] text-gray-500 font-medium mb-1 block text-center">ציון</Label>
                         <Input
                             type="number"
                             min={0}
-                            max={100}
+                            max={120}
                             value={grade || ''}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(subjectName, 'grade', parseInt(e.target.value) || 0)}
-                            className="h-11 bg-gray-50/50 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 text-center font-bold text-lg"
+                            className={`bg-white border-gray-200 text-center font-medium text-sm px-1 shadow-sm ${variant === 'compact' ? 'h-7' : 'h-8'}`}
                         />
                     </div>
 
+
+
                     {!isMandatory && onRemove && (
-                        <div className="flex justify-end items-end h-[68px] pb-[2px]">
+                        <div className="mr-auto pb-[1px]">
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={onRemove}
-                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-10 w-10 p-0 rounded-full transition-colors"
+                                className={`text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ${variant === 'compact' ? 'h-7 px-2' : 'h-8 px-2.5'} gap-1.5`}
                             >
-                                <Trash2 className="w-5 h-5" />
+                                <Trash2 className={`${variant === 'compact' ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
+                                <span className={`font-medium ${variant === 'compact' ? 'text-[10px]' : 'text-xs'}`}>הסר</span>
                             </Button>
                         </div>
                     )}

@@ -78,52 +78,58 @@ export const UnifiedDashboard = () => {
         }
     };
 
-    // ---- Render ----
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50">טוען...</div>;
+    const handleUpdateOriginalData = (newBagrut: SubjectGrade[], newPsychometric: PsychometricScores) => {
+        setOriginalData(prev => prev ? { ...prev, bagrut: newBagrut, psychometric: newPsychometric } : null);
+        // Also sync simulation to new baseline to prevent confusion
+        setSimulatedBagrut(newBagrut);
+        setSimulatedPsychometric(newPsychometric);
+    };
 
-    if (!originalData) {
-        // Fallback for no data: ideally redirect to Wizard or show "Empty State"
-        // For now, we will render a simplified "Go configure" view
+    // ---- Render ----
+    if (loading || !originalData) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 font-sans p-8 text-center">
-                <h1 className="text-2xl font-bold mb-4">ברוכים הבאים לקוקפיט הקבלה! 🚀</h1>
-                <p className="text-gray-600 mb-8">כדי להתחיל, אנחנו צריכים להכיר את הציונים שלך.</p>
-                <Button onClick={() => window.location.href = '/'} className="bg-blue-600 text-white px-8 py-3 rounded-xl">
-                    <Calculator className="w-5 h-5 ml-2" />
-                    הכנס ציונים ראשוניים
-                </Button>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+                    <p className="text-gray-500 font-medium animate-pulse">טוען את הקוקפיט...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans p-4 lg:p-6 dir-rtl" dir="rtl">
-            <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-80px)]">
+        <div className="min-h-screen bg-[#F5F5F7] font-sans p-2 lg:p-3 dir-rtl lg:overflow-hidden overflow-y-auto" dir="rtl">
+            <div className="max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-3 lg:h-[calc(100vh-24px)] h-auto">
 
-                {/* Right Column: My Data (Read Only) */}
-                <div className="lg:col-span-3 h-full overflow-hidden">
+                {/* Right Column: "The Wizard" (Editable Data) */}
+                <div className="lg:col-span-3 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0">
                     <MyDataPanel
                         stats={originalStats}
                         bagrut={originalData.bagrut}
                         psychometric={originalData.psychometric}
+                        onUpdate={(bagrut, psycho) => handleUpdateOriginalData(bagrut, psycho)}
                     />
                 </div>
 
-                {/* Middle Column: Playground (Edit) */}
-                <div className="lg:col-span-6 h-full overflow-hidden">
-                    <PlaygroundPanel
-                        bagrut={simulatedBagrut}
-                        psychometric={simulatedPsychometric}
-                        onBagrutChange={handleGradeChange}
-                        onPsychometricChange={handlePsychometricChange}
-                        onReset={handleReset}
-                        originalStats={originalStats}
-                        simulatedStats={simulatedStats}
-                    />
+                {/* Middle Column: "The Simulator" (Knobs & Speakers) */}
+                <div className="lg:col-span-6 h-full overflow-hidden flex flex-col bg-white rounded-3xl shadow-sm border border-gray-200/50 relative min-h-[600px] lg:min-h-0">
+                    {/* Background Gradient - moved to z-0 to ensure it's behind content if z-indexing fails, though pointer-events-none should work */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-white pointer-events-none z-0" />
+                    <div className="relative z-10 h-full flex flex-col">
+                        <PlaygroundPanel
+                            bagrut={simulatedBagrut}
+                            psychometric={simulatedPsychometric}
+                            onBagrutChange={handleGradeChange}
+                            onPsychometricChange={handlePsychometricChange}
+                            onReset={handleReset}
+                            originalStats={originalStats}
+                            simulatedStats={simulatedStats}
+                        />
+                    </div>
                 </div>
 
-                {/* Left Column: Targets (Results) */}
-                <div className="lg:col-span-3 h-full overflow-hidden">
+                {/* Left Column: "The Watch" (Targets) */}
+                <div className="lg:col-span-3 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50">
                     <TargetsPanel
                         simulatedStats={simulatedStats}
                         originalStats={originalStats}

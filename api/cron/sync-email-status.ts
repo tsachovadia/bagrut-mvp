@@ -7,7 +7,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export default async function handler(request, response) {
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(_request: VercelRequest, response: VercelResponse) {
     // Basic auth check for cron if needed, or Vercel specific checks
     // For now, let's just make it a GET/POST that processes recently sent emails
 
@@ -59,7 +61,8 @@ export default async function handler(request, response) {
                     } else if (newStatus === 'clicked') {
                         updateData.clicked_at = new Date().toISOString();
                         // Usually opened comes before clicked, but let's be safe
-                        if (!email.opened_at) updateData.opened_at = new Date().toISOString();
+                        const typedEmail = email as { opened_at?: string };
+                        if (!typedEmail.opened_at) updateData.opened_at = new Date().toISOString();
                     }
 
                     const { error: updateError } = await supabase

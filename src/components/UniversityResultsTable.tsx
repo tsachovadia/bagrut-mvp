@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/shim';
-import { CheckCircle, XCircle, ArrowUp, MessageCircle } from "lucide-react";
+import { CheckCircle, XCircle, ArrowUp, MessageCircle, Building2 } from "lucide-react";
 import { getDegree } from '../utils/degrees';
+import { ALL_PROGRAMS } from '../data/programs';
 
 interface UniversityAverage {
     university: string;
@@ -18,6 +19,7 @@ interface UniversityResultsTableProps {
 
 export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ averages, originalAverages }) => {
     const [showAll, setShowAll] = React.useState(false);
+    const [imageErrors, setImageErrors] = React.useState<Record<string, boolean>>({});
 
     // Sort so "Accepted" comes first if not simulated, otherwise stick to stable sort
     const displayedAverages = showAll ? averages : averages.slice(0, 5);
@@ -27,12 +29,12 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
 
     return (
 
-        <Card className="w-full mt-10">
-            <CardHeader className="bg-white/50 border-b border-gray-100/50 pb-2 pt-4">
-                <CardTitle className="text-xl font-bold text-center text-[#1d1d1f] tracking-tight">
+        <Card className="w-full mt-4">
+            <CardHeader className="bg-white/50 border-b border-gray-100/50 pb-2 pt-3">
+                <CardTitle className="text-lg font-bold text-center text-[#1d1d1f] tracking-tight">
                     תוצאות קבלה
                 </CardTitle>
-                <div className="text-center text-gray-500 font-medium mt-1 text-xs">
+                <div className="text-center text-gray-500 font-medium mt-0.5 text-[11px]">
                     עבור: <span className="text-[#0071E3]">{targetDegree?.degree_name || "מדעי המחשב"}</span> (סף משוער: {targetDegree?.threshold})
                 </div>
             </CardHeader>
@@ -41,9 +43,9 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-gray-100/50 hover:bg-transparent">
-                                <TableHead className="text-right py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">אוניברסיטה</TableHead>
-                                <TableHead className="text-right py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">סכם שחושב</TableHead>
-                                <TableHead className="text-right py-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">סטטוס קבלה</TableHead>
+                                <TableHead className="text-right py-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-400">אוניברסיטה</TableHead>
+                                <TableHead className="text-right py-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-400">סכם שחושב</TableHead>
+                                <TableHead className="text-right py-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-400">סטטוס קבלה</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -59,11 +61,36 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
                                 const currentStatus = currentScore >= (targetDegree?.threshold || 600) ? 'accepted' : 'rejected';
                                 const statusChanged = original && (originalScore >= (targetDegree?.threshold || 600) ? 'accepted' : 'rejected') !== currentStatus;
 
+                                // Find logo
+                                const program = ALL_PROGRAMS.find(p => p?.program?.institution?.name === avg.university);
+                                const logoUrl = program?.program?.institution?.logo_url;
+                                const hasError = imageErrors[avg.university];
+
                                 return (
                                     <TableRow key={index} className="group hover:bg-white/60 transition-colors border-b border-gray-50/50 last:border-0">
-                                        <TableCell className="py-2 font-medium">
-                                            <div className="font-bold text-sm text-[#1d1d1f] mb-0.5">{avg.university}</div>
-                                            <div className="text-[10px] text-gray-500 font-normal">{avg.sechem[0]?.name}</div>
+                                        <TableCell className="py-1.5 font-medium">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-shrink-0">
+                                                    {logoUrl && !hasError ? (
+                                                        <div className="w-8 h-8 rounded-full border border-gray-100 bg-white shadow-sm flex items-center justify-center overflow-hidden">
+                                                            <img
+                                                                src={logoUrl}
+                                                                alt={avg.university}
+                                                                className="w-full h-full object-contain p-1"
+                                                                onError={() => setImageErrors(prev => ({ ...prev, [avg.university]: true }))}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                                                            <Building2 className="w-4 h-4" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-xs text-[#1d1d1f] mb-0.5">{avg.university}</div>
+                                                    <div className="text-[9px] text-gray-500 font-normal">{avg.sechem[0]?.name}</div>
+                                                </div>
+                                            </div>
                                         </TableCell>
                                         <TableCell className="py-2">
                                             <div className="flex items-center gap-2">

@@ -183,7 +183,7 @@ export function WizardContainer({
     };
 
     return (
-        <div className="max-w-2xl mx-auto w-full px-2">
+        <div className="max-w-4xl mx-auto w-full px-2">
             <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-apple border border-white/60 overflow-hidden transition-all duration-300">
                 {/* Progress Header */}
                 <div className="bg-white/40 border-b border-white/30 p-2 backdrop-blur-sm">

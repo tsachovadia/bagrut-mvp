@@ -42,17 +42,17 @@ export function Header() {
     return (
         <header className="bg-white/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50 shadow-sm supports-[backdrop-filter]:bg-white/60" dir="rtl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-14 items-center">
+                <div className="flex justify-between h-10 items-center">
 
                     {/* Logo / Brand */}
-                    <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-                        <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-all duration-300 object-cover" />
-                        <span className="text-xl font-bold text-gray-900 tracking-tight">מתלבטים בלימודים</span>
+                    <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/')}>
+                        <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg shadow-sm transition-all duration-300 object-cover" />
+                        <span className="text-lg font-bold text-gray-900 tracking-tight">מתלבטים בלימודים</span>
                     </div>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex flex-1 items-center justify-center space-x-1 space-x-reverse">
-                        <NavItem onClick={() => navigate('/')} icon={<GraduationCap className="w-4 h-4" />} text="לאן אני מתקבל" />
+                        <NavItem onClick={() => navigate('/')} icon={<GraduationCap className="w-4 h-4" />} text="מחשבון בגרויות" />
                         <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
                         <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="הקוקפיט (סימולטור)" />
                         <NavItem icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />

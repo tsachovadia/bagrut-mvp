@@ -17,6 +17,8 @@ export const CompactProgramCard: React.FC<CompactProgramCardProps> = ({
     userStats,
     onClick
 }) => {
+    const [imageError, setImageError] = React.useState(false);
+
     // Calculate reachability only if we have stats
     const isReachable = userStats ? checkReachable(userStats, admission) : null;
 
@@ -46,26 +48,31 @@ export const CompactProgramCard: React.FC<CompactProgramCardProps> = ({
     return (
         <div
             onClick={onClick}
-            className="group relative bg-white rounded-2xl border border-gray-100 hover:border-blue-200 shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden flex flex-col h-full min-h-[160px]"
+            className="group relative bg-white rounded-xl border border-gray-100 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden flex flex-col h-full min-h-[max-content]"
         >
             {/* Left Color Bar (Faculty indicator) */}
-            <div className={`absolute top-0 bottom-0 right-0 w-1.5 ${facultyColor} opacity-80 group-hover:opacity-100 transition-opacity`} />
+            <div className={`absolute top-0 bottom-0 right-0 w-1 ${facultyColor} opacity-80 group-hover:opacity-100 transition-opacity`} />
 
-            <div className="p-4 flex flex-col h-full pr-6">
+            <div className="p-3 flex flex-col h-full pr-4">
                 {/* Header: Logo & Faculty */}
-                <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 line-clamp-1 max-w-[60%] pt-1">
+                <div className="flex justify-between items-start mb-2">
+                    <span className="text-[9px] uppercase font-bold tracking-wider text-gray-400 line-clamp-1 max-w-[80%] pt-0.5">
                         {program.faculty?.name}
                     </span>
 
                     {/* Institution Logo or Fallback */}
-                    {logoUrl ? (
+                    {logoUrl && !imageError ? (
                         <div
                             onClick={handleLogoClick}
                             title={program.institution?.name}
                             className="w-8 h-8 rounded-full border border-gray-100 bg-white shadow-sm flex items-center justify-center overflow-hidden hover:scale-110 transition-transform z-10"
                         >
-                            <img src={logoUrl} alt={program.institution?.name} className="w-full h-full object-contain p-1" />
+                            <img
+                                src={logoUrl}
+                                alt={program.institution?.name}
+                                className="w-full h-full object-contain p-1"
+                                onError={() => setImageError(true)}
+                            />
                         </div>
                     ) : (
                         <div
