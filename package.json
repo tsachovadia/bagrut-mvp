@@ -14,11 +14,13 @@
     "@vercel/node": "^5.5.16",
     "csv-parse": "^6.1.0",
     "dotenv": "^17.2.3",
+    "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.11.0",
-    "resend": "^6.6.0"
+    "resend": "^6.6.0",
+    "svix": "^1.84.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

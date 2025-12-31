@@ -101,7 +101,12 @@ export default async function handler(request: VercelRequest, response: VercelRe
         if (!responseAI.ok) {
             const errText = await responseAI.text();
             console.error("OpenRouter Error:", errText);
-            throw new Error(`OpenRouter API Error: ${responseAI.statusText}`);
+
+            if (responseAI.status === 429) {
+                throw new Error("High traffic. Please try again in 1 minute.");
+            }
+
+            throw new Error(`OpenRouter API Error: ${responseAI.statusText} (${responseAI.status})`);
         }
 
         const data = await responseAI.json() as any;

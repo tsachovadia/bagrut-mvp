@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import React, { useState } from 'react';
 import { Input } from './ui/shim';
+import { NumberPicker } from './ui/NumberPicker';
 import { Button } from './ui/shim';
 import { Label } from './ui/shim';
 import { Trash2, HelpCircle } from 'lucide-react';
@@ -62,26 +63,26 @@ export const BagrutSubjectRow: React.FC<BagrutSubjectRowProps> = ({
                     {/* Units Input */}
                     <div className="w-16">
                         <Label className="text-[10px] text-gray-400 mb-1 block text-center">יח"ל</Label>
-                        <Input
-                            type="number"
+                        <NumberPicker
                             min={1}
                             max={10}
                             value={units}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(subjectName, 'units', parseInt(e.target.value) || 0)}
-                            className={`text-center font-medium text-xs px-1 ${variant === 'compact' ? 'h-7' : 'h-8'}`}
+                            onChange={(val) => onChange(subjectName, 'units', val)}
+                            className="bg-white"
+                            variant={variant as any}
                         />
                     </div>
 
                     {/* Grade Input */}
                     <div className="w-20">
                         <Label className="text-[10px] text-gray-500 font-medium mb-1 block text-center">ציון</Label>
-                        <Input
-                            type="number"
+                        <NumberPicker
                             min={0}
                             max={120}
-                            value={grade || ''}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(subjectName, 'grade', parseInt(e.target.value) || 0)}
-                            className={`bg-white border-gray-200 text-center font-medium text-sm px-1 shadow-sm ${variant === 'compact' ? 'h-7' : 'h-8'}`}
+                            value={grade}
+                            onChange={(val) => onChange(subjectName, 'grade', val)}
+                            className="bg-white"
+                            variant={variant as any}
                         />
                     </div>
 

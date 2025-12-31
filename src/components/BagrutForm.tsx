@@ -211,7 +211,7 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'd
                         {/* Actually standard flex-row in RTL: Start (Right) -> End (Left). */}
                         {/* So if we want Panel on Left, it should be the second child. */}
                         <div className="hidden md:block w-72 bg-blue-50/30 border-r border-gray-100 p-4">
-                            <DynamicInfoSidepanel sector={sector} hasGrades={grades.some(g => g.grade > 0)} />
+                            <DynamicInfoSidepanel sector={sector} grades={grades} hasGrades={grades.some(g => g.grade > 0)} />
                         </div>
                     </div>
                 </CardContent>

@@ -1,11 +1,12 @@
 import { calculateOptimalAverage, type SubjectGrade, type UniversityConfig, type PsychometricScores } from './calculator';
-import { degrees, type Degree } from './degrees';
 import { SECTOR_MANDATORY_SUBJECTS } from './subjects';
+import { ALL_PROGRAMS } from '../data/programs';
+import { checkReachable, type UserAdmissionStats } from './admission-evaluation';
+import type { LogicGroup, LogicCondition } from '../types/admission';
 
 // 1. Define Default Config (The "University of Default" Logic)
 export const DEFAULT_UNIV_CONFIG: UniversityConfig = {
     average_calculation: {
-        mandatory_subjects: ['מתמטיקה', 'אנגלית', 'עברית - הבעה ולשון', 'תנ"ך', 'ספרות', 'היסטוריה', 'אזרחות'],
         min_units_for_optimization: 20,
         max_cap: 120
     },
@@ -45,19 +46,25 @@ function applyAcademicBonuses(subjects: SubjectGrade[]) {
     });
 }
 
-function getMandatorySubjectsForStudent(grades: SubjectGrade[]): string[] {
+import { type Sector } from './subjects';
+
+function determineSectorFromSubjects(grades: SubjectGrade[]): Sector {
     const subjectNames = new Set(grades.map(g => g.subject));
 
     if (subjectNames.has('עברית לדוברי ערבית')) {
-        if (subjectNames.has('מורשת דרוזית')) return SECTOR_MANDATORY_SUBJECTS.druze;
-        return SECTOR_MANDATORY_SUBJECTS.arab;
+        if (subjectNames.has('מורשת דרוזית')) return 'druze';
+        return 'arab';
     }
 
     if (subjectNames.has('תלמוד / תושב״ע') || subjectNames.has('מחשבת ישראל')) {
-        return SECTOR_MANDATORY_SUBJECTS.mamlachti_dati;
+        return 'mamlachti_dati';
     }
 
-    return SECTOR_MANDATORY_SUBJECTS.mamlachti;
+    return 'mamlachti';
+}
+
+function isLogicGroup(item: LogicGroup | LogicCondition): item is LogicGroup {
+    return 'AND' in item || 'OR' in item;
 }
 
 export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore: PsychometricScores) {
@@ -72,41 +79,60 @@ export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore:
     const subjectsWithBonuses = applyAcademicBonuses(bagrutData);
 
     // Dynamic config based on student's sector
+    const sector = determineSectorFromSubjects(bagrutData);
+
+    // We update config if needed, but mandatory subjects are now handled by sector lookup in the calculator
     const dynamicConfig = {
         ...DEFAULT_UNIV_CONFIG,
-        average_calculation: {
-            ...DEFAULT_UNIV_CONFIG.average_calculation,
-            mandatory_subjects: getMandatorySubjectsForStudent(bagrutData)
-        }
+        // Keep any other dynamic properties we might want to override
     };
 
-    const optimal = calculateOptimalAverage(subjectsWithBonuses, dynamicConfig);
+    // Calculate optimal for GENERAL university (default)
+    const optimal = calculateOptimalAverage(subjectsWithBonuses, sector, 'general', dynamicConfig);
     const psychoTotal = psychoScore.total || 550;
-    const baseScore = (optimal.average * 4) + (psychoTotal * 0.4);
 
-    const UNIVERSITIES = ['אוניברסיטת תל אביב', 'הטכניון', 'האוניברסיטה העברית', 'אוניברסיטת בן גוריון', 'אוניברסיטת בר אילן'];
+    // Base score for general estimation (if specific legacy formula is needed)
+    // const baseScore = (optimal.average * 4) + (psychoTotal * 0.4);
 
-    const allDegreesResults = degrees.map((d: Degree) => {
-        // Mock logic: Assign a random university to each degree just for display variety
-        const uniIndex = d.degree_id % UNIVERSITIES.length;
-        // In a real app, each degree belongs to a specific uni. Here we fake it.
-        const uniName = UNIVERSITIES[uniIndex];
+    // Prepare stats object for evaluation
+    const userStats: UserAdmissionStats = {
+        bagrutAverage: optimal.average,
+        bagrutGrades: bagrutData,
+        psychometric: psychoScore,
+        estimatedSekhem: (optimal.average * 0.5) + (psychoTotal * 0.5) // Crude estimation if needed by legacy
+    };
+
+    const allDegreesResults = ALL_PROGRAMS.map((p) => {
+        const isReachable = checkReachable(userStats, p.admission);
+
+        // Try to find a threshold in the logic descriptions for display
+        let thresholdDisplay = "לא צוין";
+        if (p.admission?.logic_rules?.OR) {
+            const firstRule = p.admission.logic_rules.OR[0];
+            if (isLogicGroup(firstRule) && firstRule.AND) {
+                const sekhemCond = firstRule.AND.find((c) => !isLogicGroup(c) && c.type.startsWith('sekhem')) as LogicCondition | undefined;
+                if (sekhemCond && sekhemCond.value) {
+                    thresholdDisplay = `${sekhemCond.value}`;
+                }
+            }
+        }
 
         const sechemScoreObj = {
-            name: d.degree_name, // This appears as subtitle
-            score: baseScore,
+            name: p.program.name,
+            score: userStats.estimatedSekhem, // This is a placeholder; ideally we'd calc specific uni sekhem
             type: 'general',
-            explanation: `סף קבלה: ${d.threshold}`
+            explanation: `תנאי קבלה: ${thresholdDisplay}`
         };
 
         return {
-            university: uniName, // Main bold text
+            name: p.program.name, // Added this field as it's used in TargetsPanel
+            university: p.program.institution?.name || "לא ידוע",
             average: optimal.average,
-            description: `סף: ${d.threshold}`,
+            description: `סף משוער: ${thresholdDisplay}`,
             calculation: "חישוב משוער",
-            status: baseScore >= d.threshold ? 'excellent' : 'needs-improvement',
+            status: isReachable ? 'excellent' : 'needs-improvement',
             programs: 1,
-            acceptanceProbability: baseScore >= d.threshold ? 95 : 10,
+            acceptanceProbability: isReachable ? 95 : 10,
             sechem: [sechemScoreObj],
             detailedResults: {
                 sechem_scores: [sechemScoreObj]

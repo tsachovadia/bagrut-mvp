@@ -12,7 +12,49 @@ const NEW_SUBJECTS: BagrutSubject[] = [
 ];
 
 export const ALL_SUBJECTS = [...LEGACY_ALL, ...NEW_SUBJECTS];
-export const ELECTIVE_SUBJECTS = LEGACY_ELECTIVE;
+// Comprehensive list of 5-unit eligible electives
+export const ELECTIVE_SUBJECTS: BagrutSubject[] = [
+    // Sciences (STEM)
+    { name: "פיסיקה", nameEnglish: "Physics", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "כימיה", nameEnglish: "Chemistry", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "ביולוגיה", nameEnglish: "Biology", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "מדעי המחשב", nameEnglish: "Computer Science", category: "stem", units: [5, 10], isMultiLevel: true, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "הנדסת תוכנה", nameEnglish: "Software Engineering", category: "stem", units: [5, 10], isMultiLevel: true, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "רובוטיקה", nameEnglish: "Robotics", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "מערכות אלקטרוניות", nameEnglish: "Electronic Systems", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "ביוטכנולוגיה", nameEnglish: "Biotechnology", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+
+    // Social Sciences
+    { name: "פסיכולוגיה", nameEnglish: "Psychology", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "סוציולוגיה", nameEnglish: "Sociology", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "כלכלה", nameEnglish: "Economics", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "ניהול עסקי", nameEnglish: "Business Management", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "משפטים", nameEnglish: "Law", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "תקשורת", nameEnglish: "Communications", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "גיאוגרפיה", nameEnglish: "Geography", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "מדעי החברה", nameEnglish: "Social Sciences", category: "social", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+
+    // Humanities & Arts
+    { name: "פילוסופיה", nameEnglish: "Philosophy", category: "humanities", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "אמנות", nameEnglish: "Art", category: "arts", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "תיאטרון", nameEnglish: "Theater", category: "arts", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "קולנוע", nameEnglish: "Cinema", category: "arts", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "מוסיקה", nameEnglish: "Music", category: "arts", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "מחול", nameEnglish: "Dance", category: "arts", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "עיצוב", nameEnglish: "Design", category: "arts", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+
+    // Languages
+    { name: "ערבית", nameEnglish: "Arabic", category: "languages", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "צרפתית", nameEnglish: "French", category: "languages", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "רוסית", nameEnglish: "Russian", category: "languages", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "ספרדית", nameEnglish: "Spanish", category: "languages", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "סינית", nameEnglish: "Chinese", category: "languages", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+
+    // Others
+    { name: "חינוך גופני", nameEnglish: "Physical Education", category: "other", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "חקלאות", nameEnglish: "Agriculture", category: "stem", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+    { name: "עבודת גמר", nameEnglish: "Thesis Project", category: "other", units: [5], isMultiLevel: false, required: false, defaultUnits: 5, bonusEligible: true },
+];
 
 export { type BagrutSubject };
 

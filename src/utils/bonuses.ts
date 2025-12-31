@@ -1,48 +1,127 @@
-export interface BonusRule {
-    minUnits: number;
-    bonus: number;
-    minGrade?: number;
-    subjectTypes?: string[]; // e.g., 'math', 'english', 'scientific', 'technical'
+import type { SubjectGrade } from './calculator';
+
+
+/**
+ * University Bonus Rules
+ */
+
+export interface UniversityBonusStatus {
+    university: string;
+    totalBonus: number;
+    details: { subject: string; units: number; points: number }[];
 }
 
-// Standard University Bonus Scheme (Based on TAU/Hebrew U baseline)
-export const BONUS_RULES: Record<string, BonusRule[]> = {
-    'mathematics': [
-        { minUnits: 5, bonus: 35, minGrade: 60 },
-        { minUnits: 4, bonus: 12.5, minGrade: 60 }
-    ],
-    'english': [
-        { minUnits: 5, bonus: 25, minGrade: 60 },
-        { minUnits: 4, bonus: 12.5, minGrade: 60 }
-    ],
-    'physics': [
-        { minUnits: 5, bonus: 25, minGrade: 60 } // Often 20-30, 25 is a solid average for high-demand
-    ],
-    // Catch-all for other 5-unit subjects (History, Lit, Bible, etc. extended)
-    'other': [
-        { minUnits: 5, bonus: 20, minGrade: 60 },
-        { minUnits: 4, bonus: 10, minGrade: 60 }
-    ]
+export const calculateUniversityBonuses = (grades: SubjectGrade[]): UniversityBonusStatus[] => {
+    return [
+        calculateTechnionBonuses(grades),
+        calculateTelAvivBonuses(grades),
+        calculateBenGurionBonuses(grades),
+    ];
 };
 
-export const getSubjectType = (subjectName: string): string => {
-    const normalize = (s: string) => s.trim().toLowerCase();
-    const name = normalize(subjectName);
 
-    if (name.includes('מתמטיקה') || name.includes('math')) return 'mathematics';
-    if (name.includes('אנגלית') || name.includes('english')) return 'english';
-    if (name.includes('פיזיקה') || name.includes('physics')) return 'physics';
 
-    return 'other';
+const calculateTechnionBonuses = (grades: SubjectGrade[]): UniversityBonusStatus => {
+    const details: { subject: string; units: number; points: number }[] = [];
+    let totalBonus = 0;
+
+    grades.forEach(g => {
+        if (g.units < 4) return;
+        if (g.grade < 60) return; // Technion minimum grade for bonus
+
+        let points = 0;
+        // Category currently unused but kept for future logic if needed
+        // const category = getSubjectCategory(g.subject);
+
+        if (g.subject === 'מתמטיקה') {
+            points = g.units === 5 ? 30 : 20; // estimate for 4 units
+        } else if (g.subject === 'אנגלית') {
+            points = g.units === 5 ? 25 : 10; // estimate for 4 units
+        } else if (['פיזיקה', 'כימיה', 'ביולוגיה'].includes(g.subject) && g.units === 5) {
+            points = 25; // Technion science bonus
+        } else if (g.units === 5) {
+            points = 20; // Default 5-unit bonus
+        }
+
+        // Technion "Technological" bonus (placeholder logic)
+        if (g.subject === 'הנדסת תוכנה' || g.subject === 'מדעי המחשב') {
+            if (g.units === 5) points = 25;
+        }
+
+        if (points > 0) {
+            totalBonus += points;
+            details.push({ subject: g.subject, units: g.units, points });
+        }
+    });
+
+    return { university: 'הטכניון', totalBonus, details };
 };
 
-export const calculateBonus = (subjectName: string, units: number, grade: number): number => {
-    if (grade < 60) return 0; // No bonus for failures
 
-    const type = getSubjectType(subjectName);
-    const rules = BONUS_RULES[type] || BONUS_RULES['other'];
+const calculateBenGurionBonuses = (grades: SubjectGrade[]): UniversityBonusStatus => {
+    const details: { subject: string; units: number; points: number }[] = [];
+    let totalBonus = 0;
 
-    // Find the rule that matches the unit count
-    const rule = rules.find(r => r.minUnits === units);
-    return rule ? rule.bonus : 0;
+    grades.forEach(g => {
+        if (g.units < 4) return;
+
+        let points = 0;
+        if (g.subject === 'מתמטיקה') {
+            points = g.units === 5 ? 35 : 10; // Verified 35 for 5 units
+        } else if (['פיזיקה', 'כימיה', 'ביולוגיה', 'מדעי המחשב', 'הנדסת תוכנה'].includes(g.subject)) {
+            points = g.units === 5 ? 25 : 10;
+        } else if (g.subject === 'אנגלית') {
+            points = g.units === 5 ? 25 : 10;
+        } else if (g.units === 5) {
+            points = 20;
+        } else if (g.units === 4) {
+            points = 10;
+        }
+
+        if (points > 0) {
+            totalBonus += points;
+            details.push({ subject: g.subject, units: g.units, points });
+        }
+    });
+
+    return { university: 'אונ׳ בן גוריון', totalBonus, details };
+};
+
+const calculateTelAvivBonuses = (grades: SubjectGrade[]): UniversityBonusStatus => {
+    const details: { subject: string; units: number; points: number }[] = [];
+    let totalBonus = 0;
+
+    grades.forEach(g => {
+        if (g.units < 4) return;
+
+        let points = 0;
+
+        if (g.subject === 'מתמטיקה') {
+            points = g.units === 5 ? 30 : 15; // Reverting to safer classic estimate
+        } else if (g.units === 5) {
+            points = 25; // Generic 5 unit bonus for TAU (often higher for humanities than others)
+        } else if (g.units === 4) {
+            points = 10;
+        }
+
+        if (points > 0) {
+            totalBonus += points;
+            details.push({ subject: g.subject, units: g.units, points });
+        }
+    });
+
+    return { university: 'אונ׳ תל אביב', totalBonus, details };
+};
+
+// --- Re-exporting calculateBonus for backward compatibility if used elsewhere ---
+export const calculateBonus = (subject: string, units: number, grade: number): number => {
+    // Basic generic Ministry of Education bonus (simplified)
+    if (grade < 60) return 0;
+    if (subject === 'מתמטיקה') {
+        if (units === 5) return 30; // Ministry standard often 30 or 35 depending on year
+        if (units === 4) return 10;
+    }
+    if (units === 5) return 20;
+    if (units === 4) return 10;
+    return 0;
 };

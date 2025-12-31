@@ -1,4 +1,5 @@
-import { calculateBonus } from './bonuses';
+import { SECTOR_MANDATORY_SUBJECTS, type Sector, getSubjectByName } from './subjects';
+import { calculateUniversityBonuses, calculateBonus } from './bonuses';
 
 export interface SubjectGrade {
     id: string;
@@ -9,7 +10,6 @@ export interface SubjectGrade {
 
 export interface UniversityConfig {
     average_calculation: {
-        mandatory_subjects: string[];
         min_units_for_optimization: number;
         max_cap: number;
     };
@@ -29,7 +29,16 @@ export interface PsychometricScores {
     total?: number;
 }
 
-type SubjectWithBonus = SubjectGrade & { adjusted_grade: number; bonus: number; effectiveUnits?: number };
+export type SubjectWithBonus = SubjectGrade & {
+    adjusted_grade: number;
+    bonus: number;
+    effectiveUnits?: number;
+    isMandatory?: boolean;
+};
+
+// ----------------------------------------------------
+// AVERAGE CALCULATOR LOGIC
+// ----------------------------------------------------
 
 // ----------------------------------------------------
 // AVERAGE CALCULATOR LOGIC
@@ -41,26 +50,118 @@ function calculateWeightedAverage(subjects: SubjectWithBonus[]): number {
     return totalUnits > 0 ? totalWeightedGrade / totalUnits : 0;
 }
 
-export function calculateOptimalAverage(subjectsWithBonuses: SubjectWithBonus[], config: UniversityConfig) {
-    const { mandatory_subjects = [], min_units_for_optimization = 20, max_cap = 150 } = config.average_calculation;
+export function calculateDryAverage(subjects: SubjectGrade[]): number {
+    const enriched = subjects.map(s => ({
+        ...s,
+        adjusted_grade: s.grade,
+        bonus: 0,
+        effectiveUnits: s.units
+    }));
+    return calculateWeightedAverage(enriched);
+}
 
-    const mandatory = subjectsWithBonuses.filter(s => mandatory_subjects.includes(s.subject));
-    const droppable = subjectsWithBonuses.filter(s => !mandatory_subjects.includes(s.subject))
-        .sort((a, b) => a.adjusted_grade - b.adjusted_grade);
+export function calculateOptimalAverage(
+    subjects: SubjectGrade[],
+    sector: Sector = 'mamlachti',
+    universityName: 'general' | 'הטכניון' | 'אונ׳ תל אביב' | 'אונ׳ בן גוריון' = 'general',
+    config: UniversityConfig = MOCK_UNIV_CONFIG
+) {
+    const { min_units_for_optimization = 20, max_cap = 150 } = config.average_calculation;
+    const mandatoryList = SECTOR_MANDATORY_SUBJECTS[sector] || SECTOR_MANDATORY_SUBJECTS['mamlachti'];
 
+    // 1. Calculate Bonuses and Enrich
+    let subjectsWithBonuses: SubjectWithBonus[];
+
+    if (universityName === 'general') {
+        // Use generic ministry bonuses (backward compat)
+        subjectsWithBonuses = subjects.map(s => {
+            // Basic generic Ministry of Education bonus
+            let bonus = 0;
+            if (s.grade >= 60) {
+                if (s.subject === 'מתמטיקה') bonus = s.units === 5 ? 30 : (s.units === 4 ? 10 : 0);
+                else if (s.subject === 'אנגלית') bonus = s.units === 5 ? 20 : (s.units === 4 ? 10 : 0);
+                else if (s.units === 5) bonus = 20;
+                else if (s.units === 4) bonus = 10;
+            }
+
+            return {
+                ...s,
+                bonus,
+                adjusted_grade: s.grade + bonus,
+                isMandatory: mandatoryList.includes(s.subject)
+            };
+        });
+    } else {
+        // Use specific university bonuses
+        const bonusReport = calculateUniversityBonuses(subjects).find(u => u.university === universityName);
+        subjectsWithBonuses = subjects.map(s => {
+            const bonusDetails = bonusReport?.details.find(d => d.subject === s.subject);
+            const bonus = bonusDetails ? bonusDetails.points : 0;
+            return {
+                ...s,
+                bonus,
+                adjusted_grade: s.grade + bonus,
+                isMandatory: mandatoryList.includes(s.subject)
+            };
+        });
+    }
+
+    // 2. Separate Mandatory and Droppable
+    // We treat everything in the Mandatory List as mandatory.
+    // AND we must ensure we have at least one logic for "English" and "Math" if names vary, 
+    // but SECTOR_MANDATORY_SUBJECTS uses exact names.
+
+    const mandatory = subjectsWithBonuses.filter(s => s.isMandatory);
+    let droppable = subjectsWithBonuses.filter(s => !s.isMandatory)
+        .sort((a, b) => a.adjusted_grade - b.adjusted_grade); // Sort Low to High
+
+    // 3. Optimization Loop (Greedy approach: try dropping the worst)
+    // Start with ALL subjects (including all electives)
     let currentBestCombination = [...subjectsWithBonuses];
     let currentBestAverage = calculateWeightedAverage(currentBestCombination);
 
-    for (const subjectToDrop of droppable) {
-        const nextCombination = currentBestCombination.filter(s => s.id !== subjectToDrop.id);
-        const totalUnits = nextCombination.reduce((sum, s) => sum + s.units, 0);
+    // Try dropping subjects one by one from the "worst" (lowest adjusted grade)
+    // Only drop if it improves average AND we stay above min units
 
-        if (totalUnits >= min_units_for_optimization) {
-            const nextAverage = calculateWeightedAverage(nextCombination);
-            if (nextAverage > currentBestAverage) {
-                currentBestAverage = nextAverage;
-                currentBestCombination = nextCombination;
-            }
+    // Actually, a better algorithm is:
+    // Start with Mandatory.
+    // Add electives one by one from BEST to WORST.
+    // Stop adding when adding an elective LOWERS the average (or keep adding if we need units).
+
+    // Let's switch to "Construct from Best" approach -> it's safer for maximization.
+
+    droppable = subjectsWithBonuses.filter(s => !s.isMandatory)
+        .sort((a, b) => b.adjusted_grade - a.adjusted_grade); // Sort HIGH to LOW
+
+    let baseCombination = [...mandatory];
+    let candidateAverage = calculateWeightedAverage(baseCombination);
+
+    // If base units < min_units, we MUST add top electives until we reach min_units
+    let baseUnits = baseCombination.reduce((sum, s) => sum + s.units, 0);
+
+    // Force Include loop
+    while (baseUnits < min_units_for_optimization && droppable.length > 0) {
+        const next = droppable.shift()!;
+        baseCombination.push(next);
+        baseUnits += next.units;
+    }
+
+    currentBestCombination = [...baseCombination];
+    currentBestAverage = calculateWeightedAverage(currentBestCombination);
+
+    // Optimization loop: Add remaining electives ONLY if they improve the average
+    for (const subjectToAdd of droppable) {
+        const nextCombination = [...currentBestCombination, subjectToAdd];
+        const nextAverage = calculateWeightedAverage(nextCombination);
+
+        if (nextAverage > currentBestAverage) {
+            currentBestAverage = nextAverage;
+            currentBestCombination = nextCombination;
+        } else {
+            // Since we sorted High to Low, if this one lowers average, subsequent ones likely will too.
+            // HOWEVER, math weights vary. But generally true for standard weight.
+            // We continue just in case (e.g. outlier with high units but slightly lower grade?)
+            // Actually, usually we stop. But let's check all just to be safe/greedy.
         }
     }
 
@@ -129,9 +230,8 @@ export function calculateSechem(optimalAverage: number, psychometric: Psychometr
 
 export const MOCK_UNIV_CONFIG: UniversityConfig = {
     average_calculation: {
-        mandatory_subjects: ['מתמטיקה', 'אנגלית', 'עברית - הבעה ולשון'],
         min_units_for_optimization: 20,
-        max_cap: 115
+        max_cap: 120 // Raised cap slightly
     },
     sechem_formulas: [
         {
@@ -160,10 +260,14 @@ export function getSubjectBonus(subjectName: string, units: number, grade: numbe
     return calculateBonus(subjectName, units, grade);
 }
 
-// Helper to apply bonuses (Simple MVP version)
+// Keep generic applyBonuses for legacy/simple usage if needed, 
+// using Mamlachti defaults
 export function applyBonuses(subjects: SubjectGrade[]): SubjectWithBonus[] {
+    // This is a "quick" bonus applier using generic rules, 
+    // mostly for UI previews that don't need full optimization context.
+    // It does NOT filter mandatory subjects.
     return subjects.map(s => {
-        const bonus = getSubjectBonus(s.subject, s.units);
+        const bonus = getSubjectBonus(s.subject, s.units, s.grade);
         const adjusted = s.grade + bonus;
 
         return {
