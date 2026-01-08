@@ -17,8 +17,9 @@ interface HomePageProps {
     psychometric: PsychometricScores;
     handlePsychometricUpdate: (scores: PsychometricScores) => void;
     results: any[];
-    filters: { institution: string; degree: string };
-    handleFiltersUpdate: (filters: { institution: string; degree: string }) => void;
+    // filter prop removed as it's replaced by preferences
+    preferences: { fields: string[]; institutions: string[]; isUndecided: boolean; };
+    onPreferencesUpdate: (prefs: { fields: string[]; institutions: string[]; isUndecided: boolean; }) => void;
 }
 
 export const HomePage = ({
@@ -29,8 +30,8 @@ export const HomePage = ({
     psychometric,
     handlePsychometricUpdate,
     results,
-    filters,
-    handleFiltersUpdate
+    preferences,
+    onPreferencesUpdate,
 }: HomePageProps) => {
 
     return (
@@ -73,8 +74,8 @@ export const HomePage = ({
                             psychometricData={psychometric}
                             onPsychometricUpdate={handlePsychometricUpdate}
                             results={results}
-                            filters={filters}
-                            onFiltersUpdate={handleFiltersUpdate}
+                            preferences={preferences}
+                            onPreferencesUpdate={onPreferencesUpdate}
                         />
                     </div>
                 )}

@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Info, BookOpen, Trophy, School, Star } from 'lucide-react';
 import { calculateUniversityBonuses } from '../utils/bonuses';
 import type { SubjectGrade } from '../utils/calculator';
-import { AverageDisplay } from './AverageDisplay';
 import type { Sector } from '../utils/subjects';
 
 interface DynamicInfoSidepanelProps {
@@ -66,10 +65,7 @@ export const DynamicInfoSidepanel: React.FC<DynamicInfoSidepanelProps> = ({ sect
     return (
         <div className="h-full bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex flex-col gap-6 overflow-y-auto">
 
-            {/* Average Display - Always visible if there are grades, otherwise hidden or empty state */}
-            {hasGrades && grades.length > 0 && (
-                <AverageDisplay grades={grades} sector={sector} className="animate-in fade-in slide-in-from-top-4 duration-500" />
-            )}
+
 
             {/* Sector Info */}
             <div className="space-y-3">

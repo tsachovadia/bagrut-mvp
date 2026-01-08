@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Calculator, Scale, Info, GraduationCap, School } from 'lucide-react';
+import { Calculator, Scale, Info, GraduationCap, School, ChevronDown } from 'lucide-react';
 import {
     calculateDryAverage,
     calculateOptimalAverage,
-    type SubjectGrade
+    type SubjectGrade,
+    type DroppedSubject
 } from '../utils/calculator';
 import { type Sector } from '../utils/subjects';
 import { cn } from '../lib/utils';
@@ -18,6 +19,7 @@ type TabType = 'general' | 'technion' | 'tau' | 'bgu';
 
 export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, className }) => {
     const [activeTab, setActiveTab] = useState<TabType>('general');
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const averages = useMemo(() => {
         const dry = calculateDryAverage(grades);
@@ -48,6 +50,23 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, 
         { id: 'bgu', label: 'בן גוריון', icon: School },
     ] as const;
 
+    // Empty State
+    if (currentOptimal.average === 0) {
+        return (
+            <div className={cn("bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4 p-6 text-center space-y-3", className)}>
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
+                    <Calculator className="w-6 h-6 text-slate-400" />
+                </div>
+                <div>
+                    <h3 className="text-slate-900 font-bold text-sm">מחשבון ממוצעים</h3>
+                    <p className="text-slate-500 text-xs mt-1">
+                        הזינו את ציוני הבגרות כדי לראות את הממוצע המיטבי והמותאם לכל מוסד.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={cn("bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4", className)}>
             {/* Header / Tabs */}
@@ -74,44 +93,68 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, 
             </div>
 
             {/* Main Content */}
-            <div className="p-5 text-center">
-                <div className="mb-2 text-slate-500 text-sm font-medium">
+            <div className="p-4 text-center">
+                <div className="mb-1 text-slate-500 text-xs font-medium">
                     {activeTab === 'general' ? 'ממוצע בגרות מיטבי (משוער)' : `ממוצע מותאם ל${tabs.find(t => t.id === activeTab)?.label}`}
                 </div>
 
-                <div className="flex items-baseline justify-center gap-2 dir-ltr">
-                    <span className="text-4xl font-black text-slate-900 tracking-tight">
+                <div className="flex items-baseline justify-center gap-1.5 dir-ltr">
+                    <span className="text-3xl font-black text-slate-900 tracking-tight">
                         {formatAvg(currentOptimal.average)}
                     </span>
-                    <span className="text-slate-400 text-lg font-light">
+                    <span className="text-slate-400 text-base font-light">
                         / {activeTab === 'general' ? '120' : '130'}
                     </span>
                 </div>
 
                 {/* Sub-stats row */}
-                <div className="grid grid-cols-2 gap-4 mt-6 border-t border-slate-100 pt-4">
+                <div className="grid grid-cols-2 gap-3 mt-4 border-t border-slate-100 pt-3">
                     <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">ממוצע יבש</span>
-                        <span className="text-slate-700 font-mono font-medium text-lg">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">ממוצע יבש</span>
+                        <span className="text-slate-700 font-mono font-medium text-base">
                             {formatAvg(averages.dry)}
                         </span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">יחידות שנחשבו</span>
-                        <span className="text-slate-700 font-mono font-medium text-lg">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">יחידות שנחשבו</span>
+                        <span className="text-slate-700 font-mono font-medium text-base">
                             {currentOptimal.subjects_used.reduce((acc, s) => acc + s.units, 0)}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Dropped Subjects Info (Collapsible or small text) */}
-            {currentOptimal.subjects_dropped.length > 0 && (
-                <div className="bg-amber-50/50 border-t border-amber-100/50 p-3 text-center">
-                    <p className="text-xs text-amber-700/80">
-                        <Info size={12} className="inline-block relative -top-0.5 ml-1" />
-                        הושמטו בחישוב המיטבי: {currentOptimal.subjects_dropped.map(s => s.subject).join(', ')}
-                    </p>
+            {/* Dropped Subjects Info (Collapsible) */}
+            {(currentOptimal.subjects_dropped as DroppedSubject[]).length > 0 && (
+                <div className="bg-slate-50 border-t border-slate-100 transition-colors hover:bg-slate-100/50">
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="w-full p-3 flex items-center justify-between text-xs text-slate-500"
+                    >
+                        <span className="flex items-center gap-2">
+                            <Info size={14} className="text-amber-500" />
+                            <span>
+                                {currentOptimal.subjects_dropped.length} מקצועות הושמטו לטובת הממוצע
+                                {!isExpanded && <span className="text-slate-400 mr-1 font-light">(לחץ לפירוט)</span>}
+                            </span>
+                        </span>
+                        <ChevronDown size={14} className={cn("transition-transform duration-300 text-slate-400", isExpanded && "rotate-180")} />
+                    </button>
+
+                    {isExpanded && (
+                        <div className="px-3 pb-3 space-y-2 animate-in slide-in-from-top-2 fade-in duration-200">
+                            {(currentOptimal.subjects_dropped as DroppedSubject[]).map((s) => (
+                                <div key={s.id} className="text-[11px] bg-white border border-slate-200 rounded-lg p-2.5 flex items-start gap-3 shadow-sm">
+                                    <div className="font-bold text-slate-700 whitespace-nowrap bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
+                                        {s.subject}
+                                    </div>
+                                    <div className="text-slate-500 leading-snug">
+                                        {s.reasonDescription || 'הושמט לשיפור הממוצע'}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

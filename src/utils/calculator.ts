@@ -36,6 +36,11 @@ export type SubjectWithBonus = SubjectGrade & {
     isMandatory?: boolean;
 };
 
+export interface DroppedSubject extends SubjectWithBonus {
+    reason: 'lowers_average' | 'saturation' | 'other';
+    reasonDescription: string;
+}
+
 // ----------------------------------------------------
 // AVERAGE CALCULATOR LOGIC
 // ----------------------------------------------------
@@ -149,6 +154,8 @@ export function calculateOptimalAverage(
     currentBestCombination = [...baseCombination];
     currentBestAverage = calculateWeightedAverage(currentBestCombination);
 
+    const droppedSubjects: DroppedSubject[] = [];
+
     // Optimization loop: Add remaining electives ONLY if they improve the average
     for (const subjectToAdd of droppable) {
         const nextCombination = [...currentBestCombination, subjectToAdd];
@@ -158,17 +165,27 @@ export function calculateOptimalAverage(
             currentBestAverage = nextAverage;
             currentBestCombination = nextCombination;
         } else {
-            // Since we sorted High to Low, if this one lowers average, subsequent ones likely will too.
-            // HOWEVER, math weights vary. But generally true for standard weight.
-            // We continue just in case (e.g. outlier with high units but slightly lower grade?)
-            // Actually, usually we stop. But let's check all just to be safe/greedy.
+            // This subject was NOT added. Capture the reason.
+            // It lowers the average.
+            // We want to explain: "Grade (adjusted) X is lower than current Average Y"
+            // Note: Since weights vary, simply comparing Grade < Average is mathematically approx correct but 
+            // the real test is `nextAverage > currentBestAverage`.
+
+            droppedSubjects.push({
+                ...subjectToAdd,
+                reason: 'lowers_average',
+                reasonDescription: `ציון משוקלל (${subjectToAdd.adjusted_grade}) נמוך מהממוצע הנוכחי (${currentBestAverage.toFixed(2)})`
+            });
         }
     }
+
+    // Also add any dropable subjects that were left in the queue if we broke early (though we didn't break here)
+    // In strict loop, we cover all.
 
     return {
         average: Math.min(currentBestAverage, max_cap),
         subjects_used: currentBestCombination,
-        subjects_dropped: subjectsWithBonuses.filter(s => !currentBestCombination.find(cs => cs.id === s.id)),
+        subjects_dropped: droppedSubjects,
     };
 }
 

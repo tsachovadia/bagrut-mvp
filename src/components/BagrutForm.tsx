@@ -8,19 +8,22 @@ import { calculateBonus } from '../utils/bonuses';
 import { BagrutSubjectRow } from './BagrutSubjectRow';
 import { GradeUpload } from './GradeUpload';
 import { DynamicInfoSidepanel } from './DynamicInfoSidepanel';
+import { AverageDisplay } from './AverageDisplay';
 
 interface BagrutFormProps {
     onDataUpdate: (grades: SubjectGrade[]) => void;
     initialData?: SubjectGrade[];
     onAutoFill?: () => void;
     variant?: 'default' | 'compact';
+    sector: Sector;
+    onSectorChange: (sector: Sector) => void;
 }
 
 type InputMethod = 'manual' | 'upload' | 'link';
 
-export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'default' }: BagrutFormProps) => {
+export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'default', sector, onSectorChange }: BagrutFormProps) => {
     const [activeTab, setActiveTab] = useState<InputMethod>('manual');
-    const [sector, setSector] = useState<Sector>('mamlachti');
+    // const [sector, setSector] = useState<Sector>('mamlachti'); // Lifted
 
     const [grades, setGrades] = useState<SubjectGrade[]>(initialData || []);
 
@@ -99,13 +102,15 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'd
         // Main Content - Form inputs (Right side on PC)
         const formContent = (
             <div className={`space-y-4 ${variant === 'compact' ? 'space-y-2' : ''}`}>
+                {/* Mobile Average Display - Removed (Lifted to Wizard) */}
+
                 {/* Sector Selection (Dropdown Picker) */}
                 <div className="relative">
                     <Label className="text-xs font-bold text-gray-500 mb-1.5 block">מגזר בית הספר</Label>
                     <div className="relative">
                         <select
                             value={sector}
-                            onChange={(e) => setSector(e.target.value as Sector)}
+                            onChange={(e) => onSectorChange(e.target.value as Sector)}
                             className="w-full appearance-none bg-white border border-gray-200 text-gray-900 text-sm rounded-xl px-4 py-3 pr-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
                         >
                             {(Object.entries(SECTOR_NAMES) as [Sector, string][]).map(([key, label]) => (
@@ -210,8 +215,11 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'd
                         {/* Visually left in RTL means it should be the 2nd child in DOM if direction is RTL? */}
                         {/* Actually standard flex-row in RTL: Start (Right) -> End (Left). */}
                         {/* So if we want Panel on Left, it should be the second child. */}
-                        <div className="hidden md:block w-72 bg-blue-50/30 border-r border-gray-100 p-4">
-                            <DynamicInfoSidepanel sector={sector} grades={grades} hasGrades={grades.some(g => g.grade > 0)} />
+                        <div className="hidden md:flex w-80 bg-blue-50/30 border-r border-gray-100 p-4 flex-col gap-4">
+                            {/* AverageDisplay removed from here - moved to WizardContainer */}
+                            <div className="flex-1 overflow-hidden">
+                                <DynamicInfoSidepanel sector={sector} grades={grades} hasGrades={grades.some(g => g.grade > 0)} />
+                            </div>
                         </div>
                     </div>
                 </CardContent>

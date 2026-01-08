@@ -1,10 +1,26 @@
 import { supabase } from './supabase';
 import type { SubjectGrade, PsychometricScores } from '../utils/calculator';
 
-interface UserData {
+interface UserPreferences {
+    fields: string[];
+    institutions: string[];
+    isUndecided: boolean;
+}
+
+export interface SavedSimulation {
+    id: string;
+    name: string;
+    createdAt: number;
     bagrut: SubjectGrade[];
     psychometric: PsychometricScores;
-    preferences?: { institution: string; degree: string };
+}
+
+export interface UserData {
+    bagrut: SubjectGrade[];
+    psychometric: PsychometricScores;
+    preferences: UserPreferences;
+    sector?: string; // Persist sector choice
+    savedSimulations?: SavedSimulation[];
 }
 
 const LOCAL_STORAGE_KEY = 'bagrut_plus_data';
@@ -44,11 +60,10 @@ export const saveUserData = async (data: UserData) => {
                             bagrut_data: data.bagrut,
                             psychometric_data: data.psychometric,
                             preferences: data.preferences,
+                            sector: data.sector,
                             updated_at: new Date().toISOString()
                         })
                         .eq('id', existingRows[0].id);
-
-                    // Optional: We could delete duplicates here, but better to do it via SQL migration
                 } else {
                     // Insert new record
                     await supabase
@@ -57,7 +72,9 @@ export const saveUserData = async (data: UserData) => {
                             user_id: session.user.id,
                             bagrut_data: data.bagrut,
                             psychometric_data: data.psychometric,
-                            preferences: data.preferences
+                            preferences: data.preferences,
+                            sector: data.sector,
+                            saved_simulations: data.savedSimulations
                         });
                 }
             }
@@ -72,7 +89,16 @@ export const loadUserData = async (): Promise<UserData | null> => {
     try {
         const local = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (local) {
-            return JSON.parse(local);
+            const data = JSON.parse(local);
+            // Simple migration check: if preferences exists but lacks 'fields', reset it
+            if (data.preferences && !Array.isArray(data.preferences.fields)) {
+                data.preferences = { fields: [], institutions: [], isUndecided: false };
+            }
+            // Ensure savedSimulations is an array
+            if (!data.savedSimulations) {
+                data.savedSimulations = [];
+            }
+            return data;
         }
     } catch (e) { /* ignore */ }
 
@@ -87,10 +113,18 @@ export const loadUserData = async (): Promise<UserData | null> => {
                 .single();
 
             if (data) {
+                let prefs = data.preferences;
+                // Migration check
+                if (prefs && !Array.isArray(prefs.fields)) {
+                    prefs = { fields: [], institutions: [], isUndecided: false };
+                }
+
                 return {
                     bagrut: data.bagrut_data,
                     psychometric: data.psychometric_data,
-                    preferences: data.preferences
+                    preferences: prefs,
+                    sector: data.sector,
+                    savedSimulations: data.saved_simulations || []
                 };
             }
         }

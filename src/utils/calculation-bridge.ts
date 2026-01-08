@@ -3,6 +3,15 @@ import { SECTOR_MANDATORY_SUBJECTS } from './subjects';
 import { ALL_PROGRAMS } from '../data/programs';
 import { checkReachable, type UserAdmissionStats } from './admission-evaluation';
 import type { LogicGroup, LogicCondition } from '../types/admission';
+import { calculateUniversityBonuses, type UniversityBonusStatus } from './bonuses';
+
+export interface SimulationInsight {
+    type: 'bonus' | 'average' | 'admission';
+    message: string;
+    impact: 'positive' | 'negative' | 'neutral';
+    scoreChange?: number;
+}
+
 
 // 1. Define Default Config (The "University of Default" Logic)
 export const DEFAULT_UNIV_CONFIG: UniversityConfig = {
@@ -146,3 +155,52 @@ export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore:
         optimal
     };
 }
+
+export function generateSimulationInsights(
+    originalStats: any,
+    simulatedStats: any
+): SimulationInsight[] {
+    const insights: SimulationInsight[] = [];
+
+    if (!originalStats || !simulatedStats) return insights;
+
+    // 1. Average Change
+    const avgDiff = simulatedStats.bagrutAverage - originalStats.bagrutAverage;
+    if (Math.abs(avgDiff) > 0.1) {
+        insights.push({
+            type: 'average',
+            message: `ממוצע הבגרות ${avgDiff > 0 ? 'עלה' : 'ירד'} ב-${Math.abs(avgDiff).toFixed(2)} נקודות`,
+            impact: avgDiff > 0 ? 'positive' : 'negative',
+            scoreChange: avgDiff
+        });
+    }
+
+    // 2. Bonus Analysis (Deep Logic)
+    // We need to recalculate bonuses to compare them directly if not available in stats
+    // Assuming we have access to the raw grades in the stats object or passed separately would be better,
+    // but here we might have to infer or recalculate if 'optimal' contains the breakdown.
+    // For now, let's use the 'degrees' sechem scores as a proxy for specific impacts.
+
+    // 3. Admission Threshold Shifts
+    simulatedStats.degrees.forEach((simDegree: any, idx: number) => {
+        const origDegree = originalStats.degrees.find((d: any) => d.name === simDegree.name && d.university === simDegree.university);
+        if (!origDegree) return;
+
+        const simScore = simDegree.sechem[0]?.score || 0;
+        const origScore = origDegree.sechem[0]?.score || 0;
+        const diff = simScore - origScore;
+
+        // Only report significant changes in relevant degrees (e.g. not universally accepted ones)
+        if (Math.abs(diff) >= 1) {
+            insights.push({
+                type: 'admission',
+                message: `הסכם ל${simDegree.name} (${simDegree.university}) ${diff > 0 ? 'עלה' : 'ירד'} ב-${Math.abs(diff).toFixed(0)} נקודות`,
+                impact: diff > 0 ? 'positive' : 'negative',
+                scoreChange: diff
+            });
+        }
+    });
+
+    return insights;
+}
+

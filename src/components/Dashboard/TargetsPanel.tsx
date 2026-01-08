@@ -8,6 +8,7 @@ interface Props {
     originalStats: any;
     targetDegree: string | null;
     setTargetDegree: (degree: string) => void;
+    allSimulationsStats: any[];
 }
 
 const RadialWatch = ({
@@ -83,7 +84,7 @@ const RadialWatch = ({
     );
 };
 
-export const TargetsPanel = ({ simulatedStats, originalStats, targetDegree, setTargetDegree }: Props) => {
+export const TargetsPanel = ({ simulatedStats, originalStats, targetDegree, setTargetDegree, allSimulationsStats = [] }: Props) => {
     const [isSearching, setIsSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -208,6 +209,35 @@ export const TargetsPanel = ({ simulatedStats, originalStats, targetDegree, setT
                                 label={`${selectedDegree.university} - ${selectedDegree.name}`}
                                 size={200}
                             />
+
+                            {/* Saved Simulations Comparison */}
+                            {allSimulationsStats && allSimulationsStats.length > 0 && (
+                                <div className="mt-4 px-4">
+                                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                        <h4 className="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">השוואה לסימולציות שמורות</h4>
+                                        <div className="space-y-1.5">
+                                            {allSimulationsStats.map((sim, idx) => {
+                                                const simDegree = sim.stats.degrees.find((d: any) => d.name === selectedDegree.name && d.university === selectedDegree.university);
+                                                if (!simDegree) return null;
+
+                                                const score = simDegree.sechem[0]?.score || 0;
+                                                const threshold = getThreshold(simDegree.description);
+                                                const isPassed = score >= threshold;
+
+                                                return (
+                                                    <div key={sim.id} className="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-gray-100">
+                                                        <span className="font-medium text-gray-700">{sim.name}</span>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="font-mono font-bold">{score.toFixed(0)}</span>
+                                                            <div className={`w-2 h-2 rounded-full ${isPassed ? 'bg-green-500' : 'bg-red-400'}`} />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Compact List of Alternatives (Same Degree, Diff Unis) */}

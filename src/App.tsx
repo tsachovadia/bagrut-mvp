@@ -12,6 +12,7 @@ import { AccessibilityWidget } from './components/AccessibilityWidget';
 import { useNavigate } from 'react-router-dom';
 
 import { ProgramsExplorer } from './components/ProgramsExplorer/ProgramsExplorer';
+import { ProgramsDatabaseViewer } from './components/Debug/ProgramsDatabaseViewer';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { UnifiedDashboard } from './components/Dashboard/UnifiedDashboard';
@@ -23,7 +24,11 @@ function App() {
   });
 
   const [bagrutGrades, setBagrutGrades] = useState<SubjectGrade[]>([]);
-  const [filters, setFilters] = useState({ institution: '', degree: '' });
+  const [preferences, setPreferences] = useState<{ fields: string[]; institutions: string[]; isUndecided: boolean; }>({
+    fields: [],
+    institutions: [],
+    isUndecided: false
+  });
   const [results, setResults] = useState<any[]>([]);
   const [formKey, setFormKey] = useState(0); // Kept for forced re-renders if needed
   const [wizardStarted, setWizardStarted] = useState(false);
@@ -36,7 +41,7 @@ function App() {
       if (data) {
         if (data.bagrut) setBagrutGrades(data.bagrut);
         if (data.psychometric) setPsychometric(data.psychometric);
-        if (data.preferences) setFilters(data.preferences);
+        if (data.preferences) setPreferences(data.preferences);
         setWizardStarted(true); // If data exists, likely returning user
       }
       setDataLoaded(true);
@@ -46,17 +51,17 @@ function App() {
 
   const handlePsychometricUpdate = (psychoData: PsychometricScores) => {
     setPsychometric(psychoData);
-    saveUserData({ bagrut: bagrutGrades, psychometric: psychoData, preferences: filters });
+    saveUserData({ bagrut: bagrutGrades, psychometric: psychoData, preferences });
   };
 
   const handleBagrutUpdate = (grades: SubjectGrade[]) => {
     setBagrutGrades(grades);
-    saveUserData({ bagrut: grades, psychometric: psychometric, preferences: filters });
+    saveUserData({ bagrut: grades, psychometric: psychometric, preferences });
   };
 
-  const handleFiltersUpdate = (newFilters: { institution: string; degree: string }) => {
-    setFilters(newFilters);
-    saveUserData({ bagrut: bagrutGrades, psychometric, preferences: newFilters });
+  const handlePreferencesUpdate = (newPrefs: { fields: string[]; institutions: string[]; isUndecided: boolean; }) => {
+    setPreferences(newPrefs);
+    saveUserData({ bagrut: bagrutGrades, psychometric, preferences: newPrefs });
   };
 
   // Auto-calculate whenever data changes
@@ -97,8 +102,9 @@ function App() {
           psychometric={psychometric}
           handlePsychometricUpdate={handlePsychometricUpdate}
           results={results}
-          filters={filters}
-          handleFiltersUpdate={handleFiltersUpdate}
+
+          preferences={preferences}
+          onPreferencesUpdate={handlePreferencesUpdate}
         />
       } />
       <Route path="/programs" element={
@@ -116,6 +122,7 @@ function App() {
         </div>
       } />
       <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
+      <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
     </Routes>
   );
 }

@@ -1,21 +1,21 @@
-
-import { useState, useEffect } from 'react';
-import { loadUserData } from '../../lib/userData';
+import { useState, useEffect, useMemo } from 'react';
+import { loadUserData, saveUserData, type UserData } from '../../lib/userData';
 import { calculateAdmissionStats } from '../../utils/calculation-bridge';
 import type { SubjectGrade, PsychometricScores } from '../../utils/calculator';
 import { MyDataPanel } from './MyDataPanel';
-import { PlaygroundPanel } from './PlaygroundPanel';
+import { SimulationSidebar } from './SimulationSidebar';
+
 import { TargetsPanel } from './TargetsPanel';
+import { SimulationInsightOverlay } from './SimulationInsightOverlay';
+import { generateSimulationInsights, type SimulationInsight } from '../../utils/calculation-bridge';
 import { Button } from '../ui/shim';
 import { Calculator } from 'lucide-react';
+
 
 export const UnifiedDashboard = () => {
     // ---- State ----
     const [loading, setLoading] = useState(true);
-    const [originalData, setOriginalData] = useState<{
-        bagrut: SubjectGrade[];
-        psychometric: PsychometricScores;
-    } | null>(null);
+    const [originalData, setOriginalData] = useState<UserData | null>(null);
 
     // Simulation State
     const [simulatedBagrut, setSimulatedBagrut] = useState<SubjectGrade[]>([]);
@@ -29,6 +29,10 @@ export const UnifiedDashboard = () => {
     // Calculated Stats
     const [originalStats, setOriginalStats] = useState<any>(null);
     const [simulatedStats, setSimulatedStats] = useState<any>(null);
+    const [insights, setInsights] = useState<SimulationInsight[]>([]);
+
+    const [sector, setSector] = useState<string>('mamlachti');
+
 
     // ---- Effects ----
     // 1. Load Data
@@ -37,6 +41,7 @@ export const UnifiedDashboard = () => {
             const data = await loadUserData();
             if (data && data.bagrut?.length > 0 && data.psychometric?.general > 0) {
                 setOriginalData(data);
+                if (data.sector) setSector(data.sector);
 
                 // Init Simulation with deep copy
                 setSimulatedBagrut(JSON.parse(JSON.stringify(data.bagrut)));
@@ -56,37 +61,150 @@ export const UnifiedDashboard = () => {
         if (simulatedBagrut.length > 0) {
             const stats = calculateAdmissionStats(simulatedBagrut, simulatedPsychometric);
             setSimulatedStats(stats);
+            // Generate Insights
+            if (originalStats) {
+                const newInsights = generateSimulationInsights(originalStats, stats);
+                setInsights(newInsights);
+            }
         }
-    }, [simulatedBagrut, simulatedPsychometric]);
+    }, [simulatedBagrut, simulatedPsychometric, originalStats]);
+
+    // 3. Calc stats for all saved simulations (Memoized)
+
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const simulationsWithStats = useMemo(() => {
+        if (!originalData?.savedSimulations) return [];
+        return originalData.savedSimulations.map(sim => ({
+            ...sim,
+            stats: calculateAdmissionStats(sim.bagrut, sim.psychometric)
+        })).sort((a, b) => b.createdAt - a.createdAt);
+    }, [originalData?.savedSimulations]);
+
+    // ---- Handlers ----
+    // Simulation Management State
+    const [activeSimulationId, setActiveSimulationId] = useState<string | null>(null);
+
+    // ... (Stats Effects remain)
+
+    // 2. Calc Simulation Stats on change (No change needed)
 
 
     // ---- Handlers ----
-    const handleGradeChange = (index: number, field: 'grade' | 'units', value: number) => {
-        const newBagrut = [...simulatedBagrut];
-        newBagrut[index] = { ...newBagrut[index], [field]: value };
+
+    // Update Simulation State (from MyDataPanel)
+    const handleSimulationUpdate = (newBagrut: SubjectGrade[], newPsychometric: PsychometricScores) => {
         setSimulatedBagrut(newBagrut);
+        setSimulatedPsychometric(newPsychometric);
+        // If we change data while in a saved simulation (without saving), we might conceptually be "editing" it 
+        // or starting a new unsaved one. For simplicity, we keep the ID active until they save as new or switch.
     };
 
-    const handlePsychometricChange = (field: keyof PsychometricScores, value: number) => {
-        setSimulatedPsychometric(prev => ({ ...prev, [field]: value }));
+    // Create NEW simulation
+    const handleSaveSimulation = (name: string) => {
+        if (!originalData) return;
+
+        // Default Name Logic
+        let finalName = name.trim();
+        if (!finalName) {
+            const count = (originalData.savedSimulations?.length || 0) + 1;
+            // Hebrew letter based naming? Or just numbers? User asked for "Simulation A/B"
+            // Let's stick effectively to "Simulation 1", "Simulation 2" for simplicity or a simple mapper
+            const hebrewLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
+            const letter = hebrewLetters[count - 1] || count.toString();
+            finalName = `סימולציה ${letter}`;
+        }
+
+        const newSimulation = {
+            id: crypto.randomUUID(),
+            name: finalName,
+            createdAt: Date.now(),
+            bagrut: simulatedBagrut,
+            psychometric: simulatedPsychometric
+        };
+
+
+        const updatedSimulations = [...(originalData.savedSimulations || []), newSimulation];
+        const updatedData = { ...updatedSimulations.length ? { ...originalData, savedSimulations: updatedSimulations } : originalData };
+        // Logic simplification:
+        const newData = { ...originalData, savedSimulations: updatedSimulations };
+
+        setOriginalData(newData);
+        saveUserData(newData);
+        setActiveSimulationId(newSimulation.id);
     };
 
-    const handleReset = () => {
-        if (originalData) {
-            setSimulatedBagrut(JSON.parse(JSON.stringify(originalData.bagrut)));
-            setSimulatedPsychometric({ ...originalData.psychometric });
+    // Update EXISTING simulation
+    const handleUpdateSimulation = (id: string) => {
+        if (!originalData || !originalData.savedSimulations) return;
+
+        const updatedSimulations = originalData.savedSimulations.map(sim => {
+            if (sim.id === id) {
+                return {
+                    ...sim,
+                    bagrut: simulatedBagrut,
+                    psychometric: simulatedPsychometric,
+                    createdAt: Date.now() // Optional: update timestamp
+                };
+            }
+            return sim;
+        });
+
+        const newData = { ...originalData, savedSimulations: updatedSimulations };
+        setOriginalData(newData);
+        saveUserData(newData);
+    };
+
+    const handleDeleteSimulation = (id: string) => {
+        if (!originalData || !originalData.savedSimulations) return;
+
+        const updatedSimulations = originalData.savedSimulations.filter(s => s.id !== id);
+        const newData = { ...originalData, savedSimulations: updatedSimulations };
+
+        setOriginalData(newData);
+        saveUserData(newData);
+
+        if (activeSimulationId === id) {
+            handleResetSimulation();
         }
     };
 
-    const handleUpdateOriginalData = (newBagrut: SubjectGrade[], newPsychometric: PsychometricScores) => {
-        setOriginalData(prev => prev ? { ...prev, bagrut: newBagrut, psychometric: newPsychometric } : null);
-        // Also sync simulation to new baseline to prevent confusion
-        setSimulatedBagrut(newBagrut);
-        setSimulatedPsychometric(newPsychometric);
+    const handleLoadSimulation = (simId: string) => {
+        if (!simId) {
+            // Reset to Original
+            handleResetSimulation();
+            return;
+        }
+
+        const sim = originalData?.savedSimulations?.find(s => s.id === simId);
+        if (sim) {
+            setSimulatedBagrut(JSON.parse(JSON.stringify(sim.bagrut)));
+            setSimulatedPsychometric({ ...sim.psychometric });
+            setActiveSimulationId(sim.id);
+        }
+    };
+
+    const handleResetSimulation = () => {
+        if (originalData) {
+            setSimulatedBagrut(JSON.parse(JSON.stringify(originalData.bagrut)));
+            setSimulatedPsychometric({ ...originalData.psychometric });
+            setActiveSimulationId(null);
+        }
+    };
+
+    const handleSectorUpdate = (newSector: any) => {
+        setSector(newSector);
+        if (originalData) {
+            saveUserData({
+                ...originalData,
+                sector: newSector
+            });
+        }
     };
 
     // ---- Render ----
     if (loading || !originalData) {
+        // ... (loading state)
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
                 <div className="flex flex-col items-center gap-4">
@@ -99,45 +217,54 @@ export const UnifiedDashboard = () => {
 
     return (
         <div className="min-h-screen bg-[#F5F5F7] font-sans p-2 lg:p-3 dir-rtl lg:overflow-hidden overflow-y-auto" dir="rtl">
-            <div className="max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-3 lg:h-[calc(100vh-24px)] h-auto">
+            <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row gap-3 h-auto lg:h-[calc(100vh-24px)] overflow-hidden">
 
-                {/* Right Column: "The Wizard" (Editable Data) */}
-                <div className="lg:col-span-3 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0">
+                {/* 1. Sidebar (Rightmost in RTL) */}
+                <div className="hidden lg:block h-full shrink-0 relative z-20">
+                    <SimulationSidebar
+                        savedSimulations={originalData.savedSimulations || []}
+                        activeSimulationId={activeSimulationId}
+                        onSelect={handleLoadSimulation}
+                        onDelete={handleDeleteSimulation}
+                        originalBagrut={originalData.bagrut}
+                        originalPsychometric={originalData.psychometric}
+                    />
+
+                </div>
+
+                {/* 2. My Data (Center/Right) */}
+                <div className="flex-1 lg:w-5/12 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0 relative z-10">
                     <MyDataPanel
-                        stats={originalStats}
-                        bagrut={originalData.bagrut}
-                        psychometric={originalData.psychometric}
-                        onUpdate={(bagrut, psycho) => handleUpdateOriginalData(bagrut, psycho)}
+                        originalBagrut={originalData.bagrut}
+                        originalPsychometric={originalData.psychometric}
+                        simulatedBagrut={simulatedBagrut}
+                        simulatedPsychometric={simulatedPsychometric}
+                        onSimulationUpdate={handleSimulationUpdate}
+                        onSaveSimulation={handleSaveSimulation}
+                        onUpdateSimulation={handleUpdateSimulation}
+                        onLoadSimulation={handleLoadSimulation}
+                        savedSimulations={originalData.savedSimulations || []}
+                        activeSimulationId={activeSimulationId}
+                        onReset={handleResetSimulation}
+                        sector={sector}
                     />
                 </div>
 
-                {/* Middle Column: "The Simulator" (Knobs & Speakers) */}
-                <div className="lg:col-span-6 h-full overflow-hidden flex flex-col bg-white rounded-3xl shadow-sm border border-gray-200/50 relative min-h-[600px] lg:min-h-0">
-                    {/* Background Gradient - moved to z-0 to ensure it's behind content if z-indexing fails, though pointer-events-none should work */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-white pointer-events-none z-0" />
-                    <div className="relative z-10 h-full flex flex-col">
-                        <PlaygroundPanel
-                            bagrut={simulatedBagrut}
-                            psychometric={simulatedPsychometric}
-                            onBagrutChange={handleGradeChange}
-                            onPsychometricChange={handlePsychometricChange}
-                            onReset={handleReset}
-                            originalStats={originalStats}
-                            simulatedStats={simulatedStats}
-                        />
-                    </div>
-                </div>
-
-                {/* Left Column: "The Watch" (Targets) */}
-                <div className="lg:col-span-3 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50">
+                {/* 3. Targets (Left) */}
+                <div className="flex-1 lg:w-5/12 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 relative z-10">
                     <TargetsPanel
                         simulatedStats={simulatedStats}
                         originalStats={originalStats}
                         targetDegree={targetDegree}
                         setTargetDegree={setTargetDegree}
+                        allSimulationsStats={simulationsWithStats}
                     />
                 </div>
+
+                {/* Insights Overlay */}
+                <SimulationInsightOverlay insights={insights} isVisible={true} />
             </div>
         </div>
     );
+
 };
