@@ -6,3 +6,4 @@ import { extractGradesMiddleware } from './vite-local-api'
 export default defineConfig({
   plugins: [react(), extractGradesMiddleware()],
 })
+// Force reload Sun Jan 11 10:19:13 +07 2026

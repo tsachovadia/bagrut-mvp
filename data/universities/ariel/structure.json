@@ -1,0 +1,125 @@
+{
+    "university": {
+        "name": "אוניברסיטת אריאל בשומרון",
+        "shortName": "Ariel",
+        "website": "https://www.ariel.ac.il/",
+        "faculties": [
+            {
+                "name": "הפקולטה להנדסה",
+                "description": "הנדסת חשמל, אזרחית, כימית ומכונות.",
+                "pageUrl": "https://www.ariel.ac.il/wp/engineering/",
+                "departments": [],
+                "programs": [
+                    "הנדסת חשמל ואלקטרוניקה",
+                    "הנדסה אזרחית",
+                    "הנדסה כימית",
+                    "הנדסת מכונות ומכטרוניקה",
+                    "הנדסת תעשייה וניהול"
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הטבע",
+                "description": "מדעי המחשב, מתמטיקה, פיזיקה וביולוגיה.",
+                "pageUrl": "https://www.ariel.ac.il/wp/natural-sciences/",
+                "departments": [
+                    {
+                        "name": "מדעי המחשב",
+                        "description": "מדעי המחשב ומתמטיקה.",
+                        "pageUrl": "https://www.ariel.ac.il/wp/cs/",
+                        "programs": [
+                            "מדעי המחשב",
+                            "מתמטיקה"
+                        ]
+                    },
+                    {
+                        "name": "פיזיקה",
+                        "description": "פיזיקה יישומית.",
+                        "pageUrl": "https://www.ariel.ac.il/wp/physics/",
+                        "programs": [
+                            "פיזיקה"
+                        ]
+                    },
+                    {
+                        "name": "ביולוגיה מולקולרית",
+                        "description": "מדעי החיים.",
+                        "pageUrl": "https://www.ariel.ac.il/wp/molecular-biology/",
+                        "programs": [
+                            "ביולוגיה מולקולרית"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החברה והרוח",
+                "description": "פסיכולוגיה, סוציולוגיה, קרימינולוגיה וכלכלה.",
+                "pageUrl": "https://www.ariel.ac.il/wp/social-sciences/",
+                "departments": [
+                    {
+                        "name": "פסיכולוגיה",
+                        "description": "מדעי ההתנהגות.",
+                        "pageUrl": "https://www.ariel.ac.il/wp/psychology/",
+                        "programs": [
+                            "פסיכולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "קרימינולוגיה",
+                        "description": "אכיפת חוק ושיקום.",
+                        "pageUrl": "https://www.ariel.ac.il/wp/criminology/",
+                        "programs": [
+                            "קרימינולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "כלכלה ומנהל עסקים",
+                        "description": "כלכלה חשבונאות וניהול.",
+                        "pageUrl": "https://www.ariel.ac.il/wp/economics/",
+                        "programs": [
+                            "כלכלה ומנהל עסקים",
+                            "חשבונאות"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "בית הספר למדעי הבריאות",
+                "description": "פיזיותרפיה, תזונה, קלינאות תקשורת.",
+                "pageUrl": "https://www.ariel.ac.il/wp/health-sciences/",
+                "departments": [],
+                "programs": [
+                    "פיזיותרפיה",
+                    "מדעי התזונה",
+                    "הפרעות בתקשורת",
+                    "סיעוד"
+                ]
+            },
+            {
+                "name": "בית הספר לרפואה",
+                "description": "לימודי רפואה (ע\"ש אדלסון).",
+                "pageUrl": "https://www.ariel.ac.il/wp/medicine/",
+                "departments": [],
+                "programs": [
+                    "רפואה (MD)"
+                ]
+            },
+            {
+                "name": "בית הספר לארכיטקטורה",
+                "description": "אדריכלות ועיצוב.",
+                "pageUrl": "https://www.ariel.ac.il/wp/architecture/",
+                "departments": [],
+                "programs": [
+                    "ארכיטקטורה"
+                ]
+            },
+            {
+                "name": "בית הספר לתקשורת",
+                "description": "תקשורת המונים ומדיה דיגיטלית.",
+                "pageUrl": "https://www.ariel.ac.il/wp/communication/",
+                "departments": [],
+                "programs": [
+                    "תקשורת"
+                ]
+            }
+        ]
+    }
+}

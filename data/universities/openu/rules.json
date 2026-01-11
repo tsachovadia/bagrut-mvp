@@ -1,0 +1,11 @@
+{
+    "universityKey": "openu",
+    "sekemAlgorithm": {
+        "formulaName": "Open Admission",
+        "description": "Open University does not require Psychometric or Bagrut for most programs. Admission is open to all.",
+        "calculationType": "open_admission",
+        "formula": "100",
+        "variables": []
+    },
+    "bagrutBonuses": []
+}

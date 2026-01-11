@@ -1,0 +1,368 @@
+{
+    "BAGRUT_SUBJECTS_DATA": {
+        "version": "2025_v1",
+        "description": "Mapping of Israeli Matriculation (Bagrut) subjects to questionnaire codes (Smalim) based on Ministry of Education 2014-2026 reforms.",
+        "categories": {
+            "mathematics": {
+                "id": "math",
+                "name": "מתמטיקה",
+                "is_compulsory": true,
+                "bonus_eligible": true,
+                "levels": [
+                    {
+                        "units": 3,
+                        "modules": [
+                            {
+                                "code": "35182",
+                                "name": "שאלון ראשון (801)",
+                                "weight": 0.25,
+                                "type": "external"
+                            },
+                            {
+                                "code": "35381",
+                                "name": "שאלון שני (802)",
+                                "weight": 0.35,
+                                "type": "external"
+                            },
+                            {
+                                "code": "35382",
+                                "name": "שאלון שלישי (803)",
+                                "weight": 0.40,
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "units": 4,
+                        "modules": [
+                            {
+                                "code": "35481",
+                                "name": "שאלון ראשון (804)",
+                                "weight": 0.65,
+                                "type": "external"
+                            },
+                            {
+                                "code": "35482",
+                                "name": "שאלון שני (805)",
+                                "weight": 0.35,
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "units": 5,
+                        "modules": [
+                            {
+                                "code": "35581",
+                                "name": "שאלון ראשון (806)",
+                                "weight": 0.60,
+                                "type": "external"
+                            },
+                            {
+                                "code": "35582",
+                                "name": "שאלון שני (807)",
+                                "weight": 0.40,
+                                "type": "external"
+                            }
+                        ]
+                    }
+                ],
+                "source_ref": "[1]"
+            },
+            "english": {
+                "id": "english",
+                "name": "אנגלית",
+                "is_compulsory": true,
+                "bonus_eligible": true,
+                "levels": [
+                    {
+                        "units": 3,
+                        "modules": [
+                            {
+                                "code": "16381",
+                                "name": "Module A",
+                                "type": "external"
+                            },
+                            {
+                                "code": "16384",
+                                "name": "Module B",
+                                "type": "external"
+                            },
+                            {
+                                "code": "16382",
+                                "name": "Module C",
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "units": 4,
+                        "modules": [
+                            {
+                                "code": "16382",
+                                "name": "Module C",
+                                "type": "external"
+                            },
+                            {
+                                "code": "16484",
+                                "name": "Module D",
+                                "type": "external"
+                            },
+                            {
+                                "code": "16481",
+                                "name": "Module E",
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "units": 5,
+                        "modules": [
+                            {
+                                "code": "16481",
+                                "name": "Module E",
+                                "type": "external"
+                            },
+                            {
+                                "code": "16584",
+                                "name": "Module F",
+                                "type": "external"
+                            },
+                            {
+                                "code": "16582",
+                                "name": "Module G",
+                                "type": "external"
+                            }
+                        ]
+                    }
+                ],
+                "source_ref": "[1]"
+            },
+            "humanities_cluster": {
+                "description": "Subjects subject to the 70/30 reform (External Exam / Internal Evaluation)",
+                "subjects": [
+                    {
+                        "id": "history",
+                        "name": "היסטוריה",
+                        "units": 2,
+                        "modules": [
+                            {
+                                "code": "22261",
+                                "name": "היסטוריה ב' - בחינה חיצונית",
+                                "weight": 0.70,
+                                "type": "external"
+                            },
+                            {
+                                "code": "22262",
+                                "name": "היסטוריה א' - הערכה חלופית",
+                                "weight": 0.30,
+                                "type": "internal"
+                            }
+                        ],
+                        "extensions": [
+                            {
+                                "units": 3,
+                                "code": "2381",
+                                "name": "היסטוריה מוגבר א",
+                                "type": "external"
+                            },
+                            {
+                                "units": 3,
+                                "code": "2382",
+                                "name": "היסטוריה מוגבר ב",
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "literature",
+                        "name": "ספרות",
+                        "units": 2,
+                        "modules": [
+                            {
+                                "code": "8281",
+                                "name": "ספרות - בחינה חיצונית",
+                                "weight": 0.70,
+                                "type": "external"
+                            },
+                            {
+                                "code": "8282",
+                                "name": "ספרות - הערכה חלופית",
+                                "weight": 0.30,
+                                "type": "internal"
+                            }
+                        ],
+                        "extensions": [
+                            {
+                                "units": 3,
+                                "code": "8381",
+                                "name": "ספרות מוגבר א",
+                                "type": "external"
+                            },
+                            {
+                                "units": 3,
+                                "code": "8382",
+                                "name": "ספרות מוגבר ב",
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "civics",
+                        "name": "אזרחות",
+                        "units": 2,
+                        "modules": [
+                            {
+                                "code": "34281",
+                                "name": "אזרחות - בחינה חיצונית",
+                                "weight": 0.80,
+                                "type": "external"
+                            },
+                            {
+                                "code": "34282",
+                                "name": "מטלת ביצוע",
+                                "weight": 0.20,
+                                "type": "internal"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "bible",
+                        "name": "תנ\"ך (ממלכתי)",
+                        "units": 2,
+                        "modules": [
+                            {
+                                "code": "1281",
+                                "name": "תנ\"ך - בחינה חיצונית",
+                                "weight": 0.70,
+                                "type": "external"
+                            },
+                            {
+                                "code": "1282",
+                                "name": "תנ\"ך - הערכה חלופית",
+                                "weight": 0.30,
+                                "type": "internal"
+                            }
+                        ],
+                        "extensions": [
+                            {
+                                "units": 3,
+                                "code": "1381",
+                                "name": "תנ\"ך מוגבר א",
+                                "type": "external"
+                            },
+                            {
+                                "units": 3,
+                                "code": "1382",
+                                "name": "תנ\"ך מוגבר ב",
+                                "type": "external"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "hebrew",
+                        "name": "הבעה עברית (לשון)",
+                        "units": 2,
+                        "modules": [
+                            {
+                                "code": "11281",
+                                "name": "עברית - בחינה חיצונית",
+                                "weight": 0.70,
+                                "type": "external"
+                            },
+                            {
+                                "code": "11282",
+                                "name": "עברית - הערכה חלופית",
+                                "weight": 0.30,
+                                "type": "internal"
+                            }
+                        ]
+                    }
+                ],
+                "source_ref": "[1]"
+            },
+            "science_tech_electives": {
+                "description": "High bonus potential subjects (20-30 points)",
+                "subjects": [
+                    {
+                        "id": "physics",
+                        "name": "פיזיקה",
+                        "units": 5,
+                        "components": [
+                            {
+                                "code": "36361",
+                                "name": "מכניקה",
+                                "weight": 0.30,
+                                "type": "external"
+                            },
+                            {
+                                "code": "36371",
+                                "name": "חשמל",
+                                "weight": 0.25,
+                                "type": "external"
+                            },
+                            {
+                                "code": "36382",
+                                "name": "מעבדה",
+                                "weight": 0.15,
+                                "type": "external"
+                            },
+                            {
+                                "code": "36282",
+                                "name": "קרינה וחומר (הערכה חלופית)",
+                                "weight": 0.30,
+                                "type": "internal"
+                            }
+                        ],
+                        "source_ref": "[1]"
+                    },
+                    {
+                        "id": "intro_sciences",
+                        "name": "מבוא למדעים (חובה למי שאין לו מוגבר מדעי)",
+                        "units": 1,
+                        "options": [
+                            {
+                                "code": "036183",
+                                "name": "מבוא לפיזיקה"
+                            },
+                            {
+                                "code": "043183",
+                                "name": "מבוא לביולוגיה"
+                            },
+                            {
+                                "code": "037183",
+                                "name": "מבוא לכימיה"
+                            },
+                            {
+                                "code": "704183",
+                                "name": "מוט\"ל (מדע וטכנולוגיה לכל)"
+                            }
+                        ],
+                        "source_ref": "[2]"
+                    }
+                ]
+            },
+            "internal_requirements": {
+                "description": "Non-grade requirements for Bagrut eligibility",
+                "subjects": [
+                    {
+                        "id": "physical_education",
+                        "name": "חינוך גופני",
+                        "code": "41083",
+                        "units": 2,
+                        "type": "internal_pass_fail",
+                        "source_ref": "[3]"
+                    },
+                    {
+                        "id": "social_involvement",
+                        "name": "מעורבות חברתית",
+                        "code": "mah1",
+                        "type": "certification_requirement",
+                        "note": "A fail here blocks the diploma",
+                        "source_ref": "[4]"
+                    }
+                ]
+            }
+        }
+    }
+}

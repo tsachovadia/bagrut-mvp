@@ -2,6 +2,7 @@ import { Button } from './ui/shim';
 import { Menu, X, GraduationCap, Users, HelpCircle, TrendingUp, ShoppingBag, MessageCircle, LogOut, User, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { isProduction } from '../utils/env';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -56,6 +57,9 @@ export function Header() {
                         <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
                         <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="הקוקפיט (סימולטור)" />
                         <NavItem icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />
+                        {!isProduction && (
+                            <NavItem onClick={() => navigate('/admin/shadow')} icon={<Users className="w-4 h-4" />} text="CRM (Admin)" />
+                        )}
                     </nav>
 
                     {/* Auth Button */}

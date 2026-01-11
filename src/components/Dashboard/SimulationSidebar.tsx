@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const SimulationSidebar = ({ savedSimulations, originalBagrut, originalPsychometric, activeSimulationId, onSelect, onDelete }: Props) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
 
     // Calculate summaries for all simulations
     const simulationSummaries = useMemo(() => {

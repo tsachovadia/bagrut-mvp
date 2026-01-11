@@ -1,0 +1,300 @@
+{
+    "university": {
+        "name": "אוניברסיטת בן-גוריון בנגב",
+        "shortName": "BGU",
+        "website": "https://in.bgu.ac.il",
+        "faculties": [
+            {
+                "name": "הפקולטה למדעי ההנדסה",
+                "description": "הפקולטה להנדסה בבן-גוריון נחשבת לאחת המובילות בישראל, עם דגש חזק על מחקר יישומי וקשר לתעשייה.",
+                "departments": [
+                    {
+                        "name": "הנדסת בניין",
+                        "description": "תואר ראשון בהנדסת בניין מכשיר מהנדסים לתכנון, חישוב וביצוע מבנים ותשתיות, תוך התמקדות בהנדסה אזרחית, חוזק חומרים וניהול פרויקטים.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/struct/Pages/Bsc-Struct-Eng.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת בניין"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת מכונות",
+                        "description": "הנדסת מכונות משלבת בסיס רחב בפיזיקה והנדסה עם תחומי זרימה, אנרגיה ותכן מכני מכשיר לתעשיות הרכב, הביטחון והאנרגיה.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/mech/Pages/Bsc-Mech-Eng.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת מכונות"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת חשמל ומחשבים",
+                        "description": "מסלול יוקרתי המעניק יסודות חזקים בחשמל, מחשבים ואלקטרוניקה, עם התמחויות בעיבוד אותות, תקשורת ו-VLSI.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/ece/Pages/Bsc-Elect-Comp-Eng.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת חשמל ומחשבים",
+                            "תואר ראשון בהנדסת מחשבים"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת תוכנה",
+                        "description": "הנדסת של מערכות תוכנה מורכבות, כולל תכנון, פיתוח וניהול פרויקטים, על בסיס ידע מעמיק במדעי המחשב.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/sw/Pages/Bsc-Soft-Eng.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת תוכנה"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת מערכות תקשורת",
+                        "description": "התמחות בתכנון וניהול רשתות תקשורת, אינטרנט של הדברים (IoT) ואבטחת סייבר.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/cse/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת מערכות תקשורת"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת חומרים",
+                        "description": "חקר ופיתוח חומרים מתקדמים לננו-טכנולוגיה, מיקרואלקטרוניקה ותעשיות ביטחוניות.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/mater/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת חומרים"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת תעשייה וניהול",
+                        "description": "שילוב בין הנדסה, טכנולוגיה וניהול לצורך שיפור תהליכים ומערכות בארגונים מורכבים.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/iem/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת תעשייה וניהול"
+                        ]
+                    },
+                    {
+                        "name": "הנדסה כימית",
+                        "description": "התמחות בתהליכים כימיים תעשייתיים, פיתוח חומרים ופתרונות סביבתיים.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/ce/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסה כימית"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת מערכות מידע",
+                        "description": "תכנון וניהול מערכות מידע ארגוניות, וניתוח נתונים (Data Analysis) לשיפור ביצועים עסקיים.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/ise/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת מערכות מידע"
+                        ]
+                    },
+                    {
+                        "name": "הנדסה ביורפואית",
+                        "description": "שילוב של הנדסה ורפואה לפיתוח מכשור רפואי, דיאגנוסטיקה וטכנולוגיות מצילות חיים.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/bme/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסה ביורפואית"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת נתונים",
+                        "description": "תחום חדשני המתמקד בארכיטקטורת Big Data, בינה מלאכותית וניהול מסדי נתונים ענקיים.",
+                        "pageUrl": "https://in.bgu.ac.il/engn/data/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בהנדסת נתונים"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הטבע",
+                "description": "הפקולטה למדעי הטבע מקדמת מחקר פורץ דרך והוראה ברמה עולמית בתחומי המדעים המדויקים ומדעי החיים.",
+                "departments": [
+                    {
+                        "name": "המחלקה למדעי המחשב",
+                        "description": "תכנית לימודים יוקרתית המקנה בסיס תיאורטי ומעשי מוצק בפיתוח אלגוריתמים, מערכות מחשב ובינה מלאכותית.",
+                        "pageUrl": "https://in.bgu.ac.il/natural_science/cs/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון במדעי המחשב",
+                            "ביואינפורמטיקה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה למתמטיקה",
+                        "description": "לימודים המפתחים חשיבה לוגית ואנליטית ברמה הגבוהה ביותר, עם יישומים במחקר ובתעשייה.",
+                        "pageUrl": "https://in.bgu.ac.il/natural_science/math/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון במתמטיקה",
+                            "סטטיסטיקה וניתוח נתונים"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לפיזיקה",
+                        "description": "חקר חוקי היסוד של היקום, מקוונטים ועד אסטרופיזיקה, בשילוב מעבדות מחקר מתקדמות.",
+                        "pageUrl": "https://in.bgu.ac.il/natural_science/phys/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בפיזיקה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לכימיה",
+                        "description": "מדע החומר: הבנת המבנה המולקולרי ופיתוח חומרים חדשים ותרופות.",
+                        "pageUrl": "https://in.bgu.ac.il/natural_science/chem/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בכימיה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה למדעי החיים",
+                        "description": "חקר הביולוגיה המודרנית, מגנטיקה מולקולרית ועד אקולוגיה וביוטכנולוגיה.",
+                        "pageUrl": "https://in.bgu.ac.il/natural_science/LifeSciences/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון במדעי החיים",
+                            "ביוטכנולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לגיאולוגיה וסביבה",
+                        "description": "חקר כדור הארץ, אוצרות טבע, רעידות אדמה ותהליכים סביבתיים.",
+                        "pageUrl": "https://in.bgu.ac.il/natural_science/geol/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בגיאולוגיה ומדעי הסביבה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לגיאוגרפיה ופיתוח סביבתי",
+                        "description": "הבנת המרחב האנושי והפיזי, עם דגש על תכנון עירוני וקיימות.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/geog/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בגיאוגרפיה ופיתוח סביבתי"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הרוח והחברה",
+                "description": "הלב הפועם של הקמפוס, המשלב בין חקר האדם, החברה והתרבות.",
+                "departments": [
+                    {
+                        "name": "המחלקה לפסיכולוגיה",
+                        "description": "חקר ההתנהגות האנושית והתהליכים המנטליים, עם שילוב של פסיכולוגיה קוגניטיבית, חברתית וקלינית.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/psych/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בפסיכולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לכלכלה",
+                        "description": "לימודים תיאורטיים ויישומיים בשווקים, פיננסים ומדיניות ציבורית.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/econ/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בכלכלה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לחינוך",
+                        "description": "חקר תהליכי למידה, הוראה ומערכות חינוך, כולל ייעוץ חינוכי וחינוך מיוחד.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/edu/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בחינוך"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לתקשורת",
+                        "description": "הבנת עולם המדיה, הרשתות החברתיות והשפעת התקשורת על החברה והפוליטיקה.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/comm/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בתקשורת"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לסוציולוגיה ולאנתרופולוגיה",
+                        "description": "חקר מבנים חברתיים, תרבויות וקבוצות בחברה הישראלית והעולמית.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/soc-ant/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בסוציולוגיה ואנתרופולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לפוליטיקה וממשל",
+                        "description": "ניתוח מערכות שלטון, יחסים בינלאומיים והפוליטיקה הישראלית.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/politics/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בפוליטיקה וממשל"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה לעבודה סוציאלית",
+                        "description": "מסלול הכשרה לטיפול וסיוע לאוכלוסיות מוחלשות, עם דגש על שינוי חברתי.",
+                        "pageUrl": "https://in.bgu.ac.il/humsos/socwork/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בעבודה סוציאלית"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה לניהול ע\"ש גילפורד גלייזר",
+                "description": "בית הספר למנהל עסקים המוביל, המכשיר את דור המנהלים הבא.",
+                "departments": [
+                    {
+                        "name": "ניהול / מנהל עסקים",
+                        "description": "תוכנית המקנה סט כלים ניהוליים ופיננסיים להובלת ארגונים בסביבה עסקית תחרותית.",
+                        "pageUrl": "https://in.bgu.ac.il/ggb/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בניהול",
+                            "חשבונאות"
+                        ]
+                    },
+                    {
+                        "name": "ניהול מלונאות ותיירות",
+                        "description": "הכשרה ייחודית לניהול בתעשיית התיירות והאירוח הבינלאומית.",
+                        "pageUrl": "https://in.bgu.ac.il/ggb/tourism/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בניהול תיירות ומלונאות"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הבריאות",
+                "description": "מובילה בחינוך רפואי ומחקר ביו-רפואי, עם דגש על רפואה בקהילה.",
+                "departments": [
+                    {
+                        "name": "בית הספר לרפואה",
+                        "description": "תכנית הלימודים היוקרתית לרפואה (M.D), המשלבת מצוינות קלינית עם גישה אנושית.",
+                        "pageUrl": "https://in.bgu.ac.il/fohs/Pages/default.aspx",
+                        "programs": [
+                            "רפואה (MD)"
+                        ]
+                    },
+                    {
+                        "name": "ניהול מערכות בריאות",
+                        "description": "הכשרת מנהלים למערכת הבריאות הציבורית והפרטית.",
+                        "pageUrl": "https://in.bgu.ac.il/fohs/hsm/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בניהול מערכות בריאות"
+                        ]
+                    },
+                    {
+                        "name": "סיעוד",
+                        "description": "הכשרת אחים ואחיות אקדמאים עם ידע קליני נרחב.",
+                        "pageUrl": "https://in.bgu.ac.il/fohs/nursing/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בסיעוד"
+                        ]
+                    },
+                    {
+                        "name": "פיזיותרפיה",
+                        "description": "מקצוע טיפולי המתמקד בשיקום התנועה והתפקוד הגופני.",
+                        "pageUrl": "https://in.bgu.ac.il/fohs/physio/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון בפיזיותרפיה"
+                        ]
+                    },
+                    {
+                        "name": "רפואת חירום",
+                        "description": "הכשרת פרמדיקים אקדמאים לניהול מצבי חירום רפואיים.",
+                        "pageUrl": "https://in.bgu.ac.il/fohs/em/Pages/default.aspx",
+                        "programs": [
+                            "תואר ראשון ברפואת חירום"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

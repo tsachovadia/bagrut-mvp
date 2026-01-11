@@ -10,12 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.89.0",
+    "@types/jsdom": "^27.0.0",
     "@vercel/node": "^5.5.16",
+    "axios": "^1.13.2",
+    "cheerio": "^1.1.2",
     "clsx": "^2.1.1",
     "csv-parse": "^6.1.0",
     "dotenv": "^17.2.3",
+    "driver.js": "^1.4.0",
     "framer-motion": "^12.24.7",
+    "jsdom": "^27.4.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

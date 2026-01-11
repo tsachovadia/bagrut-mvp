@@ -1,0 +1,221 @@
+{
+    "university": {
+        "name": "הטכניון - מכון טכנולוגי לישראל",
+        "shortName": "Technion",
+        "website": "https://www.technion.ac.il",
+        "faculties": [
+            {
+                "name": "הפקולטה להנדסה אזרחית וסביבתית",
+                "description": "הפקולטה עוסקת בתכנון, הקמה וניהול של המערכות והמבנים המשרתים את החברה, תוך שמירה על איכות הסביבה ומשאבי הטבע.",
+                "departments": [
+                    {
+                        "name": "הנדסה אזרחית",
+                        "description": "הכשרת מהנדסים לתכנון מבנים, תחבורה, ומשאבי מים.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/civil-engineering/",
+                        "programs": [
+                            "הנדסה אזרחית - תכנון קונסטרוקציות",
+                            "הנדסה אזרחית - ניהול ובנייה",
+                            "הנדסה אזרחית - תחבורה",
+                            "הנדסה אזרחית - משאבי מים וסביבה"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת מיפוי וגיאו-אינפורמציה",
+                        "description": "עיסוק במדידה, מיפוי ועיבוד מידע מרחבי באמצעות לוויינים, רחפנים ומערכות מידע.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/mapping-and-geo-information/",
+                        "programs": [
+                            "הנדסת מיפוי וגיאו-אינפורמציה"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסת מכונות",
+                "description": "הפקולטה מכשירה מהנדסים העוסקים בפיתוח, תכנון וייצור של מערכות מכניות ומערכות אנרגיה.",
+                "departments": [
+                    {
+                        "name": "הנדסת מכונות",
+                        "description": "תחום רחב הכולל רובוטיקה, מכטרוניקה, אנרגיה, זרימה ותכן מכני.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/mechanical-engineering/",
+                        "programs": [
+                            "הנדסת מכונות - כללי",
+                            "הנדסת מכונות - רובוטיקה באוטונומיה"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסת חשמל ומחשבים",
+                "description": "מהפקולטות הגדולות והמובילות, העוסקת בחזית הטכנולוגיה של אלקטרוניקה, מחשבים ותקשורת.",
+                "departments": [
+                    {
+                        "name": "הנדסת חשמל",
+                        "description": "עיבוד אותות, בקרה, מיקרו-אלקטרוניקה, אלקטרואופטיקה ועוד.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/electrical-engineering/",
+                        "programs": [
+                            "הנדסת חשמל",
+                            "הנדסת חשמל - פיזיקה (משולב)"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת מחשבים",
+                        "description": "שילוב בין חומרה לתוכנה, תכנון מעבדים ומערכות משובצות.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/computer-engineering/",
+                        "programs": [
+                            "הנדסת מחשבים"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה לכימיה ע\"ש שוליך",
+                "description": "מחקר ולימוד במדעי הכימיה, מכימיה פיזיקלית ועד ביו-כימיה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/chemistry/",
+                "programs": [
+                    "כימיה",
+                    "ביוכימיה מולקולרית"
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסה כימית",
+                "description": "הנדסת תהליכים כימיים, ביו-רפואיים, וננו-טכנולוגיה לתעשייה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/chemical-engineering/",
+                "programs": [
+                    "הנדסה כימית",
+                    "הנדסה ביוכימית"
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסת ביוטכנולוגיה ומזון",
+                "description": "שילוב של הנדסה, ביולוגיה וכימיה לפיתוח תרופות, מזון וטכנולוגיות מתקדמות.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/biotechnology-and-food-engineering/",
+                "programs": [
+                    "הנדסת ביוטכנולוגיה ומזון"
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסת אווירונוטיקה וחלל",
+                "description": "הכשרת מהנדסים לתעשיות התעופה והחלל, עם דגש על אווירודינמיקה, הנעה ובקרה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/aerospace-engineering/",
+                "programs": [
+                    "הנדסת אווירונוטיקה וחלל"
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסת תעשייה וניהול",
+                "description": "שילוב של הנדסה, מדעי הנתונים, כלכלה וניהול לייעול מערכות מורכבות.",
+                "departments": [
+                    {
+                        "name": "הנדסת תעשייה וניהול",
+                        "description": "אופטימיזציה, מערכות מידע, וניהול פרויקטים.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/industrial-engineering-and-management/",
+                        "programs": [
+                            "הנדסת תעשייה וניהול"
+                        ]
+                    },
+                    {
+                        "name": "הנדסת נתונים ומידע",
+                        "description": "Data Science & Engineering - התמקדות באלגוריתמים, למידת מכונה וניתוח נתוני עתק.",
+                        "pageUrl": "https://admissions.technion.ac.il/study-tracks/data-science-and-engineering/",
+                        "programs": [
+                            "הנדסת נתונים ומידע"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למתמטיקה",
+                "description": "לימודים עיוניים ויישומים במתמטיקה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/mathematics/",
+                "programs": [
+                    "מתמטיקה",
+                    "מתמטיקה שימושית",
+                    "מתמטיקה עם מדעי המחשב"
+                ]
+            },
+            {
+                "name": "הפקולטה לפיזיקה",
+                "description": "חקר חוקי הטבע הבסיסיים, מאסטרופיזיקה ועד פיזיקת חלקיקים.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/physics/",
+                "programs": [
+                    "פיזיקה"
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי המחשב",
+                "description": "מהמובילות בעולם, מכשירה את דור העתיד של מדעני המחשב ומהנדסי התוכנה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/computer-science/",
+                "programs": [
+                    "מדעי המחשב",
+                    "הנדסת תוכנה",
+                    "מדעי המחשב וביואינפורמטיקה"
+                ]
+            },
+            {
+                "name": "הפקולטה לביולוגיה",
+                "description": "חקר מדעי החיים מרמת המולקולה ועד לאורגניזם השלם.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/biology/",
+                "programs": [
+                    "ביולוגיה"
+                ]
+            },
+            {
+                "name": "הפקולטה לרפואה",
+                "description": "הכשרת רופאים וחוקרים במדעי הרפואה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/medicine/",
+                "programs": [
+                    "רפואה (MD)",
+                    "מדעי הרפואה (B.Sc)"
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסה ביו-רפואית",
+                "description": "שילוב הנדסה ורפואה לפיתוח מכשור רפואי וטכנולוגיות דיאגנוסטיות.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/biomedical-engineering/",
+                "programs": [
+                    "הנדסה ביו-רפואית"
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסת חומרים",
+                "description": "פיתוח חומרים מתקדמים לתעשיות ההייטק, הביטחון והרפואה.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/materials-engineering/",
+                "programs": [
+                    "הנדסת חומרים",
+                    "הנדסת חומרים ופיזיקה (משולב)",
+                    "הנדסת חומרים וכימיה (משולב)"
+                ]
+            },
+            {
+                "name": "הפקולטה לארכיטקטורה ובינוי ערים",
+                "description": "עיצוב הסביבה הבנויה, מאדריכלות מבנים ועד תכנון עירוני.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/architecture/",
+                "programs": [
+                    "ארכיטקטורה",
+                    "אדריכלות נוף"
+                ]
+            },
+            {
+                "name": "הפקולטה לחינוך למדע וטכנולוגיה",
+                "description": "הכשרת מורים למדעים וטכנולוגיה ומחקר בחינוך.",
+                "departments": [],
+                "pageUrl": "https://admissions.technion.ac.il/study-tracks/science-and-technology-education/",
+                "programs": [
+                    "חינוך למדע וטכנולוגיה"
+                ]
+            }
+        ]
+    }
+}

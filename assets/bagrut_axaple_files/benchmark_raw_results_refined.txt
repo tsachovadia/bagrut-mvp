@@ -1,0 +1,541 @@
+BENCHMARK EXECUTION DATE: 2026-01-11T09:06:34.010Z
+INPUT FILE: tsach_bagrut.pdf
+================================================================================
+
+--------------------------------------------------
+MODEL: GPT-4o (Full) (openai/gpt-4o)
+TIME: 20.58s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+```markdown
+| Student Name       | School Name | ID Number  |
+|--------------------|-------------|------------|
+| יצחק עבדוללה      | תיכון הדרים | 316390368  |
+
+| Exam Code | Subject Name          | Units | Grade in words | Sub-grade | Final Grade | Exam Date |
+|-----------|-----------------------|-------|----------------|-----------|-------------|-----------|
+| 001206    | חינוך כללי            | 2     | טוב מאוד       |           | 085         | 06/2014   |
+| 007101    | מתמטיקה (רגיל)       | 3     | טוב מאוד       |           | 086         | 06/2012   |
+| 011107    | עברית:הבעה והבנה     | 2     | טוב מאוד       |           | 088         | 06/2012   |
+| 011108    | עברית:הבעה והבנה     | 1     | טוב מאוד       |           | 073         | 06/2013   |
+| 011320    | ערבית                | 5     | טוב            |           | 079         | 06/2013   |
+| 016116    | אנגלית               | 4     | טוב מאוד       |           | 086         | 06/2013   |
+| 016118    | אנגלית               | 1     | טוב            |           | 080         | 06/2014   |
+| 016206    | היסטוריה             | 2     | טוב            |           | 079         | 06/2014   |
+| 016310    | תנ"ך                 | 2     | טוב מאוד       |           | 082         | 06/2014   |
+| 016500    | אזרחות               | 1     | טוב מאוד       |           | 084         | 06/2014   |
+| 016506    | ספרות                | 2     | טוב מאוד       |           | 079         | 06/2014   |
+| 031106    | פיזיקה               | 5     | טוב מאוד       |           | 085         | 06/2014   |
+| 034218    | כימיה                | 5     | טוב מאוד       |           | 086         | 06/2014   |
+| 034318    | ביולוגיה             | 5     | טוב מאוד       |           | 095         | 06/2014   |
+| 035500    | מתמטיקה              | 5     | טוב מאוד       |           | 094         | 06/2014   |
+| 899222    | מדעי המחשב           | 5     | טוב מאוד       |           | 095         | 06/2014   |
+| 899322    | מדעי המחשב           | 5     | טוב מאוד       |           | 094         | 06/2014   |
+| 899422    | מדעי המחשב           | 5     | טוב מאוד       |           | 095         | 06/2014   |
+| 917553    | פיזיקה               | 5     | מצוין          |           | 098         | 06/2014   |
+```
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: Claude 3.5 Sonnet (anthropic/claude-3.5-sonnet)
+TIME: 23.70s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+Let me analyze this Bagrut transcript systematically.
+
+HEADER INFORMATION:
+- Student ID (מס' זהות): 316390368
+- School Number (סמל בי"ס): 441006
+- Class (כיתה): 1206
+
+Let me present the data in a clean Markdown table:
+
+| Exam Code | Subject | Units | Grade (Words) | Sub-grade | Final Grade | Date |
+|-----------|---------|-------|---------------|-----------|-------------|-------|
+| 001206 | תנ"ך כללי | 2 | טוב מאוד | 085 | | 06/2014 |
+| 007101 | ספרות/הבנה והבעה | 1 | טוב מאוד | 086 | | 06/2012 |
+| 011107 | ספרות/הבנה והבעה | 1 | טוב מאוד | 088 | | 06/2012 |
+| 011108 | ספרות/הבנה והבעה | 1 | טוב | 073 | | 06/2013 |
+| 011320 | עברית | 2 | טוב | 079 | | 06/2013 |
+| 016106 | אנגלית | 0 | טוב | 086 | | 06/2014 |
+| 016108 | אנגלית | 0 | טוב | 080 | | 06/2014 |
+| 016112 | אנגלית | 0 | טוב מאוד | 095 | | 06/2014 |
+| 016117 | אנגלית | 5 | טוב | 068 | | 01/2014 |
+| 022115 | היסטוריה לימודי | 1 | טוב | 082 | | 06/2012 |
+| 022116 | היסטוריה | 2 | טוב | 079 | | 06/2013 |
+| 022200 | היסטוריה | 2 | טוב | 085 | | 06/2014 |
+| 034118 | אזרחות | 0 | טוב | 074 | | 06/2014 |
+| 034200 | אזרחות | 2 | טוב | 040 | | 06/2014 |
+| 035500 | מתמטיקה | 5 | טוב מאוד | 085 | | 06/2014 |
+| 035806 | מתמטיקה | 0 | טוב מאוד | 067 | | 06/2014 |
+| 035807 | מתמטיקה | 0 | טוב מאוד | 087 | | 06/2013 |
+| 036002 | פיזיקה (מעבדה) | 2 | טוב | 081 | | 06/2014 |
+| 036003 | פיזיקה וקרינה | 0 | טוב | 082 | | 06/2014 |
+| 036201 | פיזיקה וקרינה | 2 | טוב מאוד | 088 | | 06/2014 |
+| 899127 | מד' המחשב-יח' א' | 1 | מצוין | 083 | | 06/2014 |
+| 899222 | מדעי המחשב-א' | 2 | מצוין | 098 | | 06/2014 |
+| 899300 | מדעי המחשב | 3 | מצוין | 094 | | 06/2014 |
+| 904441 | ספרות (כללי) | 2 | מצוין | 095 | | 01/2014 |
+| 917450 | פיזיקה | 5 | טוב מאוד | 087 | | 06/2014 |
+| 917553 | פיזיקה | 1 | מצוין | 098 | | 06/2014 |
+
+Note: I've organized the data maintaining the exact information as shown in the transcript. The grades are presented in both numeric form (sub-grade) and words (Grade Words) as they appear in the original document.
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: GPT-4 Turbo Vision (openai/gpt-4-turbo)
+TIME: 24.55s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+### Header Extraction
+- **Student's Full Name:** מיכל חזון
+- **School Name:** בי"ס תיכון חדש
+- **ID Number:** 316390368
+
+### Table Extraction
+
+| Exam Date | Exam Code | Subject Name       | Units | Grade in Words | Sub-grade | Final Grade |
+|-----------|-----------|--------------------|-------|----------------|-----------|-------------|
+| 06/2014   | 001206    | היסטוריה           | 2     | טוב מאוד       | 85        | 85          |
+| 06/2012   | 007101    | תנ"ך               | 1     | טוב מאוד       | 86        | 88          |
+| 06/2013   | 011107    | תנ"ך               | 1     | טוב            | 73        | 88          |
+| 06/2013   | 011300    | עברית              | 2     | טוב מאוד       | 79        | 79          |
+| 06/2013   | 016106    | אנגלית             | 0     | טוב מאוד       | 86        | 86          |
+| 06/2014   | 016108    | אנגלית             | 0     | טוב מאוד       | 80        | 95          |
+| 01/2014   | 016117    | אנגלית             | 0     | טוב מאוד       | 68        | 95          |
+| 06/2014   | 016500    | אנגלית             | 5     | טוב מאוד       | 82        | 82          |
+| 06/2012   | 022110    | היסטוריה           | 1     | טוב מאוד       | 79        | 85          |
+| 06/2013   | 022116    | היסטוריה           | 1     | טוב מאוד       | 83        | 85          |
+| 06/2014   | 034118    | מתמטיקה            | 2     | טוב מאוד       | 74        | 74          |
+| 06/2014   | 034200    | מתמטיקה            | 0     | טוב מאוד       | 40        | 40          |
+| 08/2013   | 035500    | מתמטיקה            | 5     | טוב מאוד       | 67        | 67          |
+| 06/2014   | 035800    | מתמטיקה            | 3     | טוב מאוד       | 85        | 85          |
+| 06/2014   | 038007    | מתמטיקה            | 0     | טוב מאוד       | 81        | 87          |
+| 06/2014   | 038002    | מתמטיקה            | 0     | טוב מאוד       | 82        | 87          |
+| 06/2014   | 036003    | מתמטיקה            | 0     | טוב מאוד       | 88        | 88          |
+| 06/2013   | 039201    | פיזיקה             | 2     | טוב מאוד       | 83        | 83          |
+| 06/2014   | 899222    | חינוך גופני        | 2     | טוב מאוד       | 94        | 94          |
+| 01/2014   | 904441    | פסיכולוגיה (בחירה)| 2     | טוב מאוד       | 81        | 81          |
+| 06/2014   | 917553    | פסיכולוגיה        | 5     | טוב מאוד       | 87        | 98          |
+
+### Self-Correction & Validation
+- Corrected "טוב" and "טוב מאוד" where necessary.
+- Ensured that numeric grades are correctly assigned to the 'Sub-grade' and 'Final Grade' columns.
+- Cross-referenced Exam Codes with Subject Names for consistency.
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: Llama 3.2 90B Vision (meta-llama/llama-3.2-90b-vision-instruct)
+TIME: 47.66s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+## Step 1: HEADER EXTRACTION
+The student's full name is 'הבוגר/ת מינהל פדגוגי', the school name is 'בי"ס תיכון הדרום', and the ID number is '316390368'.
+
+
+## Step 2: TABLE EXTRACTION (ROW-BY-ROW)
+1. Row 1: 
+   - Exam Date: 06/2014
+   - Exam Code: 085
+   - Subject Name: תנ"ך כללי
+   - Units: 
+   - Grade in words: טוב מאוד
+   - Sub-grade: 2
+   - Final Grade: 86
+
+2. Row 2: 
+   - Exam Date: 06/2012
+   - Exam Code: 086
+   - Subject Name: תושב"ע (כללי)
+   - Units: 
+   - Grade in words: טוב
+   - Sub-grade: 2
+   - Final Grade: 88
+
+3. Row 3: 
+   - Exam Date: 06/2012
+   - Exam Code: 088
+   - Subject Name: שברית/הבנה הבנה
+   - Units: 
+   - Grade in words: טוב מאוד
+   - Sub-grade: 
+   - Final Grade: 
+
+4. Row 4: 
+   - Exam Date: 06/2013
+   - Exam Code: 073
+   - Subject Name: שברית/הבנה הבנה
+   - Units: 
+   - Grade in words: כמעט טוב
+   - Sub-grade: 2
+   - Final Grade: 86
+
+5. Row 5: 
+   - Exam Date: 06/2013
+   - Exam Code: 079
+   - Subject Name: אנגלית
+   - Units: 
+   - Grade in words: טוב
+   - Sub-grade: 2
+   - Final Grade: 86
+
+6. Row 6: 
+   - Exam Date: 06/2014
+   - Exam Code: 080
+   - Subject Name: אנגלית
+   - Units: 
+   - Grade in words: טוב
+   - Sub-grade: 
+   - Final Grade: 95
+
+7. Row 7: 
+   - Exam Date: 01/2014
+   - Exam Code: 068
+   - Subject Name: אנגלית
+   - Units: 5
+   - Grade in words: כמעט טוב
+   - Sub-grade: 
+   - Final Grade: 68
+
+8. Row 8: 
+   - Exam Date: 06/2014
+   - Exam Code: 082
+   - Subject Name: היסטוריה/לימודי
+   - Units: 
+   - Grade in words: טוב
+   - Sub-grade: 
+   - Final Grade: 
+
+9. Row 9: 
+   - Exam Date: 06/2012
+   - Exam Code: 079
+   - Subject Name: היסטוריה/לימודי
+   - Units: 
+   - Grade in words: טוב
+   - Sub-grade: 1
+   - Final Grade: 85
+
+10. Row 10: 
+    - Exam Date: 06/2013
+    - Exam Code: 083
+    - Subject Name: היסטוריה
+    - Units: 2
+    - Grade in words: טוב מאוד
+    - Sub-grade: 
+    - Final Grade: 74
+
+11. Row 11: 
+    - Exam Date: 06/2014
+    - Exam Code: 074
+    - Subject Name: אדירות
+    - Units: 
+    - Grade in words: כמעט טוב
+    - Sub-grade: 2
+    - Final Grade: 40
+
+12. Row 12: 
+    - Exam Date: 06/2014
+    - Exam Code: 067
+    - Subject Name: אדירות
+    - Units: 
+    - Grade in words: בלחי סופיק כמעט טוב
+    - Sub-grade: 2
+    - Final Grade: 85
+
+13. Row 13: 
+    - Exam Date: 06/2014
+    - Exam Code: 085
+    - Subject Name: מתמטיקה
+    - Units: 3
+    - Grade in words: טוב מאוד
+    - Sub-grade: 5
+    - Final Grade: 87
+
+14. Row 14: 
+    - Exam Date: 06/2013
+    - Exam Code: 087
+    - Subject Name: מתמטיקה
+    - Units: 
+    - Grade in words: טוב
+    - Sub-grade: 
+    - Final Grade: 81
+
+15. Row 15: 
+    - Exam Date: 06/2014
+    - Exam Code: 081
+    - Subject Name: מתמטיקה
+    - Units: 
+    - Grade in words: טוב מאוד
+    - Sub-grade: 2
+    - Final Grade: 82
+
+16. Row 16: 
+    - Exam Date: 06/2013
+    - Exam Code: 088
+    - Subject Name: פיזיקה (תשס"ל)
+    - Units: 
+    - Grade in words: טוב מאוד
+    - Sub-grade: 
+    - Final Grade: 83
+
+17. Row 17: 
+    - Exam Date: 06/2014
+    - Exam Code: 098
+    - Subject Name: פיזיקה קרינה
+    - Units: 1
+    - Grade in words: מצוין
+    - Sub-grade: 2
+    - Final Grade: 94
+
+18. Row 18: 
+    - Exam Date: 06/2014
+    - Exam Code: 095
+    - Subject Name: מדע המחשב-ת"נ-י
+    - Units: 2
+    - Grade in words: טוב מאוד
+    - Sub-grade: 
+    - Final Grade: 81
+
+19. Row 19: 
+    - Exam Date: 06/2014
+    - Exam Code: 087
+    - Subject Name: מדעי המחשב
+    - Units: 2
+    - Grade in words: טוב
+    - Sub-grade: 5
+    - Final Grade: 98
+
+20. Row 20: 
+    - Exam Date: 06/2014
+    - Exam Code: 098
+    - Subject Name: ספרות (כללי)
+    - Units: 1
+    - Grade in words: טוב מאוד
+    - Sub-grade: 
+    - Final Grade: 
+
+## Step 3: SELF-CORRECTION & VALIDATION
+- 'טות' or 'טות מאוד' is corrected to 'טוב' or 'טוב מאוד'.
+- RTL/LTR FIX applied to ensure numeric grades are in the correct columns.
+- SUBJECT CODES cross-referenced with Subject Names.
+
+
+## Step 4: FORMAT
+| Exam Date | Exam Code | Subject Name | Units | Grade in words | Sub-grade | Final Grade |
+| --- | --- | --- | --- | --- | --- | --- |
+| 06/2014 | 085 | תנ"ך כללי |  | טוב מאוד | 2 | 86 |
+| 06/2012 | 086 | תושב"ע (כללי) |  | טוב | 2 | 88 |
+| 06/2012 | 088 | שברית/הבנה הבנה |  | טוב מאוד |  |  |
+| 06/2013 | 073 | שברית/הבנה הבנה |  | כמעט טוב | 2 | 86 |
+| 06/2013 | 079 | אנגלית |  | טוב | 2 | 86 |
+| 06/2014 | 080 | אנגלית |  | טוב |  | 95 |
+| 01/2014 | 068 | אנגלית | 5 | כמעט טוב |  | 68 |
+| 06/2014 | 082 | היסטוריה/לימודי |  | טוב |  |  |
+| 06/2012 | 079 | היסטוריה/לימודי |  | טוב | 1 | 85 |
+| 06/2013 | 083 | היסטוריה | 2 | טוב מאוד |  | 74 |
+| 06/2014 | 074 | אדירות |  | כמעט טוב | 2 | 40 |
+| 06/2014 | 067 | אדירות |  | בלחי סופיק כמעט טוב | 2 | 85 |
+| 06/2014 | 085 | מתמטיקה | 3 | טוב מאוד | 5 | 87 |
+| 06/2013 | 087 | מתמטיקה |  | טוב |  | 81 |
+| 06/2014 | 081 | מתמטיקה |  | טוב מאוד | 2 | 82 |
+| 06/2013 | 088 | פיזיקה (תשס"ל) |  | טוב מאוד |  | 83 |
+| 06/2014 | 098 | פיזיקה קרינה | 1 | מצוין | 2 | 94 |
+| 06/2014 | 095 | מדע המחשב-ת"נ-י | 2 | טוב מאוד |  | 81 |
+| 06/2014 | 087 | מדעי המחשב | 2 | טוב | 5 | 98 |
+| 06/2014 | 098 | ספרות (כללי) | 1 | טוב מאוד |  |  |
+
+The final answer is: 
+## Student Information
+- **Name**: מינהל פדגוגי
+- **School**: תיכון הדרום
+- **ID**: 316390368
+
+## Bagrut Transcript
+| Exam Date | Exam Code | Subject Name | Units | Grade in words | Sub-grade | Final Grade |
+| --- | --- | --- | --- | --- | --- | --- |
+| 06/2014 | 085 | תנ"ך כללי |  | טוב מאוד | 2 | 86 |
+| 06/2012 | 086 | תושב"ע (כללי) |  | טוב | 2 | 88 |
+| 06/2012 | 088 | שברית/הבנה הבנה |  | טוב מאוד |  |  |
+| 06/2013 | 073 | שברית/הבנה הבנה |  | כמעט טוב | 2 | 86 |
+| 06/2013 | 079 | אנגלית |  | טוב | 2 | 86 |
+| 06/2014 | 080 | אנגלית |  | טוב |  | 95 |
+| 01/2014 | 068 | אנגלית | 5 | כמעט טוב |  | 68 |
+| 06/2014 | 082 | היסטוריה/לימודי |  | טוב |  |  |
+| 06/2012 | 079 | היסטוריה/לימודי |  | טוב | 1 | 85 |
+| 06/2013 | 083 | היסטוריה | 2 | טוב מאוד |  | 74 |
+| 06/2014 | 074 | אדירות |  | כמעט טוב | 2 | 40 |
+| 06/2014 | 067 | אדירות |  | בלחי סופיק כמעט טוב | 2 | 85 |
+| 06/2014 | 085 | מתמטיקה | 3 | טוב מאוד | 5 | 87 |
+| 06/2013 | 087 | מתמטיקה |  | טוב |  | 81 |
+| 06/2014 | 081 | מתמטיקה |  | טוב מאוד | 2 | 82 |
+| 06/2013 | 088 | פיזיקה (תשס"ל) |  | טוב מאוד |  | 83 |
+| 06/2014 | 098 | פיזיקה קרינה | 1 | מצוין | 2 | 94 |
+| 06/2014 | 095 | מדע המחשב-ת"נ-י | 2 | טוב מאוד |  | 81 |
+| 06/2014 | 087 | מדעי המחשב | 2 | טוב | 5 | 98 |
+| 06/2014 | 098 | ספרות (כללי) | 1 | טוב מאוד |  |  |
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: GPT-4o Mini (openai/gpt-4o-mini)
+TIME: 14.66s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+Here’s the extracted information in a clean Markdown table format:
+
+### HEADER EXTRACTION
+
+- **Student Name:** יונתן הירש
+- **School Name:** תיכון ברנר
+- **ID Number:** 316390368
+
+### TABLE EXTRACTION
+
+| Exam Code | Subject Name               | Units | Grade in Words | Sub-grade | Final Grade | Exam Date  |
+|-----------|----------------------------|-------|----------------|-----------|-------------|------------|
+| 001206    | חינוך גופני               | 2     | טוב            | 2         | 2           | 06/2014    |
+| 007101    | מתמטיקה (כלל)             | 5     | טוב מאוד       | 5         | 5           | 06/2012    |
+| 011107    | עברית: הבנת הנקרא         | 2     | טוב            | 2         | 2           | 06/2013    |
+| 011108    | עברית: הבעה               | 2     | טוב            | 2         | 2           | 06/2013    |
+| 011120    | אזרחות                    | 2     | טוב            | 2         | 2           | 06/2014    |
+| 016106    | ספרות                     | 2     | טוב            | 2         | 2           | 06/2014    |
+| 016110    | היסטוריה                  | 2     | טוב            | 2         | 2           | 06/2014    |
+| 016500    | לשון                     | 2     | טוב            | 2         | 2           | 06/2014    |
+| 033118    | פיזיקה                    | 2     | טוב            | 2         | 2           | 06/2014    |
+| 035500    | מתמטיקה                   | 5     | טוב מאוד       | 5         | 5           | 06/2014    |
+| 899222    | מדעי המחשב                | 2     | טוב            | 2         | 2           | 06/2014    |
+| 917553    | קפיצה                     | 1     | טוב            | 1         | 1           | 06/2014    |
+
+This table summarizes the extracted data from the Bagrut transcript. If any values were missing, they would be left empty.
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: Llama 3.2 11B Vision (meta-llama/llama-3.2-11b-vision-instruct)
+TIME: 11.87s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+
+
+unsafe
+S6
+--------------------------------------------------
+

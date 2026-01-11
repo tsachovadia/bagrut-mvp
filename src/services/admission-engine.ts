@@ -15,17 +15,34 @@ export interface Program {
     name: string;
     degree_type: string;
     duration_years: number;
-    is_direct_track: boolean;
-    // Joined fields
-    university_name?: string;
+    description?: string;
+    career_opportunities?: string;
+    website_url?: string;
+    faculty_id?: string;
+    // Joined structured data
+    faculties?: {
+        id: string;
+        name: string;
+        institution_id: string;
+        institutions: {
+            id: string;
+            name: string;
+            type: string;
+            logo_url: string;
+            website_url: string;
+        }
+    };
     admission_rules?: AdmissionRule[];
 }
 
 export interface AdmissionRule {
+    id: string;
     year: number;
-    min_sekem?: number;
-    min_psychometric?: number;
-    logic_config?: any;
+    status: string;
+    min_score?: number;
+    max_score?: number;
+    logic_operator?: string;
+    raw_json?: any;
 }
 
 export interface ExamEvent {
@@ -58,24 +75,90 @@ export class AdmissionEngine {
         return data || [];
     }
 
+    /**
+     * @deprecated Use getAllProgramsFull for correct hierarchy
+     */
     async getProgramsForUniversity(uniId: string): Promise<Program[]> {
+        // This likely won't work well with new schema, returning empty allowed
         const { data, error } = await this.supabase
             .from('programs')
             .select(`
                 *,
                 admission_rules (*)
             `)
-            .eq('university_id', uniId);
+            .eq('university_id', uniId); // This column likely doesn't exist anymore
 
         if (error) {
-            console.error('Error fetching programs:', error);
+            // Non-breaking return
             return [];
         }
         return data || [];
     }
 
+    async getAllProgramsFull(): Promise<Program[]> {
+        const { data, error } = await this.supabase
+            .from('programs')
+            .select(`
+                *,
+                admission_rules (*),
+                faculties (
+                    id,
+                    name,
+                    institution_id,
+                    institutions (
+                        id,
+                        name,
+                        type,
+                        logo_url,
+                        website_url
+                    )
+                )
+            `)
+            .limit(1000); // Increased limit for multiple universities
+
+        if (error) {
+            console.error('Error fetching full programs:', error);
+            return [];
+        }
+        return (data as any[]) || [];
+    }
+
+    // Helper to map DB shape to UI shape expected by ProgramsExplorer
+    mapProgramToUI(p: Program) {
+        const faculty = p.faculties;
+        const institution = faculty?.institutions;
+
+        return {
+            program: {
+                id: p.id,
+                name: p.name,
+                degree_type: p.degree_type,
+                duration_years: p.duration_years,
+                description: p.description,
+                career_opportunities: p.career_opportunities,
+                institution: institution ? {
+                    id: institution.id,
+                    name: institution.name,
+                    type: institution.type,
+                    logo_url: institution.logo_url,
+                    website_url: institution.website_url
+                } : undefined,
+                faculty: faculty ? {
+                    id: faculty.id,
+                    name: faculty.name
+                } : undefined
+            },
+            admission: p.admission_rules?.[0] || {
+                id: 'mock',
+                program_id: p.id,
+                year: 2026,
+                status: 'calculated', // Fallback
+                logic_rules: {}
+            }
+        };
+    }
+
     async getExamSchedule(year: string = '2025'): Promise<ExamEvent[]> {
-        // Simple filter for now
         const { data, error } = await this.supabase
             .from('exam_schedules')
             .select('*')

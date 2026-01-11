@@ -202,6 +202,13 @@ export const UnifiedDashboard = () => {
         }
     };
 
+    const handlePreferencesUpdate = (newPrefs: any) => {
+        if (!originalData) return;
+        const newData = { ...originalData, preferences: newPrefs };
+        setOriginalData(newData);
+        saveUserData(newData);
+    };
+
     // ---- Render ----
     if (loading || !originalData) {
         // ... (loading state)
@@ -232,8 +239,8 @@ export const UnifiedDashboard = () => {
 
                 </div>
 
-                {/* 2. My Data (Center/Right) */}
-                <div className="flex-1 lg:w-5/12 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0 relative z-10">
+                {/* 2. My Data (Center - Takes remaining space) */}
+                <div className="flex-1 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0 relative z-10">
                     <MyDataPanel
                         originalBagrut={originalData.bagrut}
                         originalPsychometric={originalData.psychometric}
@@ -250,14 +257,16 @@ export const UnifiedDashboard = () => {
                     />
                 </div>
 
-                {/* 3. Targets (Left) */}
-                <div className="flex-1 lg:w-5/12 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 relative z-10">
+                {/* 3. Targets (Left Sidebar) */}
+                <div className="h-full shrink-0 relative z-20 min-h-[500px] lg:min-h-0">
                     <TargetsPanel
                         simulatedStats={simulatedStats}
                         originalStats={originalStats}
                         targetDegree={targetDegree}
                         setTargetDegree={setTargetDegree}
                         allSimulationsStats={simulationsWithStats}
+                        preferences={originalData?.preferences}
+                        onPreferencesUpdate={handlePreferencesUpdate}
                     />
                 </div>
 

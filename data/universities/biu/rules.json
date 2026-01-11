@@ -1,0 +1,65 @@
+{
+    "universityKey": "biu",
+    "sekemAlgorithm": {
+        "formulaName": "BIU Standard Formula",
+        "description": "Bar Ilan weighted score based on Bagrut and Psychometric.",
+        "calculationType": "custom_linear",
+        "formula": "(bagrut_avg * 0.5) + (psychometric * 0.5)",
+        "variables": [
+            "bagrut_avg",
+            "psychometric"
+        ]
+    },
+    "bagrutBonuses": [
+        {
+            "subject": "Mathematics",
+            "minUnits": 5,
+            "bonusPoints": 25
+        },
+        {
+            "subject": "Mathematics",
+            "minUnits": 4,
+            "bonusPoints": 15
+        },
+        {
+            "subject": "Physics",
+            "minUnits": 5,
+            "bonusPoints": 25
+        },
+        {
+            "subject": "English",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Computer Science",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Chemistry",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Biology",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Jewish Thought",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "History",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Literature",
+            "minUnits": 5,
+            "bonusPoints": 20
+        }
+    ]
+}

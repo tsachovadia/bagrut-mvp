@@ -1,0 +1,210 @@
+BENCHMARK EXECUTION DATE: 2026-01-11T09:26:59.696Z
+INPUT FILE: tsach_bagrut.pdf
+SDK: @google/generative-ai
+================================================================================
+
+--------------------------------------------------
+MODEL: Gemini 2.0 Flash (001) (gemini-2.0-flash-001)
+TIME: 9.08s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+Okay, here's the breakdown of the Bagrut transcript, formatted as a Markdown table:
+
+**1. HEADER EXTRACTION:**
+
+*   **Student Name:** עובדיה צח יצחק
+*   **School Name:** תיכון הדרים
+*   **ID Number:** 316390368
+
+**2. TABLE EXTRACTION:**
+
+| Exam Code | Subject Name          | Units | Grade in words | Sub-grade | Final Grade | Exam Date |
+| --------- | --------------------- | ----- | -------------- | --------- | ----------- | --------- |
+| 001206    | תנ"ך כללי             | 2     | טוב מאוד      |           | 085         | 06/2014   |
+| 007101    | תושבע"פ (כללי)       | 1     | טוב מאוד      |           | 086         | 06/2012   |
+| 011107    | עברית:הבנה הבעה     | 1     | טוב מאוד      | 088       |             | 06/2012   |
+| 011108    | עברית:הבנה הבעה     | 1     | כמעט טוב     | 073       |             | 06/2013   |
+| 011320    | עברית                | 2     | טוב           | 079       |             | 06/2013   |
+| 016106    | אנגלית               | 0     | טוב מאוד      | 086       |             | 06/2013   |
+| 016108    | אנגלית               | 0     | טוב           | 080       |             | 06/2014   |
+| 016112    | אנגלית               | 0     | מצוין         | 095       |             | 06/2014   |
+| 016117    | אנגלית               | 0     | כמעט טוב     | 068       |             | 01/2014   |
+| 016500    | אנגלית               | 5     | טוב           | 082       |             | 06/2014   |
+| 022115    | היסטוריה לימודי     | 1     | טוב           | 079       |             | 06/2012   |
+| 022116    | היסטוריה לימודי     | 1     | טוב מאוד      | 085       |             | 06/2013   |
+| 022200    | היסטוריה             | 2     | טוב           | 083       |             | 06/2013   |
+| 034114    | אזרחות               | 0     | כמעט טוב     | 074       |             | 06/2014   |
+| 034118    | אזרחות               | 0     | בלתי מספיק   | 040       |             | 06/2014   |
+| 034200    | אזרחות               | 2     | כמעט טוב     | 067       |             | 06/2014   |
+| 035500    | מתמטיקה             | 5     | טוב מאוד      | 085       |             | 06/2014   |
+| 035806    | מתמטיקה             | 3     | טוב מאוד      | 087       |             | 08/2013   |
+| 035807    | מתמטיקה             | 0     | טוב           | 081       |             | 06/2014   |
+| 036002    | פיזיקה (חשמל)        | 0     | טוב           | 082       |             | 06/2014   |
+| 036003    | פיזיקה (קרינה ו      | 0     | טוב מאוד      | 088       |             | 06/2014   |
+| 036201    | פיזיקה (מכ',אופ      | 2     | טוב           | 083       |             | 06/2013   |
+| 899127    | מי המחשב-מע' א'      | 1     | מצוין         | 098       |             | 06/2014   |
+| 899222    | מדעי המחשב א'       | 2     | טוב מאוד      | 094       |             | 06/2013   |
+| 899300    | מדעי המחשב          | 3     | מצוין         | 095       |             | 06/2014   |
+| 904441    | ספרות (כללי)        | 2     | טוב           | 081       |             | 01/2014   |
+| 917450    | פיזיקה               | 5     | טוב מאוד      | 087       |             | 06/2014   |
+| 917553    | פיזיקה               | 1     | מצוין         | 098       |             | 06/2014   |
+
+**3. VALIDATION & CORRECTIONS:**
+
+*   All instances of "טות" and "טות מאוד" have been corrected to "טוב" and "טוב מאוד" respectively.
+*   Numeric grades are placed in the correct columns.
+
+
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: Gemini 1.5 Flash (Latest) (gemini-flash-latest)
+TIME: 14.00s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+**Student Information**
+
+| Field | Value |
+| :--- | :--- |
+| **Student Name (הבוגר/ת)** | שובדיה צח יצחק |
+| **School Name (בי"ס)** | תיכון הדרים |
+| **ID Number (מס' זהות)** | 316390368 |
+
+**Bagrut Exam Results**
+
+| Exam Code | Subject Name | Units | Grade in words | Sub-grade (תת) | Final Grade (סופי) | Exam Date |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 001206 | חנ"ך כללי | 2 | טוב מאוד | | 85 | 06/2014 |
+| 007101 | מחשבתע"פ (כללי) | 1 | טוב מאוד | | 86 | 06/2012 |
+| 011107 | עברית:הבנה הבעה | 1 | טוב מאוד | 88 | | 06/2012 |
+| 011108 | עברית:הבנה הבעה | 1 | טוב | 73 | | 06/2013 |
+| 011320 | עברית | 2 | טוב | | 79 | 06/2013 |
+| 016106 | אנגלית | 0 | טוב מאוד | 86 | | 06/2013 |
+| 016108 | אנגלית | 0 | טוב | 80 | | 06/2014 |
+| 016112 | אנגלית | 0 | מצוין | 95 | | 06/2014 |
+| 016117 | אנגלית | 0 | כמעט טוב | 68 | | 01/2014 |
+| 016500 | אנגלית | 5 | טוב | | 82 | 06/2014 |
+| 022115 | היסטוריה ל'ימודי | 1 | טוב | 79 | | 06/2012 |
+| 022116 | היסטוריה ל'ימודי | 1 | טוב מאוד | 85 | | 06/2013 |
+| 022200 | היסטוריה | 2 | טוב | | 83 | 06/2013 |
+| 034114 | אזרחות | 0 | כמעט טוב | 74 | | 06/2014 |
+| 034118 | אזרחות | 0 | בלתי מספיק | 40 | | 06/2014 |
+| 034200 | אזרחות | 2 | כמעט טוב | | 67 | 06/2014 |
+| 035500 | מתמטיקה | 5 | טוב מאוד | | 85 | 06/2014 |
+| 035806 | מתמטיקה | 3 | טוב מאוד | 87 | | 08/2013 |
+| 035807 | מתמטיקה | 0 | טוב | 81 | | 06/2014 |
+| 036002 | פיזיקה (חשמל) | 0 | טוב | 82 | | 06/2014 |
+| 036003 | פיזיקה (קרינה ו | 0 | טוב מאוד | 88 | | 06/2014 |
+| 036201 | פיזיקה (מכ', אור | 2 | טוב | | 83 | 06/2013 |
+| 899127 | מדעי המחשב א' | 1 | מצוין | 98 | | 06/2014 |
+| 899222 | מדעי המחשב א' | 2 | טוב מאוד | 94 | | 06/2013 |
+| 899300 | מדעי המחשב | 3 | מצוין | | 95 | 06/2014 |
+| 904441 | ספרות (כללי) | 2 | טוב | | 81 | 01/2014 |
+| 917450 | פיזיקה | 5 | טוב מאוד | | 87 | 06/2014 |
+| 917553 | פיזיקה | 1 | מצוין | 98 | | 06/2014 |
+--------------------------------------------------
+
+--------------------------------------------------
+MODEL: Gemini 1.5 Pro (Latest) (gemini-pro-latest)
+TIME: 30.27s
+PROMPT:
+You are an expert document analyzer specializing in Israeli Bagrut transcripts.
+Your goal is 100% accuracy. Follow this step-by-step logic:
+
+1. HEADER EXTRACTION:
+   - Identify the student's full name next to the label 'הבוגר/ת'. 
+   - Identify the school name next to 'בי"ס'.
+   - Identify the ID number (9 digits) next to 'מס' זהות'.
+
+2. TABLE EXTRACTION (ROW-BY-ROW):
+   - Analyze each row as a single unit.
+   - For each row, extract: [Exam Code], [Subject Name], [Units], [Grade in words], [Sub-grade (תת)], [Final Grade (סופי)], [Exam Date].
+   
+3. SELF-CORRECTION & VALIDATION:
+   - HEBREW CONTEXT: If you see 'טות' or 'טות מאוד', correct it to 'טוב' or 'טוב מאוד'. 
+   - RTL/LTR FIX: Ensure numeric grades are assigned to the correct columns (Sub-grade vs. Final Grade). The 'סופי' (Final) column is usually the leftmost grade in the table.
+   - SUBJECT CODES: Cross-reference the Exam Code with the Subject Name (e.g., Code 035500 is ALWAYS Mathematics).
+
+4. FORMAT:
+   Return a clean Markdown table. If a value is missing, leave it empty.
+
+RESPONSE:
+### **Header Information**
+*   **הבוגר/ת (Student Name):** עובדיה צח יצחק
+*   **בי"ס (School Name):** תיכון הדרים
+*   **מס' זהות (ID Number):** 316390368
+
+### **Grades Table**
+
+| Exam Code | Subject Name | Units | Grade in words | Sub-grade (תת) | Final Grade (סופי) | Exam Date |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 001206 | תנ"ך כללי | 2 | טוב מאוד | | 085 | 06/2014 |
+| 007101 | תושבע"פ (כללי) | 1 | טוב מאוד | | 086 | 06/2012 |
+| 011107 | עברית:הבנה הבעה | 1 | טוב מאוד | 088 | | 06/2012 |
+| 011108 | עברית:הבנה הבעה | 1 | כמעט טוב | 073 | | 06/2013 |
+| 011320 | עברית | 2 | טוב | | 079 | 06/2013 |
+| 016106 | אנגלית | 0 | טוב מאוד | 086 | | 06/2013 |
+| 016108 | אנגלית | 0 | טוב | 080 | | 06/2014 |
+| 016112 | אנגלית | 0 | מצוין | 095 | | 06/2014 |
+| 016117 | אנגלית | 0 | כמעט טוב | 068 | | 01/2014 |
+| 016500 | אנגלית | 5 | טוב | | 082 | 06/2014 |
+| 022115 | היסטוריה לימודי | 1 | טוב | 079 | | 06/2012 |
+| 022116 | היסטוריה לימודי | 1 | טוב מאוד | 085 | | 06/2013 |
+| 022200 | היסטוריה | 2 | טוב | | 083 | 06/2013 |
+| 034114 | אזרחות | 0 | כמעט טוב | 074 | | 06/2014 |
+| 034118 | אזרחות | 0 | בלתי מספיק | 040 | | 06/2014 |
+| 034200 | אזרחות | 2 | כמעט טוב | | 067 | 06/2014 |
+| 035500 | מתמטיקה | 5 | טוב מאוד | | 085 | 06/2014 |
+| 035806 | מתמטיקה | 3 | טוב מאוד | 087 | | 08/2013 |
+| 035807 | מתמטיקה | 0 | טוב | 081 | | 06/2014 |
+| 036002 | פיזיקה (חשמל) | 0 | טוב | 082 | | 06/2014 |
+| 036003 | פיזיקה (קרינה ו | 0 | טוב מאוד | 088 | | 06/2014 |
+| 036201 | פיזיקה (מכ',אופ | 2 | טוב | 083 | | 06/2013 |
+| 899127 | מד' המחשב-תכ' א' | 1 | מצוין | 098 | | 06/2014 |
+| 899222 | מדעי המחשב א' | 2 | טוב מאוד | | 095 | 06/2013 |
+| 899300 | מדעי המחשב | 3 | מצוין | 094 | | 06/2014 |
+| 904441 | ספרות (כללי) | 2 | טוב | | 081 | 01/2014 |
+| 917450 | פיזיקה | 5 | טוב מאוד | | 087 | 06/2014 |
+| 917553 | פיזיקה | 1 | מצוין | | 098 | 06/2014 |
+--------------------------------------------------
+

@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# מחשבון בגרויות - Launch Pad MVP
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+פלטפורמה מקיפה לחישוב ממוצעי בגרות, סימולציית קבלה לאוניברסיטאות, וניהול לידים (CRM).
+המערכת משלבת לוגיקות חישוב מדויקות (מבוססות האוניברסיטה העברית) עם ממשק משתמש מודרני וכלי ניהול מתקדמים.
 
-Currently, two official plugins are available:
+## 🚀 פיצ'רים מרכזיים
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 🎓 לסטודנטים (Public)
+*   **מחשבון בגרויות:** חישוב ממוצע בגרות (רגיל ומותאם/מיטבי) כולל בונוסים לפי מוסדות.
+*   **חיפוש תארים:** מאגר מידע של תוכניות לימוד.
+*   **הקוקפיט (Dashboard):** סימולטור קבלה בזמן אמת. מציג סיכויי קבלה לפי סכם, ומאפשר "משחק" עם הציונים כדי לראות איך שיפורים משפיעים על הקבלה.
 
-## React Compiler
+### 🕵️‍♂️ למנהלים (ShadowNet Admin)
+*   **CRM מובנה:** מערכת לניהול משתמשים ולידים.
+*   **פיד סיגנלים:** מעקב אחרי פעולות משתמשים בזמן אמת.
+*   **ניהול קבוצות:** אינטגרציה לקבוצות WhatsApp.
+*   **שותפים (B2B):** ניהול קשרי עבודה עם מוסדות לימוד.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ סביבות ופיצ'רים (Environment Flags)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+המערכת רצה בשתי קונפיגורציות עיקריות: **Development** ו-**Production**.
+אנו משתמשים ב-Utility פנימי (`src/utils/env.ts`) כדי לזהות את הסביבה.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### ההבדלים בין הסביבות:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| פיצ'ר | Development | Production |
+| :--- | :--- | :--- |
+| **כפתור "מלא נתונים לדוגמה"** | ✅ מוצג (בטופס הבגרויות) | ❌ מוסתר |
+| **גישה ל-CRM** | ✅ פתוח (קישור בתפריט העליון) | ❌ חסום (אין קישור + הגנת Route) |
+| **נתיבי Admin (`/admin/shadow`)** | ✅ נגישים | 🚫 Redirect לדף הבית |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+> **הערה לפיתוח:** כדי לבדוק את התנהגות הפרודקשן בסביבה מקומית, ניתן לשנות זמנית את הערך ב-`src/utils/env.ts` או להריץ `npm run build` ו-`npm run preview`.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 💻 Tech Stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+*   **Framework:** React 18 + Vite
+*   **Language:** TypeScript
+*   **UI:** Tailwind CSS + Lucide React
+*   **Database & Auth:** Supabase
+*   **Deployment:** Vercel (Current configuration)
+
+## 🏃‍♂️ הרצה מקומית
+
+1.  התקנת תלויות:
+    ```bash
+    npm install
+    ```
+
+2.  הרצת שרת פיתוח:
+    ```bash
+    npm run dev
+    ```
+    המערכת תעלה בכתובת `http://localhost:5173`.
+
+## 📁 מבנה הפרויקט (High Level)
+
+*   `src/components/Wizard`: לוגיקת המחשבון (שלבים).
+*   `src/components/Dashboard`: הקוקפיט והסימולטור.
+*   `src/components/Admin`: רכיבי ה-ShadowNet CRM.
+*   `src/utils/calculation-bridge.ts`: הגשר בין ה-UI למנוע חישוב הציונים.
+*   `src/utils/env.ts`: ניהול משתני סביבה ודגלים.

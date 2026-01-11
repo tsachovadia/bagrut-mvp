@@ -1,0 +1,319 @@
+{
+    "university": {
+        "name": "אוניברסיטת תל אביב",
+        "shortName": "TAU",
+        "website": "https://www.tau.ac.il",
+        "faculties": [
+            {
+                "name": "הפקולטה להרצל",
+                "description": "הפקולטה למדעי הרוח ע\"ש לסטר וסאלי אנטין",
+                "departments": [
+                    {
+                        "name": "בית הספר למדעי היהדות וארכאולוגיה ע\"ש חיים רוזנברג",
+                        "description": "חקר התרבות, ההיסטוריה והמורשת היהודית",
+                        "pageUrl": "https://humanities.tau.ac.il/rosenberg",
+                        "programs": [
+                            "ארכאולוגיה ותרבויות המזרח הקדום",
+                            "היסטוריה של עם ישראל",
+                            "לשון עברית ובלשנות שמית",
+                            "מקרא",
+                            "פילוסופיה יהודית ותלמוד"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר לפילוסופיה, בלשנות ולימודי מדע",
+                        "description": "חשיבה ביקורתית, לוגיקה וחקר השפה",
+                        "pageUrl": "https://humanities.tau.ac.il/philosophy",
+                        "programs": [
+                            "פילוסופיה",
+                            "בלשנות",
+                            "לימודי מדע (היסטוריה ופילוסופיה של המדעים והרעיונות)",
+                            "לימודי דתות",
+                            "לימודים קוגניטיביים של השפה ושימושיה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר להיסטוריה",
+                        "description": "חקר ההיסטוריה הכללית מהעת העתיקה ועד ימינו",
+                        "pageUrl": "https://humanities.tau.ac.il/history_school",
+                        "programs": [
+                            "היסטוריה כללית",
+                            "לימודים קלאסיים",
+                            "לימודי מזרח אסיה",
+                            "לימודי אפריקה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר למדעי התרבות",
+                        "description": "חקר התרבות, הספרות והשפה",
+                        "pageUrl": "https://humanities.tau.ac.il/culture",
+                        "programs": [
+                            "ספרות",
+                            "אנגלית וספרות אמריקנית",
+                            "תרבות צרפת",
+                            "לימודי נשים ומגדר",
+                            "ערבית ואסלאם"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החברה ע\"ש גרשון גורדון",
+                "description": "חקר החברה, הפוליטיקה והכלכלה",
+                "departments": [
+                    {
+                        "name": "בית הספר לכלכלה ע\"ש איתן ברגלס",
+                        "description": "לימודי כלכלה",
+                        "pageUrl": "https://econ.tau.ac.il",
+                        "programs": [
+                            "כלכלה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר למדעי המדינה, ממשל ויחסים בינלאומיים",
+                        "description": "חקר הפוליטיקה והיחסים הבינלאומיים",
+                        "pageUrl": "https://social-sciences.tau.ac.il/political-science",
+                        "programs": [
+                            "מדע המדינה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר למדעי הפסיכולוגיה",
+                        "description": "חקר הנפש וההתנהגות",
+                        "pageUrl": "https://social-sciences.tau.ac.il/psychology",
+                        "programs": [
+                            "פסיכולוגיה",
+                            "מדעי המוח (פסיכו-ביולוגיה)"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר ללימודי חברה ומדיניות",
+                        "description": "סוציולוגיה, תקשורת ולימודי עבודה",
+                        "pageUrl": "https://social-sciences.tau.ac.il/aguda",
+                        "programs": [
+                            "סוציולוגיה ואנתרופולוגיה",
+                            "תקשורת",
+                            "לימודי עבודה"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסה ע\"ש איבי ואלדר פליישמן",
+                "description": "מובילה במחקר ופיתוח טכנולוגי",
+                "departments": [
+                    {
+                        "name": "בית הספר להנדסת חשמל",
+                        "description": "הנדסת חשמל ומחשבים",
+                        "pageUrl": "https://engineering.tau.ac.il/electrical",
+                        "programs": [
+                            "הנדסת חשמל",
+                            "הנדסת חשמל ופיזיקה",
+                            "הנדסת מחשבים"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר להנדסה מכנית",
+                        "description": "הנדסת מכונות ומערכות",
+                        "pageUrl": "https://engineering.tau.ac.il/mechanical",
+                        "programs": [
+                            "הנדסה מכנית"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה להנדסת תעשייה וניהול",
+                        "description": "אופטימיזציה וניהול מערכות",
+                        "pageUrl": "https://engineering.tau.ac.il/industrial",
+                        "programs": [
+                            "הנדסת תעשייה וניהול"
+                        ]
+                    },
+                    {
+                        "name": "המחלקה להנדסה ביו-רפואית",
+                        "description": "טכנולוגיה בשירות הרפואה",
+                        "pageUrl": "https://engineering.tau.ac.il/biomedical",
+                        "programs": [
+                            "הנדסה ביו-רפואית"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעים מדויקים ע\"ש ריימונד ובברלי סאקלר",
+                "description": "חקר המתמטיקה, מדעי המחשב והטבע",
+                "departments": [
+                    {
+                        "name": "בית הספר למדעי המחשב ע\"ש בלווטניק",
+                        "description": "מדעי המחשב וחישוב",
+                        "pageUrl": "https://cs.tau.ac.il",
+                        "programs": [
+                            "מדעי המחשב",
+                            "ביואינפורמטיקה",
+                            "מדעי המחשב ומתמטיקה",
+                            "מדעי המחשב ופיזיקה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר למדעי המתמטיקה",
+                        "description": "מתמטיקה עיונית ושימושית",
+                        "pageUrl": "https://en-exact-sciences.tau.ac.il/math",
+                        "programs": [
+                            "מתמטיקה",
+                            "סטטיסטיקה וחקר ביצועים"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר לפיזיקה ואסטרונומיה",
+                        "description": "חקר היקום והחומר",
+                        "pageUrl": "https://en-exact-sciences.tau.ac.il/physics",
+                        "programs": [
+                            "פיזיקה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר לכימיה",
+                        "description": "חקר החומרים",
+                        "pageUrl": "https://en-exact-sciences.tau.ac.il/chemistry",
+                        "programs": [
+                            "כימיה"
+                        ]
+                    },
+                    {
+                        "name": "החוג לגיאופיזיקה",
+                        "description": "מדעי כדור הארץ",
+                        "pageUrl": "https://en-exact-sciences.tau.ac.il/geophysics",
+                        "programs": [
+                            "מדעי כדור הארץ"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החיים ע\"ש ג'ורג' ס. וייז",
+                "description": "חקר הביולוגיה",
+                "departments": [
+                    {
+                        "name": "בית הספר למדעי הצמח ואבטחת מזון",
+                        "description": "בוטניקה וחקלאות",
+                        "pageUrl": "https://lifesci.tau.ac.il/plant_sciences",
+                        "programs": [
+                            "מדעי הצמח"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר לזואולוגיה",
+                        "description": "חקר בעלי החיים",
+                        "pageUrl": "https://lifesci.tau.ac.il/zoology",
+                        "programs": [
+                            "מדעי החיים (ביולוגיה)",
+                            "אקולוגיה ואבולוציה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר לנוירוביולוגיה, ביוכימיה וביופיזיקה",
+                        "description": "חקר המוח והתא",
+                        "pageUrl": "https://lifesci.tau.ac.il/neuro-biochem-biophys",
+                        "programs": [
+                            "ביוטכנולוגיה",
+                            "ביולוגיה מולקולרית"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה לרפואה ע\"ש סאקלר",
+                "description": "הכשרת רופאים ומחקר רפואי",
+                "departments": [
+                    {
+                        "name": "בית הספר לרפואה",
+                        "description": "לימודי רפואה",
+                        "pageUrl": "https://med.tau.ac.il",
+                        "programs": [
+                            "רפואה (MD)"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר למקצועות הבריאות",
+                        "description": "מקצועות פרה-רפואיים",
+                        "pageUrl": "https://med.tau.ac.il/health-professions",
+                        "programs": [
+                            "סיעוד",
+                            "ריפוי בעיסוק",
+                            "פיזיותרפיה",
+                            "הפרעות בתקשורת"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר לרפואת שיניים",
+                        "description": "רפואת פה ולסת",
+                        "pageUrl": "https://dentistry.tau.ac.il",
+                        "programs": [
+                            "רפואת שיניים"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למשפטים ע\"ש בוכמן",
+                "description": "לימודי משפט",
+                "departments": [
+                    {
+                        "name": "בית הספר למשפטים",
+                        "description": "משפטים",
+                        "pageUrl": "https://law.tau.ac.il",
+                        "programs": [
+                            "משפטים"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה לאמנויות ע\"ש יולנדה ודוד כץ",
+                "description": "אמנות ויצירה",
+                "departments": [
+                    {
+                        "name": "בית הספר לקולנוע וטלוויזיה ע\"ש סטיב טיש",
+                        "description": "קולנוע ומדיה",
+                        "pageUrl": "https://arts.tau.ac.il/film-tv",
+                        "programs": [
+                            "קולנוע וטלוויזיה"
+                        ]
+                    },
+                    {
+                        "name": "בית הספר למוזיקה ע\"ש בוכמן-מהטה",
+                        "description": "מוזיקה קלאסית וביצוע",
+                        "pageUrl": "https://arts.tau.ac.il/music",
+                        "programs": [
+                            "מוזיקה"
+                        ]
+                    },
+                    {
+                        "name": "החוג לתולדות האמנות",
+                        "description": "היסטוריה של האמנות",
+                        "pageUrl": "https://arts.tau.ac.il/art-history",
+                        "programs": [
+                            "תולדות האמנות",
+                            "אמנות התיאטרון"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה לניהול ע\"ש קולר",
+                "description": "מנהל עסקים וניהול",
+                "departments": [
+                    {
+                        "name": "בית הספר לניהול",
+                        "description": "ניהול ומנהל עסקים",
+                        "pageUrl": "https://coller.tau.ac.il",
+                        "programs": [
+                            "ניהול",
+                            "חשבונאות",
+                            "ניהול טכנולוגיה"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

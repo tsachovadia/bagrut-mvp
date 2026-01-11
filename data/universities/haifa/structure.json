@@ -1,0 +1,144 @@
+{
+    "university": {
+        "name": "אוניברסיטת חיפה",
+        "shortName": "Haifa",
+        "website": "https://www.haifa.ac.il/",
+        "faculties": [
+            {
+                "name": "הפקולטה למדעי הרוח",
+                "description": "היסטוריה, ספרות, שפות, אמנות וארכיאולוגיה.",
+                "pageUrl": "https://hums.haifa.ac.il/",
+                "departments": [
+                    {
+                        "name": "היסטוריה",
+                        "description": "היסטוריה כללית והיסטוריה של עם ישראל.",
+                        "pageUrl": "https://history.haifa.ac.il/",
+                        "programs": [
+                            "היסטוריה כללית",
+                            "היסטוריה של עם ישראל"
+                        ]
+                    },
+                    {
+                        "name": "ספרות עברית והשוואתית",
+                        "description": "ספרות עברית וספרות עולם.",
+                        "pageUrl": "https://hw.haifa.ac.il/he/dept/hebrewlit",
+                        "programs": [
+                            "ספרות עברית והשוואתית"
+                        ]
+                    },
+                    {
+                        "name": "אסיה",
+                        "description": "לימודי אסיה - סין, יפן הודו.",
+                        "pageUrl": "https://asia.haifa.ac.il/",
+                        "programs": [
+                            "לימודי אסיה"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החברה",
+                "description": "מדע המדינה, סוציולוגיה, פסיכולוגיה ותקשורת.",
+                "pageUrl": "https://soc.haifa.ac.il/",
+                "departments": [
+                    {
+                        "name": "פסיכולוגיה",
+                        "description": "פסיכולוגיה ומדעי המוח.",
+                        "pageUrl": "https://psychology.haifa.ac.il/",
+                        "programs": [
+                            "פסיכולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "סוציולוגיה ואנתרופולוגיה",
+                        "description": "חקר החברה והתרבות.",
+                        "pageUrl": "https://soc-ant.haifa.ac.il/",
+                        "programs": [
+                            "סוציולוגיה ואנתרופולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "מדע המדינה",
+                        "description": "ממשל, פוליטיקה ויחסים בינלאומיים.",
+                        "pageUrl": "https://poli-sci.haifa.ac.il/",
+                        "programs": [
+                            "מדע המדינה"
+                        ]
+                    },
+                    {
+                        "name": "תקשורת",
+                        "description": "חקר התקשורת והמדיה.",
+                        "pageUrl": "https://com.haifa.ac.il/",
+                        "programs": [
+                            "תקשורת"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למשפטים",
+                "description": "לימודי משפט ותוכניות ייחודיות.",
+                "pageUrl": "https://law.haifa.ac.il/",
+                "departments": [],
+                "programs": [
+                    "משפטים (LL.B)"
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הטבע",
+                "description": "מדעי המחשב, מתמטיקה, וביולוגיה ימית.",
+                "pageUrl": "https://sciences.haifa.ac.il/",
+                "departments": [
+                    {
+                        "name": "מדעי המחשב",
+                        "description": "מדעי המחשב ומערכות מידע.",
+                        "pageUrl": "https://cs.haifa.ac.il/",
+                        "programs": [
+                            "מדעי המחשב",
+                            "מערכות מידע"
+                        ]
+                    },
+                    {
+                        "name": "מתמטיקה",
+                        "description": "מתמטיקה עיונית ושימושית.",
+                        "pageUrl": "https://math.haifa.ac.il/",
+                        "programs": [
+                            "מתמטיקה"
+                        ]
+                    },
+                    {
+                        "name": "ביולוגיה ימית",
+                        "description": "חקר הים והסביבה הימית.",
+                        "pageUrl": "https://marsci.haifa.ac.il/",
+                        "programs": [
+                            "ביולוגיה ימית"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הרווחה והבריאות",
+                "description": "עבודה סוציאלית, סיעוד, ריפוי בעיסוק ופיזיותרפיה.",
+                "pageUrl": "https://hw.haifa.ac.il/",
+                "departments": [],
+                "programs": [
+                    "עבודה סוציאלית",
+                    "סיעוד",
+                    "ריפוי בעיסוק",
+                    "פיזיותרפיה",
+                    "הפרעות בתקשורת"
+                ]
+            },
+            {
+                "name": "הפקולטה לחינוך",
+                "description": "חינוך מיוחד, ייעוץ והוראה.",
+                "pageUrl": "https://edu.haifa.ac.il/",
+                "departments": [],
+                "programs": [
+                    "חינוך מיוחד",
+                    "ייעוץ והתפתחות האדם"
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "אוניברסיטת אריאל שבשומרון",
+    "raw_text": "אוניברסיטת אריאל שבשומרון אזור ירושלים מוסדות מתוקצבים מידע נוסף",
+    "id": "institution-15369",
+    "classes": "row result-row institution"
+  },
+  {
+    "name": "אוניברסיטת בן-גוריון בנגב",
+    "raw_text": "אוניברסיטת בן-גוריון בנגב אזור הדרום מוסדות מתוקצבים מידע נוסף",
+    "id": "institution-15326",
+    "classes": "row result-row institution"
+  },
+  {
+    "name": "אוניברסיטת בר-אילן",
+    "raw_text": "אוניברסיטת בר-אילן אזור תל אביב מוסדות מתוקצבים מידע נוסף",
+    "id": "institution-15327",
+    "classes": "row result-row institution"
+  },
+  {
+    "name": "אוניברסיטת חיפה",
+    "raw_text": "אוניברסיטת חיפה אזור חיפה מוסדות מתוקצבים מידע נוסף",
+    "id": "institution-15328",
+    "classes": "row result-row institution"
+  },
+  {
+    "name": "אוניברסיטת רייכמן",
+    "raw_text": "אוניברסיטת רייכמן אזור השרון מוסדות לא מתוקצבים מידע נוסף",
+    "id": "institution-15375",
+    "classes": "row result-row institution"
+  }
+]

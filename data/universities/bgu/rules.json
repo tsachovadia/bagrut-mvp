@@ -1,0 +1,42 @@
+{
+    "university": "אוניברסיטת בן-גוריון בנגב",
+    "admission_rules": {
+        "calculator_type": "bgu_general",
+        "sekem_formula": {
+            "approx_formula": "((OptimalAverage * 3.5) + Psychometric) / 2 + 50",
+            "description": "נוסחה משוערת. האוניברסיטה אינה מפרסמת את המקדמים המדויקים, אך זהו הקירוב המקובל."
+        },
+        "bonuses": {
+            "mathematics": {
+                "5_units": 35,
+                "4_units": 10
+            },
+            "english": {
+                "5_units": 25,
+                "4_units": 10
+            },
+            "scientific_subjects": {
+                "subjects": [
+                    "פיזיקה",
+                    "כימיה",
+                    "ביולוגיה",
+                    "מדעי המחשב",
+                    "הנדסת תוכנה"
+                ],
+                "5_units": 25,
+                "4_units": 10
+            },
+            "other_subjects": {
+                "5_units": 20,
+                "4_units": 10
+            },
+            "min_grade_for_bonus": 60
+        },
+        "program_requirements": {
+            "engineering": {
+                "physics_requirement": "חובה (או מכינה)",
+                "min_psychometric": "משתנה לפי מחלקה, לרוב סביב 600+"
+            }
+        }
+    }
+}

@@ -1,0 +1,93 @@
+{
+    "university": {
+        "name": "האוניברסיטה הפתוחה",
+        "shortName": "OpenU",
+        "website": "https://www.openu.ac.il/",
+        "faculties": [
+            {
+                "name": "המחלקה למתמטיקה ומדעי המחשב",
+                "description": "מדעי המחשב, מתמטיקה והנדסת תוכנה.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "מדעי המחשב",
+                    "מתמטיקה",
+                    "הנדסת תוכנה",
+                    "מערכות מידע"
+                ]
+            },
+            {
+                "name": "המחלקה למדעי הטבע",
+                "description": "פיזיקה, כימיה, ומדעי החיים.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "מדעי הטבע",
+                    "מדעי החיים",
+                    "פיזיקה",
+                    "כימיה"
+                ]
+            },
+            {
+                "name": "המחלקה לניהול וכלכלה",
+                "description": "ניהול, כלכלה וחשבונאות.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "ניהול",
+                    "כלכלה",
+                    "חשבונאות",
+                    "ניהול משאבי אנוש"
+                ]
+            },
+            {
+                "name": "המחלקה לסוציולוגיה, מדע המדינה ותקשורת",
+                "description": "מדעי החברה, תקשורת ויחסים בינלאומיים.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "סוציולוגיה",
+                    "מדע המדינה וממשל",
+                    "תקשורת",
+                    "יחסים בינלאומיים"
+                ]
+            },
+            {
+                "name": "המחלקה לחינוך ופסיכולוגיה",
+                "description": "חינוך, פסיכולוגיה ולקויות למידה.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "פסיכולוגיה",
+                    "חינוך",
+                    "לקויות למידה"
+                ]
+            },
+            {
+                "name": "המחלקה לספרות, לשון ואמנויות",
+                "description": "ספרות, לשון עברית, אמנויות, מוזיקה.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "ספרות",
+                    "לשון עברית",
+                    "תולדות האמנות",
+                    "מוזיקה",
+                    "קולנוע"
+                ]
+            },
+            {
+                "name": "המחלקה להיסטוריה, פילוסופיה ומדעי היהדות",
+                "description": "היסטוריה, פילוסופיה ומדעי הרוח.",
+                "pageUrl": "https://www.openu.ac.il/en/about/pages/academics.aspx",
+                "departments": [],
+                "programs": [
+                    "היסטוריה",
+                    "פילוסופיה",
+                    "מדעי היהדות",
+                    "לימודי מזרח תיכון"
+                ]
+            }
+        ]
+    }
+}

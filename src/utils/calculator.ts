@@ -6,6 +6,9 @@ export interface SubjectGrade {
     subject: string;
     units: number;
     grade: number;
+    semel?: string;
+    examDate?: string;
+    originalText?: string;
 }
 
 export interface UniversityConfig {

@@ -1,0 +1,45 @@
+{
+    "universityKey": "reichman",
+    "sekemAlgorithm": {
+        "formulaName": "Standard Weighted Score",
+        "description": "Weighted average of Bagrut and Psychometric (similar to public universities).",
+        "calculationType": "custom_linear",
+        "formula": "(bagrut_avg * 0.5) + (psychometric * 0.5)",
+        "variables": [
+            "bagrut_avg",
+            "psychometric"
+        ]
+    },
+    "bagrutBonuses": [
+        {
+            "subject": "Mathematics",
+            "minUnits": 5,
+            "bonusPoints": 30
+        },
+        {
+            "subject": "Mathematics",
+            "minUnits": 4,
+            "bonusPoints": 15
+        },
+        {
+            "subject": "English",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "English",
+            "minUnits": 4,
+            "bonusPoints": 10
+        },
+        {
+            "subject": "Computer Science",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Physics",
+            "minUnits": 5,
+            "bonusPoints": 20
+        }
+    ]
+}

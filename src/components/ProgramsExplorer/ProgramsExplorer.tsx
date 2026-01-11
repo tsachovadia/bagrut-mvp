@@ -1,46 +1,65 @@
-import { useState, useMemo } from 'react';
-import { Search, BookOpen, GraduationCap, Building2, CheckCircle2, ChevronDown, List, Grid, X } from 'lucide-react';
-import { Button, Input, Badge } from '../ui/shim';
-import { CompactProgramCard } from '../CompactProgramCard';
+import { useState, useMemo, useEffect } from 'react';
+import { useProgramFilters } from '../../hooks/useProgramFilters';
+import { Search, Filter, Building2 } from 'lucide-react';
+import { Button, Badge } from '../ui/shim';
+import { CompactProgramRow } from '../CompactProgramRow';
+import { ProgramSummaryPanel } from '../ProgramSummaryPanel';
 import { useNavigate } from 'react-router-dom';
-import { ALL_PROGRAMS } from '../../data/programs';
+import { admissionEngine } from '../../services/admission-engine';
+import { ProgramFilterPanel } from '../ProgramFilterPanel';
+import { TrackedDegreesWidget } from '../TrackedDegreesWidget';
 import type { UserAdmissionStats } from '../../utils/admission-evaluation';
 
 interface ProgramsExplorerProps {
     userStats: UserAdmissionStats;
+    trackedDegrees: any[];
 }
 
-export const ProgramsExplorer = ({ userStats }: ProgramsExplorerProps) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedInst, setSelectedInst] = useState<string[]>([]);
-    const [onlyReachable, setOnlyReachable] = useState(false);
+export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorerProps) => {
+    const [selectedFields, setSelectedFields] = useState<string[]>([]);
+    const [selectedInstIds, setSelectedInstIds] = useState<string[]>([]);
+    const [programs, setPrograms] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showFilters, setShowFilters] = useState(true);
+    const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    // Use Shared Data
-    const items = ALL_PROGRAMS;
+    useEffect(() => {
+        const fetchPrograms = async () => {
+            try {
+                const data = await admissionEngine.getAllProgramsFull();
+                const mapped = data.map(p => admissionEngine.mapProgramToUI(p));
+                setPrograms(mapped);
+            } catch (e) {
+                console.error("Failed to load programs", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPrograms();
+    }, []);
 
-    const institutions = useMemo(() => {
-        const insts = new Set(items.map(i => i.program.institution?.name).filter(Boolean));
-        return Array.from(insts) as string[];
-    }, [items]);
+    // Filter Logic (Consolidated via Hook)
+    const filteredPrograms = useProgramFilters(programs, {
+        fields: selectedFields,
+        institutionIds: selectedInstIds,
+        isUndecided: false, // Explorer always filters explicitly
+        searchQuery: ''
+    }, {
+        getField: (item: any) => item.program.name,
+        getInstitutionId: (item: any) => item.program.institution?.id,
+        getInstitutionName: (item: any) => item.program.institution?.name
+    });
 
-    const filteredPrograms = useMemo(() => {
-        return items.filter(({ program }) => {
-            const matchesSearch = program.name.includes(searchTerm) ||
-                program.institution?.name.includes(searchTerm) ||
-                program.description?.includes(searchTerm);
-            const matchesInst = selectedInst.length === 0 || selectedInst.includes(program.institution?.name || '');
-
-            // Note: Reachability check requires logic evaluation which is complex to do here without evaluating rules.
-            // For MVP: We skip actual 'reachable' logic filter here or implement simple check if needed.
-            // Keeping it simple for now (filter UI is there but logic requires 'checkReachable' utility).
-
-            return matchesSearch && matchesInst;
-        });
-    }, [searchTerm, selectedInst, items]);
+    // Auto-select first program on load/filter change if none selected
+    useEffect(() => {
+        if (!selectedProgramId && filteredPrograms.length > 0) {
+            setSelectedProgramId(filteredPrograms[0].program.id);
+        }
+    }, [filteredPrograms, selectedProgramId]);
 
     const groupedPrograms = useMemo(() => {
-        const groups: Record<string, typeof items> = {};
+        const groups: Record<string, typeof programs> = {};
         filteredPrograms.forEach(item => {
             const instName = item.program.institution?.name || 'אחר';
             if (!groups[instName]) groups[instName] = [];
@@ -49,95 +68,133 @@ export const ProgramsExplorer = ({ userStats }: ProgramsExplorerProps) => {
         return groups;
     }, [filteredPrograms]);
 
+    const selectedProgramData = useMemo(() => {
+        return programs.find(p => p.program.id === selectedProgramId);
+    }, [programs, selectedProgramId]);
 
-    const toggleInst = (inst: string) => {
-        setSelectedInst(prev =>
-            prev.includes(inst) ? prev.filter(i => i !== inst) : [...prev, inst]
-        );
+    const handleFilterUpdate = (fields: string[], instIds: string[]) => {
+        setSelectedFields(fields);
+        setSelectedInstIds(instIds);
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full relative min-h-screen pb-20">
+        <div className="w-full relative min-h-screen pb-20 bg-gray-50">
             {/* Header / Filters Section */}
-            <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm transition-all duration-300">
-                <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
-                    {/* Search & Main Controls */}
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                        <div className="relative w-full md:w-96 group">
-                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors" />
-                            <Input
-                                placeholder="חפש תואר, מוסד או תחום..."
-                                className="pr-10 h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 rounded-2xl transition-all"
-                                value={searchTerm}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+            <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-4 py-3">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-xl font-bold text-gray-800">סייר התוכניות</h1>
+                            <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors">
+                                {filteredPrograms.length} תוצאות
+                            </Badge>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex items-center gap-2 h-9 text-xs"
+                        >
+                            <Filter size={14} />
+                            {showFilters ? 'הסתר מסננים' : 'סינון מתקדם'}
+                        </Button>
+                    </div>
+
+                    {showFilters && (
+                        <div className="animate-in fade-in slide-in-from-top-2 duration-200 pb-2">
+                            <ProgramFilterPanel
+                                selectedFields={selectedFields}
+                                selectedInstitutions={selectedInstIds}
+                                onUpdate={handleFilterUpdate}
+                                variant="explorer"
+                                className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/60"
+                                programs={programs}
                             />
                         </div>
+                    )}
 
-                        {/* Quick Toggles */}
-                        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar py-1">
-                            {/* Institution Filter Pills */}
-                            {institutions.map(inst => (
-                                <button
-                                    key={inst}
-                                    onClick={() => toggleInst(inst)}
-                                    className={`
-                                        whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all border
-                                        ${selectedInst.includes(inst)
-                                            ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                                        }
-                                    `}
-                                >
-                                    {inst}
-                                </button>
-                            ))}
+                    {/* Active Filters Summary (when collapsed) */}
+                    {!showFilters && (selectedFields.length > 0 || selectedInstIds.length > 0) && (
+                        <div className="flex gap-2 pb-1 overflow-x-auto text-xs">
+                            {selectedFields.map(f => <Badge key={f} variant="secondary" className="px-2 py-0.5">{f}</Badge>)}
+                            {selectedInstIds.length > 0 && <Badge variant="outline" className="px-2 py-0.5">{selectedInstIds.length} מוסדות</Badge>}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
-            {/* Results Grid */}
-            <main className="max-w-7xl mx-auto px-4 py-8">
-                <div className="space-y-12">
-                    {Object.entries(groupedPrograms).map(([instName, progs]) => (
-                        <section key={instName} className="scroll-mt-24">
-                            {/* Section Header */}
-                            <div className="flex items-center gap-3 mb-6 sticky top-[88px] z-20 bg-gray-50/95 backdrop-blur-sm py-3 border-b border-gray-200/50">
-                                <Building2 className="w-6 h-6 text-gray-400" />
-                                <h2 className="text-xl font-bold text-gray-800">{instName}</h2>
-                                <Badge variant="secondary" className="rounded-full bg-white border border-gray-200">
-                                    {progs.length} תוכניות
-                                </Badge>
-                            </div>
+            {/* Split Layout */}
+            <main className="max-w-7xl mx-auto px-4 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
-                            {/* Dense Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {progs.map(({ program, admission }) => (
-                                    <CompactProgramCard
-                                        key={program.id}
-                                        program={program}
-                                        admission={admission}
-                                        userStats={userStats}
-                                        onClick={() => navigate(`/program/${program.id}`)}
-                                    />
-                                ))}
-                            </div>
-                        </section>
-                    ))}
+                    {/* Right Panel (RTL): Results List - 6 Cols */}
+                    <div className="col-span-1 lg:col-span-6 space-y-8 order-2 lg:order-1">
+                        {Object.entries(groupedPrograms).map(([instName, progs]) => (
+                            <section key={instName} className="scroll-mt-32">
+                                {/* Section Header */}
+                                <div className="flex items-center gap-2 mb-3 sticky top-[138px] z-10 bg-gray-50/95 backdrop-blur-sm py-2">
+                                    <h2 className="text-sm font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
+                                        {instName} <span className="text-gray-300 mx-1">|</span> {progs.length}
+                                    </h2>
+                                </div>
 
-                    {filteredPrograms.length === 0 && (
-                        <div className="text-center py-32 opacity-60">
-                            <Search className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                            <p className="text-gray-500">לא נמצאו תוצאות לחיפוש זה</p>
-                            <Button
-                                variant="link"
-                                className="text-blue-600"
-                                onClick={() => { setSearchTerm(''); setSelectedInst([]); setOnlyReachable(false); }}
-                            >
-                                נקה סינונים
-                            </Button>
-                        </div>
-                    )}
+                                {/* Stacked List */}
+                                <div className="space-y-2">
+                                    {progs.map(({ program, admission }) => (
+                                        <CompactProgramRow
+                                            key={program.id}
+                                            program={program}
+                                            admission={admission}
+                                            userStats={userStats}
+                                            isSelected={selectedProgramId === program.id}
+                                            onClick={() => setSelectedProgramId(program.id)}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        ))}
+
+                        {filteredPrograms.length === 0 && (
+                            <div className="text-center py-20 opacity-60">
+                                <Search className="w-10 h-10 mx-auto mb-2 text-gray-400" />
+                                <p className="text-sm text-gray-500">לא נמצאו תוצאות לחיפוש זה</p>
+                                <Button
+                                    variant="link"
+                                    className="text-blue-600 text-sm"
+                                    onClick={() => handleFilterUpdate([], [])}
+                                >
+                                    נקה סינונים
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Middle Panel: Summary - 4 Cols */}
+                    <div className="hidden lg:block lg:col-span-4 sticky top-[140px] h-[calc(100vh-150px)] order-3 lg:order-2">
+                        <ProgramSummaryPanel
+                            program={selectedProgramData?.program || null}
+                            admission={selectedProgramData?.admission || null}
+                            userStats={userStats}
+                            className="h-full shadow-sm border-gray-200"
+                        />
+                    </div>
+
+                    {/* Left Panel (RTL): Tracked Degrees - 2 Cols */}
+                    <div className="hidden lg:block lg:col-span-2 sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar order-1 lg:order-3">
+                        <TrackedDegreesWidget
+                            trackedDegrees={trackedDegrees}
+                            className="shadow-sm border-gray-200"
+                            onRemove={(name) => console.log('Remove', name)}
+                        />
+                    </div>
                 </div>
             </main>
         </div>

@@ -1,0 +1,192 @@
+{
+    "university": {
+        "name": "אוניברסיטת בר אילן",
+        "shortName": "BIU",
+        "website": "https://www.biu.ac.il/",
+        "faculties": [
+            {
+                "name": "הפקולטה למדעי היהדות",
+                "description": "הפקולטה הגדולה מסוגה בעולם לחקר היהדות.",
+                "pageUrl": "https://jewish-faculty.biu.ac.il/",
+                "departments": [
+                    {
+                        "name": "תנ\"ך",
+                        "description": "לימודי תנ\"ך ופרשנות.",
+                        "pageUrl": "https://bible.biu.ac.il/",
+                        "programs": [
+                            "תנ\"ך"
+                        ]
+                    },
+                    {
+                        "name": "תולדות ישראל",
+                        "description": "היסטוריה של עם ישראל בעת העתיקה והחדשה.",
+                        "pageUrl": "https://jewish-history.biu.ac.il/",
+                        "programs": [
+                            "תולדות ישראל ויהדות זמננו"
+                        ]
+                    },
+                    {
+                        "name": "מחשבת ישראל",
+                        "description": "פילוסופיה יהודית, קבלה וחסידות.",
+                        "pageUrl": "https://jewish-thought.biu.ac.il/",
+                        "programs": [
+                            "מחשבת ישראל"
+                        ]
+                    },
+                    {
+                        "name": "ספרות עם ישראל",
+                        "description": "ספרות עברית, יידיש ולדינו.",
+                        "pageUrl": "https://hebrew-literature.biu.ac.il/",
+                        "programs": [
+                            "ספרות עם ישראל"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הרוח",
+                "description": "שפות, היסטוריה כללית, פילוסופיה, ומוזיקה.",
+                "pageUrl": "https://humanities.biu.ac.il/",
+                "departments": [
+                    {
+                        "name": "אנגלית",
+                        "description": "ספרות אנגלית ובלשנות.",
+                        "pageUrl": "https://english.biu.ac.il/",
+                        "programs": [
+                            "בלשנות אנגלית",
+                            "ספרות אנגלית"
+                        ]
+                    },
+                    {
+                        "name": "ערבית",
+                        "description": "שפה וספרות ערבית.",
+                        "pageUrl": "https://arabic.biu.ac.il/",
+                        "programs": [
+                            "ערבית"
+                        ]
+                    },
+                    {
+                        "name": "מוזיקה",
+                        "description": "מוזיקולוגיה, תרפיה במוזיקה וטכנולוגיה מוזיקלית.",
+                        "pageUrl": "https://music.biu.ac.il/",
+                        "programs": [
+                            "מוזיקה",
+                            "תרפיה במוזיקה"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החברה",
+                "description": "פסיכולוגיה, סוציולוגיה, מדעי המדינה וקרימינולוגיה.",
+                "pageUrl": "https://social-sciences.biu.ac.il/",
+                "departments": [
+                    {
+                        "name": "פסיכולוגיה",
+                        "description": "לימודי פסיכולוגיה ומדעי המוח.",
+                        "pageUrl": "https://psychology.biu.ac.il/",
+                        "programs": [
+                            "פסיכולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "מדע המדינה",
+                        "description": "ממשל ופוליטיקה.",
+                        "pageUrl": "https://politics.biu.ac.il/",
+                        "programs": [
+                            "מדע המדינה"
+                        ]
+                    },
+                    {
+                        "name": "קרימינולוגיה",
+                        "description": "חקר הפשיעה ואכיפת החוק.",
+                        "pageUrl": "https://crim.biu.ac.il/",
+                        "programs": [
+                            "קרימינולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "כלכלה",
+                        "description": "לימודי כלכלה ומנהל עסקים.",
+                        "pageUrl": "https://economia.biu.ac.il/",
+                        "programs": [
+                            "כלכלה",
+                            "כלכלה ומנהל עסקים"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה להנדסה",
+                "description": "הנדסת חשמל, מחשבים ותעשייה וניהול.",
+                "pageUrl": "https://engineering.biu.ac.il/",
+                "departments": [],
+                "programs": [
+                    "הנדסת חשמל",
+                    "הנדסת מחשבים",
+                    "הנדסת תעשייה ומערכות מידע"
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הטבע",
+                "description": "מדעי המחשב, מתמטיקה, פיזיקה וכימיה.",
+                "pageUrl": "https://exact-sciences.biu.ac.il/",
+                "departments": [
+                    {
+                        "name": "מדעי המחשב",
+                        "description": "פיתוח תוכנה, סייבר ובינה מלאכותית.",
+                        "pageUrl": "https://cs.biu.ac.il/",
+                        "programs": [
+                            "מדעי המחשב"
+                        ]
+                    },
+                    {
+                        "name": "מתמטיקה",
+                        "description": "מתמטיקה שימושית ועיונית.",
+                        "pageUrl": "https://math.biu.ac.il/",
+                        "programs": [
+                            "מתמטיקה"
+                        ]
+                    },
+                    {
+                        "name": "פיזיקה",
+                        "description": "פיזיקה וחישוב קוונטי.",
+                        "pageUrl": "https://physics.biu.ac.il/",
+                        "programs": [
+                            "פיזיקה"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החיים",
+                "description": "ביולוגיה, ביוטכנולוגיה ומדעי הטבע.",
+                "pageUrl": "https://life-sciences.biu.ac.il/",
+                "departments": [],
+                "programs": [
+                    "מדעי החיים",
+                    "ביוטכנולוגיה"
+                ]
+            },
+            {
+                "name": "הפקולטה למשפטים",
+                "description": "לימודי משפטים והכשרה משפטית.",
+                "pageUrl": "https://law.biu.ac.il/",
+                "departments": [],
+                "programs": [
+                    "משפטים (LL.B)"
+                ]
+            },
+            {
+                "name": "בית הספר לחינוך",
+                "description": "חינוך מיוחד, ייעוץ חינוכי ומנהיגות בחינוך.",
+                "pageUrl": "https://education.biu.ac.il/",
+                "departments": [],
+                "programs": [
+                    "חינוך מיוחד",
+                    "ייעוץ חינוכי"
+                ]
+            }
+        ]
+    }
+}

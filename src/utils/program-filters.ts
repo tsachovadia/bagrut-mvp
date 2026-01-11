@@ -5,12 +5,16 @@ export interface FilterOptions {
     institutions: { id: string; name: string; logo?: string }[];
 }
 
-export const getProgramFilterOptions = (): FilterOptions => {
-    const uniqueFields = Array.from(new Set(ALL_PROGRAMS.map(p => p.program.name))).sort();
+// Now accepts optional 'programs' to derive filters from live data
+export const getProgramFilterOptions = (programs?: any[]): FilterOptions => {
+    const sourceData = programs && programs.length > 0 ? programs : ALL_PROGRAMS;
+
+    // Extract Fields (using 'name' as proxy for now, ideally 'tags')
+    const uniqueFields = Array.from(new Set(sourceData.map(p => p.program.name))).sort();
 
     const uniqueInstitutionsMap = new Map<string, { id: string; name: string; logo?: string }>();
 
-    ALL_PROGRAMS.forEach(p => {
+    sourceData.forEach(p => {
         const inst = p.program.institution;
         if (inst && inst.id && !uniqueInstitutionsMap.has(inst.id)) {
             uniqueInstitutionsMap.set(inst.id, {

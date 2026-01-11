@@ -1,13 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { WizardProgress } from './WizardProgress';
 import { BagrutForm } from '../BagrutForm';
 import { PsychometricForm } from '../PsychometricForm';
 import { SmartPreferencesStep } from './SmartPreferencesStep';
-import { UniversityResultsTable } from '../UniversityResultsTable';
-
-import { ProgramShowcase } from '../ProgramShowcase';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/shim';
-import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { AverageDisplay } from '../AverageDisplay';
 import { SekemDisplay } from '../SekemDisplay';
 import { calculateOptimalAverage, type SubjectGrade, type PsychometricScores } from '../../utils/calculator';
@@ -27,7 +25,7 @@ const STEPS = [
     'ציוני בגרות',
     'פסיכומטרי',
     'העדפות',
-    'תוצאות',
+    'חישוב נתונים',
 ];
 
 export function WizardContainer({
@@ -43,6 +41,17 @@ export function WizardContainer({
 
     const [formKey, setFormKey] = useState(0);
     const [sector, setSector] = useState<any>('mamlachti'); // Lifted state
+    const navigate = useNavigate();
+
+    // Auto-redirect logic for the final step
+    useEffect(() => {
+        if (currentStep === 3) {
+            const timer = setTimeout(() => {
+                navigate('/dashboard');
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [currentStep, navigate]);
 
     // Calculate dynamic stats for the persistent banner
     const currentBagrutStats = useMemo(() => {
@@ -72,54 +81,7 @@ export function WizardContainer({
         return false;
     };
 
-    // Updated filter logic:
-    const getDisplayResults = (data = results) => {
-        // If undecided, we might want to show everything or a special "Discovery" mix. 
-        // For now, if undecided is TRUE, we return everything (Discovery Mode).
-        if (preferences.isUndecided) {
-            return data;
-        }
 
-        // If no preferences set at all, also return everything
-        if (preferences.fields.length === 0 && preferences.institutions.length === 0) {
-            return data;
-        }
-
-        // Filter Logic
-        return data.filter((item: any) => {
-            // Normalize Item Data - matching ALL_PROGRAMS structure { program: { name, institution... }, ... }
-            const degreeName = (item.program?.name || item.name || '').toString();
-            const institutionObj = item.program?.institution || item.institution;
-            const institutionName = (institutionObj?.name || '').toString();
-            const institutionId = institutionObj?.id || '';
-
-            // 1. Institution Match
-            // If institutions are selected, the item MUST match one of them.
-            // If NO institutions selected, we don't filter by institution (User is open to any).
-            let instMatch = true;
-            if (preferences.institutions.length > 0) {
-                instMatch = preferences.institutions.some(prefId => {
-                    // Try strict ID match first
-                    if (institutionId && institutionId === prefId) return true;
-                    // Fallback to name match
-                    return institutionName.includes(prefId.replace('inst_', ''));
-                });
-            }
-
-            // 2. Field Match (Dilemma)
-            // If fields are selected, the item MUST match one of them.
-            // If NO fields selected, we don't filter by field (User is open to any).
-            let fieldMatch = true;
-            if (preferences.fields.length > 0) {
-                // Check if program name includes any of the selected fields (keywords)
-                fieldMatch = preferences.fields.some(field =>
-                    degreeName.includes(field) || degreeName.includes(field.replace('הנדסת', '')) // Simple normalization
-                );
-            }
-
-            return instMatch && fieldMatch;
-        });
-    };
 
 
 
@@ -237,24 +199,22 @@ export function WizardContainer({
                         )}
 
                         {currentStep === 3 && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-
-
-                                <div className="text-center mb-6 mt-8">
-                                    <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center gap-2">
-                                        <CheckCircle className="w-6 h-6 text-green-500" />
-                                        תוצאות הקבלה שלך
-                                    </h2>
-                                    <p className="text-slate-500 mt-1">חישוב משוקלל של ממוצעי הבגרות והפסיכומטרי שלך</p>
+                            <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex flex-col items-center justify-center min-h-[400px] text-center">
+                                <div className="w-24 h-24 mb-6 relative">
+                                    <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20"></div>
+                                    <div className="relative bg-white rounded-full p-6 shadow-xl border border-blue-100">
+                                        <div className="w-full h-full border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-2xl animate-bounce">🤖</span>
+                                    </div>
                                 </div>
-                                <UniversityResultsTable
-                                    averages={getDisplayResults(results)}
-                                    originalAverages={null}
-                                />
-
-                                <div className="mt-12 border-t pt-8">
-                                    <ProgramShowcase />
-                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                                    הרובוטים שלנו בודקים בכל האוניברסיטאות...
+                                </h2>
+                                <p className="text-slate-500 max-w-sm mx-auto animate-pulse">
+                                    מחשבים סיכויי קבלה למאות מסלולי לימוד על סמך הנתונים שלך
+                                </p>
                             </div>
                         )}
                     </div>

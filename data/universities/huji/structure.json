@@ -1,0 +1,176 @@
+{
+    "university": {
+        "name": "האוניברסיטה העברית בירושלים",
+        "shortName": "HUJI",
+        "website": "https://new.huji.ac.il/",
+        "faculties": [
+            {
+                "name": "הפקולטה למדעי הרוח",
+                "description": "מדעי הרוח, היסטוריה, פילוסופיה, ספרות ושפות.",
+                "departments": [
+                    {
+                        "name": "לימודי אסיה",
+                        "description": "לימודי מזרח אסיה, סין, יפן, הודו וקוריאה.",
+                        "pageUrl": "https://asia.huji.ac.il/",
+                        "programs": [
+                            "לימודי אסיה (דו-חוגי)",
+                            "לימודי יפן",
+                            "לימודי סין"
+                        ]
+                    },
+                    {
+                        "name": "היסטוריה",
+                        "description": "היסטוריה כללית, היסטוריה של עם ישראל.",
+                        "pageUrl": "https://history.huji.ac.il/",
+                        "programs": [
+                            "היסטוריה",
+                            "היסטוריה של עם ישראל"
+                        ]
+                    },
+                    {
+                        "name": "פילוסופיה",
+                        "description": "פילוסופיה כללית, מחשבת ישראל.",
+                        "pageUrl": "https://philosophie.huji.ac.il/",
+                        "programs": [
+                            "פילוסופיה",
+                            "מחשבת ישראל"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי החברה",
+                "description": "כלכלה, פסיכולוגיה, סוציולוגיה, מדע המדינה ויחסים בינלאומיים.",
+                "departments": [
+                    {
+                        "name": "כלכלה",
+                        "description": "לימודי כלכלה עיונית ויישומית.",
+                        "pageUrl": "https://economics.huji.ac.il/",
+                        "programs": [
+                            "כלכלה",
+                            "כלכלה וחשבונאות"
+                        ]
+                    },
+                    {
+                        "name": "פסיכולוגיה",
+                        "description": "חקר ההתנהגות והנפש.",
+                        "pageUrl": "https://psychology.huji.ac.il/",
+                        "programs": [
+                            "פסיכולוגיה"
+                        ]
+                    },
+                    {
+                        "name": "מדע המדינה",
+                        "description": "פוליטיקה, ממשל ויחסים בינלאומיים.",
+                        "pageUrl": "https://politics.huji.ac.il/",
+                        "programs": [
+                            "מדע המדינה",
+                            "יחסים בינלאומיים"
+                        ]
+                    },
+                    {
+                        "name": "תקשורת ועיתונאות",
+                        "description": "חקר התקשורת, המדיה והעיתונות.",
+                        "pageUrl": "https://smart.huji.ac.il/",
+                        "programs": [
+                            "תקשורת ועיתונאות"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "בית הספר למנהל עסקים",
+                "description": "הכשרת מנהלים, יזמים ומומחים פיננסיים.",
+                "departments": [],
+                "pageUrl": "https://bschool.huji.ac.il/",
+                "programs": [
+                    "מנהל עסקים",
+                    "חשבונאות"
+                ]
+            },
+            {
+                "name": "הפקולטה למשפטים",
+                "description": "מהפקולטות המובילות בישראל למשפט.",
+                "departments": [],
+                "pageUrl": "https://law.huji.ac.il/",
+                "programs": [
+                    "משפטים (LL.B)",
+                    "משפטים וכלכלה (משולב)",
+                    "משפטים ומנהל עסקים (משולב)"
+                ]
+            },
+            {
+                "name": "הפקולטה למדעי הטבע",
+                "description": "מתמטיקה, מדעי המחשב, פיזיקה, כימיה וביולוגיה.",
+                "departments": [
+                    {
+                        "name": "מתמטיקה",
+                        "description": "מתמטיקה עיונית ושימושית.",
+                        "pageUrl": "https://math.huji.ac.il/",
+                        "programs": [
+                            "מתמטיקה"
+                        ]
+                    },
+                    {
+                        "name": "מדעי המחשב",
+                        "description": "ביה\"ס להנדסה ומדעי המחשב - פיתוח תוכנה, אלגוריתמים וחישוביות.",
+                        "pageUrl": "https://www.cs.huji.ac.il/",
+                        "programs": [
+                            "מדעי המחשב",
+                            "הנדסת מחשבים (עם פיזיקה/דגש חומרה)"
+                        ]
+                    },
+                    {
+                        "name": "פיזיקה",
+                        "description": "חקר היקום והחומר.",
+                        "pageUrl": "https://phys.huji.ac.il/",
+                        "programs": [
+                            "פיזיקה"
+                        ]
+                    },
+                    {
+                        "name": "מדעי החיים",
+                        "description": "ביולוגיה, אקולוגיה ומדעי הצמח.",
+                        "pageUrl": "https://nsl.huji.ac.il/",
+                        "programs": [
+                            "מדעי החיים (ביולוגיה)",
+                            "מדעי המוח (פסיכוביולוגיה)"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "הפקולטה לחקלאות, מזון וסביבה",
+                "description": "קמפוס רחובות - מדעי התזונה, החקלאות והווטרינריה.",
+                "departments": [],
+                "pageUrl": "https://agri.huji.ac.il/",
+                "programs": [
+                    "מדעי התזונה",
+                    "מדעי הצמח בחקלאות",
+                    "מדעי בעלי חיים"
+                ]
+            },
+            {
+                "name": "הפקולטה לרפואה",
+                "description": "רפואה, רוקחות, ריפוי בעיסוק וסיעוד.",
+                "departments": [],
+                "pageUrl": "https://medicine.huji.ac.il/",
+                "programs": [
+                    "רפואה (MD)",
+                    "רוקחות",
+                    "ריפוי בעיסוק",
+                    "סיעוד"
+                ]
+            },
+            {
+                "name": "בית הספר לעבודה סוציאלית",
+                "description": "הכשרה למקצועות הרווחה והטיפול הסוציאלי.",
+                "departments": [],
+                "pageUrl": "https://sw.huji.ac.il/",
+                "programs": [
+                    "עבודה סוציאלית"
+                ]
+            }
+        ]
+    }
+}

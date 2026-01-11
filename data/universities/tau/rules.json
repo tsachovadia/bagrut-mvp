@@ -1,0 +1,16 @@
+{
+    "university": "TAU",
+    "admission_rules": {
+        "calculator_type": "tau_sekem",
+        "sekem_formula": {
+            "approx_formula": "Sekem ≈ 0.5 * Bagrut (Final) + 0.5 * Psychometric (0-100 scale)",
+            "description": "At Tel Aviv University, the Sekem score is calculated by combining the weighted Bagrut average (after bonuses) and the Psychometric score. The weighting is typically 50/50 but can vary by faculty. The Psychometric score is normalized to a 0-100 scale (or university specific scale) before combination. Bonuses are given for 5-unit subjects: Math (25 pts), English (20 pts), Physics (20 pts), and others (20 pts)."
+        },
+        "bonuses": {
+            "math_5": 25,
+            "english_5": 20,
+            "physics_5": 20,
+            "other_5": 20
+        }
+    }
+}

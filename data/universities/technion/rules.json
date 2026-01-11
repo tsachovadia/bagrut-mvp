@@ -1,0 +1,46 @@
+{
+    "universityKey": "technion",
+    "sekemAlgorithm": {
+        "formulaName": "Technion Sekem",
+        "description": "Approximation of the Technion Sekem score calculation. Combines Bagrut optimal average and Psychometric score.",
+        "calculationType": "custom_linear",
+        "formula": "(bagrut_optimal * 0.75) + (psychometric * 0.5) - 37",
+        "variables": [
+            "bagrut_optimal",
+            "psychometric"
+        ],
+        "minPsychometric": 450
+    },
+    "bagrutBonuses": [
+        {
+            "subject": "Mathematics",
+            "minUnits": 5,
+            "bonusPoints": 30
+        },
+        {
+            "subject": "Physics",
+            "minUnits": 5,
+            "bonusPoints": 30
+        },
+        {
+            "subject": "English",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Computer Science",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Chemistry",
+            "minUnits": 5,
+            "bonusPoints": 20
+        },
+        {
+            "subject": "Biology",
+            "minUnits": 5,
+            "bonusPoints": 20
+        }
+    ]
+}

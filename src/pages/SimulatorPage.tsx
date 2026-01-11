@@ -7,6 +7,7 @@ import { loadUserData } from '../lib/userData';
 import { calculateAdmissionStats } from '../utils/calculation-bridge';
 import type { SubjectGrade, PsychometricScores } from '../utils/calculator';
 import { calculateBonus } from '../utils/bonuses';
+import { ResultsAuthGate } from '../components/ResultsAuthGate';
 
 export const SimulatorPage = () => {
     const navigate = useNavigate();
@@ -282,82 +283,84 @@ export const SimulatorPage = () => {
 
                     {/* Right Column - Results */}
                     <div className="lg:col-span-7 space-y-6">
-                        {/* Sechem Card */}
-                        <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+                        <ResultsAuthGate>
+                            {/* Sechem Card */}
+                            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
-                            <h3 className="text-blue-100 font-medium mb-2 relative z-10">סכם יעד משוער</h3>
-                            <div className="flex items-baseline gap-4 relative z-10">
-                                <span className="text-6xl font-bold tracking-tight">
-                                    {simulatedStats?.degrees[0]?.sechem[0]?.score?.toFixed(0) || 0}
-                                </span>
-                                {sechemDelta !== 0 && (
-                                    <span className={`text-xl font-medium ${sechemDelta > 0 ? 'text-green-300' : 'text-red-300'}`}>
-                                        {sechemDelta > 0 ? '+' : ''}{sechemDelta.toFixed(0)}
+                                <h3 className="text-blue-100 font-medium mb-2 relative z-10">סכם יעד משוער</h3>
+                                <div className="flex items-baseline gap-4 relative z-10">
+                                    <span className="text-6xl font-bold tracking-tight">
+                                        {simulatedStats?.degrees[0]?.sechem[0]?.score?.toFixed(0) || 0}
                                     </span>
-                                )}
+                                    {sechemDelta !== 0 && (
+                                        <span className={`text-xl font-medium ${sechemDelta > 0 ? 'text-green-300' : 'text-red-300'}`}>
+                                            {sechemDelta > 0 ? '+' : ''}{sechemDelta.toFixed(0)}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="mt-8 grid grid-cols-2 gap-4 relative z-10">
+                                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                                        <div className="text-blue-100 text-sm mb-1">ממוצע בגרות</div>
+                                        <div className="text-2xl font-bold">{simulatedStats?.bagrutAverage?.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                                        <div className="text-blue-100 text-sm mb-1">פסיכומטרי</div>
+                                        <div className="text-2xl font-bold">{simulatedPsychometric.general}</div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="mt-8 grid grid-cols-2 gap-4 relative z-10">
-                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-                                    <div className="text-blue-100 text-sm mb-1">ממוצע בגרות</div>
-                                    <div className="text-2xl font-bold">{simulatedStats?.bagrutAverage?.toFixed(2)}</div>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-                                    <div className="text-blue-100 text-sm mb-1">פסיכומטרי</div>
-                                    <div className="text-2xl font-bold">{simulatedPsychometric.general}</div>
-                                </div>
-                            </div>
-                        </div>
+                            {/* Acceptance Impact */}
+                            {simulatedStats?.degrees && simulatedStats.degrees.length > 0 && (
+                                <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+                                    <h3 className="font-bold text-gray-900 mb-6">סיכויי קבלה</h3>
+                                    <div className="space-y-4">
+                                        {simulatedStats.degrees.slice(0, 5).map((degree: any, idx: number) => {
+                                            // Mock threshold logic for visual variety if needed, 
+                                            // but calculateAdmissionStats returns structured data.
+                                            // It seems calculateAdmissionStats simulates 1 degree per university?
+                                            // Looking at calculation-bridge.ts: it maps 'degrees' array.
+                                            // Let's rely on what's returned.
+                                            const originalDegree = originalStats?.degrees?.find((d: any) => d.university === degree.university);
+                                            const wasAccepted = originalDegree?.status === 'excellent';
+                                            const isAccepted = degree.status === 'excellent';
 
-                        {/* Acceptance Impact */}
-                        {simulatedStats?.degrees && simulatedStats.degrees.length > 0 && (
-                            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-                                <h3 className="font-bold text-gray-900 mb-6">סיכויי קבלה</h3>
-                                <div className="space-y-4">
-                                    {simulatedStats.degrees.slice(0, 5).map((degree: any, idx: number) => {
-                                        // Mock threshold logic for visual variety if needed, 
-                                        // but calculateAdmissionStats returns structured data.
-                                        // It seems calculateAdmissionStats simulates 1 degree per university?
-                                        // Looking at calculation-bridge.ts: it maps 'degrees' array.
-                                        // Let's rely on what's returned.
-                                        const originalDegree = originalStats?.degrees?.find((d: any) => d.university === degree.university);
-                                        const wasAccepted = originalDegree?.status === 'excellent';
-                                        const isAccepted = degree.status === 'excellent';
+                                            // Identify if status changed
+                                            const statusChanged = !wasAccepted && isAccepted;
 
-                                        // Identify if status changed
-                                        const statusChanged = !wasAccepted && isAccepted;
-
-                                        return (
-                                            <div key={idx} className={`flex items-center justify-between p-4 rounded-2xl border ${statusChanged ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100'}`}>
-                                                <div>
-                                                    <div className="font-bold text-gray-900">{degree.university}</div>
-                                                    <div className="text-sm text-gray-500">{degree.sechem[0]?.explanation}</div>
-                                                </div>
-                                                <div className="text-left">
-                                                    {statusChanged ? (
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                                            עברת את הסף! 🚀
-                                                        </span>
-                                                    ) : isAccepted ? (
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                                            קבלה בטוחה
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                                            לא עובר סף
-                                                        </span>
-                                                    )}
-                                                    <div className="text-xs text-gray-400 mt-1">
-                                                        סכם: {degree.sechem[0]?.score?.toFixed(0)}
+                                            return (
+                                                <div key={idx} className={`flex items-center justify-between p-4 rounded-2xl border ${statusChanged ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100'}`}>
+                                                    <div>
+                                                        <div className="font-bold text-gray-900">{degree.university}</div>
+                                                        <div className="text-sm text-gray-500">{degree.sechem[0]?.explanation}</div>
+                                                    </div>
+                                                    <div className="text-left">
+                                                        {statusChanged ? (
+                                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                                עברת את הסף! 🚀
+                                                            </span>
+                                                        ) : isAccepted ? (
+                                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                                קבלה בטוחה
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                                לא עובר סף
+                                                            </span>
+                                                        )}
+                                                        <div className="text-xs text-gray-400 mt-1">
+                                                            סכם: {degree.sechem[0]?.score?.toFixed(0)}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </ResultsAuthGate>
                     </div>
                 </div>
             </div>

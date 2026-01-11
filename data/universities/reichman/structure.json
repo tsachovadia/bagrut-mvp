@@ -1,0 +1,82 @@
+{
+    "university": {
+        "name": "אוניברסיטת רייכמן",
+        "shortName": "Reichman",
+        "website": "https://www.runi.ac.il/",
+        "faculties": [
+            {
+                "name": "בית הספר אריסון למנהל עסקים",
+                "description": "לימודי מנהל עסקים, יזמות ושיווק.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/business/",
+                "departments": [],
+                "programs": [
+                    "מנהל עסקים",
+                    "מנהל עסקים ויזמות",
+                    "מנהל עסקים ושיווק",
+                    "מנהל עסקים וכלכלה"
+                ]
+            },
+            {
+                "name": "בית הספר אפי ארזי למדעי המחשב",
+                "description": "מדעי המחשב וטכנולוגיה.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/cs/",
+                "departments": [],
+                "programs": [
+                    "מדעי המחשב",
+                    "מדעי המחשב ויזמות"
+                ]
+            },
+            {
+                "name": "בית הספר ברוך איבצ'ר לפסיכולוגיה",
+                "description": "לימודי פסיכולוגיה ומדעי המוח.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/psychology/",
+                "departments": [],
+                "programs": [
+                    "פסיכולוגיה"
+                ]
+            },
+            {
+                "name": "בית הספר לאודר לממשל, דיפלומטיה ואסטרטגיה",
+                "description": "ממשל, דיפלומטיה וביטחון.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/government/",
+                "departments": [],
+                "programs": [
+                    "ממשל",
+                    "דיפלומטיה ואסטרטגיה",
+                    "ממשל וקיימות"
+                ]
+            },
+            {
+                "name": "בית הספר הארי רדזינר למשפטים",
+                "description": "לימודי משפטים וממשל.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/law/",
+                "departments": [],
+                "programs": [
+                    "משפטים",
+                    "משפטים וממשל",
+                    "משפטים ומנהל עסקים"
+                ]
+            },
+            {
+                "name": "בית הספר סמי עופר לתקשורת",
+                "description": "תקשורת דיגיטלית, שיווקית ואינטראקטיבית.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/communications/",
+                "departments": [],
+                "programs": [
+                    "תקשורת",
+                    "תקשורת אינטראקטיבית"
+                ]
+            },
+            {
+                "name": "בית הספר אדלסון ליזמות",
+                "description": "יזמות וחדשנות עסקית.",
+                "pageUrl": "https://www.runi.ac.il/en/schools/entrepreneurship/",
+                "departments": [],
+                "programs": [
+                    "יזמות ומנהל עסקים",
+                    "יזמות ומדעי המחשב"
+                ]
+            }
+        ]
+    }
+}

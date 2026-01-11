@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import { HomePage } from './pages/HomePage';
 import { ProgramPage } from './pages/ProgramPage';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
+import { initializeGTM } from './utils/gtm';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
 import { loadUserData, saveUserData } from './lib/userData';
 import { TermsOfUse } from './components/TermsOfUse';
@@ -16,6 +17,11 @@ import { ProgramsDatabaseViewer } from './components/Debug/ProgramsDatabaseViewe
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { UnifiedDashboard } from './components/Dashboard/UnifiedDashboard';
+import { CRMPage } from './pages/Admin/CRMPage';
+import { SignalsPage } from './pages/Admin/SignalsPage';
+import { GroupsPage } from './pages/Admin/GroupsPage';
+import { PartnersPage } from './pages/Admin/PartnersPage';
+import { isProduction } from './utils/env';
 
 function App() {
   const navigate = useNavigate();
@@ -37,6 +43,9 @@ function App() {
   // Load initial data
   useEffect(() => {
     async function init() {
+      // Initialize GTM
+      initializeGTM();
+
       const data = await loadUserData();
       if (data) {
         if (data.bagrut) setBagrutGrades(data.bagrut);
@@ -110,7 +119,7 @@ function App() {
       <Route path="/programs" element={
         <div className="min-h-screen flex flex-col font-sans" dir="rtl">
           <Header />
-          <ProgramsExplorer userStats={userStats} />
+          <ProgramsExplorer userStats={userStats} trackedDegrees={results} />
           <Footer />
         </div>
       } />
@@ -123,6 +132,10 @@ function App() {
       } />
       <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
       <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
+      <Route path="/admin/shadow" element={!isProduction ? <CRMPage /> : <Navigate to="/" />} />
+      <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
+      <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
+      <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
     </Routes>
   );
 }

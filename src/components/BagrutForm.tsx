@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isProduction } from '../utils/env';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label } from './ui/shim';
 import { Plus, Trash2, GraduationCap, UploadCloud, FileText, ExternalLink, BookOpen, AlertCircle, RefreshCw, Sparkles, ChevronDown } from 'lucide-react';
 import { SECTOR_MANDATORY_SUBJECTS, SECTOR_NAMES, type Sector, getSubjectByName, ELECTIVE_SUBJECTS, type BagrutSubject } from '../utils/subjects';
@@ -13,7 +14,7 @@ import { AverageDisplay } from './AverageDisplay';
 interface BagrutFormProps {
     onDataUpdate: (grades: SubjectGrade[]) => void;
     initialData?: SubjectGrade[];
-    onAutoFill?: () => void;
+    fillSampleData?: () => void;
     variant?: 'default' | 'compact';
     sector: Sector;
     onSectorChange: (sector: Sector) => void;
@@ -21,7 +22,7 @@ interface BagrutFormProps {
 
 type InputMethod = 'manual' | 'upload' | 'link';
 
-export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'default', sector, onSectorChange }: BagrutFormProps) => {
+export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant = 'default', sector, onSectorChange }: BagrutFormProps) => {
     const [activeTab, setActiveTab] = useState<InputMethod>('manual');
     // const [sector, setSector] = useState<Sector>('mamlachti'); // Lifted
 
@@ -299,12 +300,13 @@ export const BagrutForm = ({ onDataUpdate, initialData, onAutoFill, variant = 'd
                         <GraduationCap className="h-7 w-7 text-blue-600" />
                         ציוני בגרות
                     </div>
-                    {onAutoFill && (
+                    {!isProduction && (
                         <Button
+                            type="button"
                             variant="outline"
                             size="sm"
-                            onClick={onAutoFill}
-                            className="text-blue-600 border-blue-200 hover:bg-blue-50 text-xs font-bold"
+                            onClick={fillSampleData}
+                            className="text-gray-500 hover:text-blue-600 border-dashed"
                         >
                             ✨ מלא נתונים לדוגמה
                         </Button>

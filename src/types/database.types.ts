@@ -97,7 +97,7 @@ export type Database = {
                     opened_at?: string | null
                     recipient_email?: string | null
                     resend_email_id?: string | null
-                    status?: string
+                    status: string
                     subject?: string | null
                     user_agent?: string | null
                 }
@@ -306,6 +306,7 @@ export type Database = {
                     is_direct_track: boolean
                     name: string
                     university_id: string | null
+                    website_url: string | null
                 }
                 Insert: {
                     created_at?: string | null
@@ -317,6 +318,7 @@ export type Database = {
                     is_direct_track: boolean
                     name: string
                     university_id?: string | null
+                    website_url?: string | null
                 }
                 Update: {
                     created_at?: string | null
@@ -328,6 +330,7 @@ export type Database = {
                     is_direct_track?: boolean
                     name?: string
                     university_id?: string | null
+                    website_url?: string | null
                 }
                 Relationships: [
                     {
@@ -373,6 +376,206 @@ export type Database = {
                     logo_url?: string | null
                     name?: string
                     website_url?: string | null
+                }
+                Relationships: []
+            }
+            user_profiles: {
+                Row: {
+                    age_range: string | null
+                    ai_summary: string | null
+                    app_advisor_chat: boolean | null
+                    app_calculator_uses: number | null
+                    app_last_active: string | null
+                    bagrut_avg_raw: number | null
+                    bagrut_grades: Json | null
+                    saved_simulations: Json | null
+                    bagrut_status: string | null
+                    big_trip_status: string | null
+                    budget_estimation: string | null
+                    campaign_id: string | null
+                    churn_risk: string | null
+                    conversion_prob: number | null
+                    created_at: string | null
+                    decision_factors: string[] | null
+                    device_type: string | null
+                    draft_date: string | null
+                    email_primary: string | null
+                    english_units: number | null
+                    first_name: string | null
+                    gender: string | null
+                    graduation_year: number | null
+                    high_school_name: string | null
+                    id: string
+                    institution_pref: string[] | null
+                    is_officer: boolean | null
+                    languages: string[] | null
+                    last_name: string | null
+                    lead_score: number | null
+                    lead_stage: string | null
+                    location_city: string | null
+                    major_subjects: string[] | null
+                    math_units: number | null
+                    military_status: string | null
+                    nickname: string | null
+                    origin_country: string | null
+                    parents_involved: boolean | null
+                    phone_primary: string | null
+                    phone_secondary: string | null
+                    post_army_status: string | null
+                    privacy_level: string | null
+                    psycho_date_last: string | null
+                    psycho_date_next: string | null
+                    psycho_score_eng: number | null
+                    psycho_score_quant: number | null
+                    psycho_score_total: number | null
+                    psycho_status: string | null
+                    release_date: string | null
+                    savings_goal: boolean | null
+                    scholarship_needed: boolean | null
+                    service_type: string | null
+                    shadow_id: string | null
+                    socio_eco_rank: number | null
+                    source: string | null
+                    start_semester: string | null
+                    start_year_target: string | null
+                    target_degree_1: string | null
+                    target_degree_2: string | null
+                    trip_destination: string | null
+                    unit_name: string | null
+                    updated_at: string | null
+                    wa_groups_common: number | null
+                    wa_has_custom_avatar: boolean | null
+                    wa_joined_via_link: boolean | null
+                }
+                Insert: {
+                    age_range?: string | null
+                    ai_summary?: string | null
+                    app_advisor_chat?: boolean | null
+                    app_calculator_uses?: number | null
+                    app_last_active?: string | null
+                    bagrut_avg_raw?: number | null
+                    bagrut_status?: string | null
+                    big_trip_status?: string | null
+                    budget_estimation?: string | null
+                    campaign_id?: string | null
+                    churn_risk?: string | null
+                    conversion_prob?: number | null
+                    created_at?: string | null
+                    decision_factors?: string[] | null
+                    device_type?: string | null
+                    draft_date?: string | null
+                    email_primary?: string | null
+                    english_units?: number | null
+                    first_name?: string | null
+                    gender?: string | null
+                    graduation_year?: number | null
+                    high_school_name?: string | null
+                    id?: string
+                    institution_pref?: string[] | null
+                    is_officer?: boolean | null
+                    languages?: string[] | null
+                    last_name?: string | null
+                    lead_score?: number | null
+                    lead_stage?: string | null
+                    location_city?: string | null
+                    major_subjects?: string[] | null
+                    math_units?: number | null
+                    military_status?: string | null
+                    nickname?: string | null
+                    origin_country?: string | null
+                    parents_involved?: boolean | null
+                    phone_primary?: string | null
+                    phone_secondary?: string | null
+                    post_army_status?: string | null
+                    privacy_level?: string | null
+                    psycho_date_last?: string | null
+                    psycho_date_next?: string | null
+                    psycho_score_eng?: number | null
+                    psycho_score_quant?: number | null
+                    psycho_score_total?: number | null
+                    psycho_status?: string | null
+                    release_date?: string | null
+                    savings_goal?: boolean | null
+                    scholarship_needed?: boolean | null
+                    service_type?: string | null
+                    shadow_id?: string | null
+                    socio_eco_rank?: number | null
+                    source?: string | null
+                    start_semester?: string | null
+                    start_year_target?: string | null
+                    target_degree_1?: string | null
+                    target_degree_2?: string | null
+                    trip_destination?: string | null
+                    unit_name?: string | null
+                    updated_at?: string | null
+                    wa_groups_common?: number | null
+                    wa_has_custom_avatar?: boolean | null
+                    wa_joined_via_link?: boolean | null
+                }
+                Update: {
+                    age_range?: string | null
+                    ai_summary?: string | null
+                    app_advisor_chat?: boolean | null
+                    app_calculator_uses?: number | null
+                    app_last_active?: string | null
+                    bagrut_avg_raw?: number | null
+                    bagrut_status?: string | null
+                    big_trip_status?: string | null
+                    budget_estimation?: string | null
+                    campaign_id?: string | null
+                    churn_risk?: string | null
+                    conversion_prob?: number | null
+                    created_at?: string | null
+                    decision_factors?: string[] | null
+                    device_type?: string | null
+                    draft_date?: string | null
+                    email_primary?: string | null
+                    english_units?: number | null
+                    first_name?: string | null
+                    gender?: string | null
+                    graduation_year?: number | null
+                    high_school_name?: string | null
+                    id?: string
+                    institution_pref?: string[] | null
+                    is_officer?: boolean | null
+                    languages?: string[] | null
+                    last_name?: string | null
+                    lead_score?: number | null
+                    lead_stage?: string | null
+                    location_city?: string | null
+                    major_subjects?: string[] | null
+                    math_units?: number | null
+                    military_status?: string | null
+                    nickname?: string | null
+                    origin_country?: string | null
+                    parents_involved?: boolean | null
+                    phone_primary?: string | null
+                    phone_secondary?: string | null
+                    post_army_status?: string | null
+                    privacy_level?: string | null
+                    psycho_date_last?: string | null
+                    psycho_date_next?: string | null
+                    psycho_score_eng?: number | null
+                    psycho_score_quant?: number | null
+                    psycho_score_total?: number | null
+                    psycho_status?: string | null
+                    release_date?: string | null
+                    savings_goal?: boolean | null
+                    scholarship_needed?: boolean | null
+                    service_type?: string | null
+                    shadow_id?: string | null
+                    socio_eco_rank?: number | null
+                    source?: string | null
+                    start_semester?: string | null
+                    start_year_target?: string | null
+                    target_degree_1?: string | null
+                    target_degree_2?: string | null
+                    trip_destination?: string | null
+                    unit_name?: string | null
+                    updated_at?: string | null
+                    wa_groups_common?: number | null
+                    wa_has_custom_avatar?: boolean | null
+                    wa_joined_via_link?: boolean | null
                 }
                 Relationships: []
             }
@@ -495,3 +698,12 @@ export type CompositeTypes<
     : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+    public: {
+        Enums: {
+            institution_type: ["university", "college"],
+            lead_status: ["new", "draft_generated", "sent", "replied"],
+        },
+    },
+} as const

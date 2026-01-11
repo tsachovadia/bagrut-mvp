@@ -136,6 +136,7 @@ export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore:
         return {
             name: p.program.name, // Added this field as it's used in TargetsPanel
             university: p.program.institution?.name || "לא ידוע",
+            institutionId: p.program.institution?.id, // Added for unified filtering
             average: optimal.average,
             description: `סף משוער: ${thresholdDisplay}`,
             calculation: "חישוב משוער",

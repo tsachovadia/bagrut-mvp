@@ -46,35 +46,39 @@ export const saveUserData = async (data: UserData) => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
                 // Check if we have existing record(s) for this user
-                // query returns array instead of .single() to avoid crashing on duplicates
-                const { data: existingRows } = await supabase
-                    .from('user_calculations')
+                const { data: existingProfile } = await supabase
+                    .from('user_profiles')
                     .select('id')
-                    .eq('user_id', session.user.id);
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
 
-                if (existingRows && existingRows.length > 0) {
-                    // Update the first found record
+                const dbPayload = {
+                    user_id: session.user.id,
+                    bagrut_grades: data.bagrut as any, // Cast to any for JSONB compatibility
+                    saved_simulations: data.savedSimulations as any, // Cast to any for JSONB compatibility
+                    // Map Psychometric
+                    psycho_score_total: data.psychometric.total,
+                    psycho_score_eng: data.psychometric.english,
+                    psycho_score_quant: data.psychometric.quantitative,
+                    // Map Preferences
+                    institution_pref: data.preferences.institutions,
+                    major_subjects: data.preferences.fields,
+                    updated_at: new Date().toISOString()
+                };
+
+                if (existingProfile) {
                     await supabase
-                        .from('user_calculations')
-                        .update({
-                            bagrut_data: data.bagrut,
-                            psychometric_data: data.psychometric,
-                            preferences: data.preferences,
-                            sector: data.sector,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', existingRows[0].id);
+                        .from('user_profiles')
+                        .update(dbPayload)
+                        .eq('id', existingProfile.id);
                 } else {
-                    // Insert new record
                     await supabase
-                        .from('user_calculations')
+                        .from('user_profiles')
                         .insert({
-                            user_id: session.user.id,
-                            bagrut_data: data.bagrut,
-                            psychometric_data: data.psychometric,
-                            preferences: data.preferences,
-                            sector: data.sector,
-                            saved_simulations: data.savedSimulations
+                            ...dbPayload,
+                            // Set defaults for new profile if needed
+                            email_primary: session.user.email,
+                            first_name: 'משתמש חדש' // Placeholder
                         });
                 }
             }
@@ -107,24 +111,40 @@ export const loadUserData = async (): Promise<UserData | null> => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
             const { data } = await supabase
-                .from('user_calculations')
+                .from('user_profiles')
                 .select('*')
                 .eq('user_id', session.user.id)
-                .single();
+                .maybeSingle();
 
             if (data) {
-                let prefs = data.preferences;
-                // Migration check
-                if (prefs && !Array.isArray(prefs.fields)) {
-                    prefs = { fields: [], institutions: [], isUndecided: false };
-                }
+                // Map from user_profiles back to UserData structure
+                // Use type assertion as JSONB is returned as generic Json
+                const bagrutData = (data.bagrut_grades as any) || [];
+                const savedSims = (data.saved_simulations as any) || [];
+
+                // Construct psychometric object
+                // Construct psychometric object
+                const psychometric = {
+                    general: data.psycho_score_total || 0, // General score is the main one
+                    total: data.psycho_score_total || 0,
+                    english: data.psycho_score_eng || 0,
+                    quantitative: data.psycho_score_quant || 0,
+                    verbal: 0 // Not stored in schema currently, default to 0
+                };
+
+                // Construct preferences
+                const preferences: UserPreferences = {
+                    fields: data.major_subjects || [],
+                    institutions: data.institution_pref || [],
+                    isUndecided: false // Default/Not persisted explicitly
+                };
 
                 return {
-                    bagrut: data.bagrut_data,
-                    psychometric: data.psychometric_data,
-                    preferences: prefs,
-                    sector: data.sector,
-                    savedSimulations: data.saved_simulations || []
+                    bagrut: bagrutData,
+                    psychometric: psychometric,
+                    preferences: preferences,
+                    sector: undefined, // Sector not in user_profiles explicitly (maybe via school?)
+                    savedSimulations: savedSims
                 };
             }
         }

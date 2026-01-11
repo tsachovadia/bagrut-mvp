@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Target, CheckCircle, XCircle, ChevronDown, Trophy, Medal, Search, Building2 } from 'lucide-react';
-import { Card } from '../ui/shim';
+import { useState, useMemo } from 'react';
+import { useProgramFilters } from '../../hooks/useProgramFilters';
+import { SmartPreferencesStep } from '../Wizard/SmartPreferencesStep';
+import { CheckCircle, XCircle, Search, Building2, SlidersHorizontal, ArrowRight, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, Layers, GraduationCap } from 'lucide-react';
 import { ALL_PROGRAMS } from '../../data/programs';
 
 interface Props {
@@ -9,291 +10,273 @@ interface Props {
     targetDegree: string | null;
     setTargetDegree: (degree: string) => void;
     allSimulationsStats: any[];
+    preferences?: { fields: string[]; institutions: string[]; isUndecided: boolean; };
+    onPreferencesUpdate?: (prefs: { fields: string[]; institutions: string[]; isUndecided: boolean }) => void;
 }
 
-const RadialWatch = ({
-    score,
-    threshold,
-    label,
-    size = 180,
-    active = false
-}: {
-    score: number,
-    threshold: number,
-    label: string,
-    size?: number,
-    active?: boolean
-}) => {
-    const radius = size / 2 - 10;
-    const circumference = 2 * Math.PI * radius;
-    const progress = Math.min((score / threshold), 1.5); // Allow over-achievement visual
-    const fillPercent = Math.min(progress, 1);
-    const offset = circumference - (fillPercent * circumference);
+export const TargetsPanel = ({ simulatedStats, targetDegree, setTargetDegree, preferences, onPreferencesUpdate }: Props) => {
 
-    const isPassed = score >= threshold;
-    const color = isPassed ? '#22c55e' : '#ef4444'; // Green or Red
-
-    return (
-        <div className="relative flex flex-col items-center justify-center p-4 transition-all duration-500">
-            <div className="relative" style={{ width: size, height: size }}>
-                {/* Background Track */}
-                <svg className="transform -rotate-90 w-full h-full">
-                    <circle
-                        cx={size / 2}
-                        cy={size / 2}
-                        r={radius}
-                        stroke="#f3f4f6"
-                        strokeWidth="12"
-                        fill="none"
-                    />
-                    {/* Progress Arc */}
-                    <circle
-                        cx={size / 2}
-                        cy={size / 2}
-                        r={radius}
-                        stroke={color}
-                        strokeWidth="12"
-                        fill="none"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={offset}
-                        strokeLinecap="round"
-                        className="transition-all duration-1000 ease-out"
-                    />
-                </svg>
-
-                {/* Inner Content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">ציון נוכחי</span>
-                    <span className={`text-4xl font-mono font-bold tracking-tighter ${isPassed ? 'text-gray-800' : 'text-gray-800'}`}>
-                        {score.toFixed(0)}
-                    </span>
-                    <div className="w-12 h-0.5 bg-gray-100 my-2" />
-                    <span className="text-xs font-medium text-gray-500">
-                        יעד: <span className="font-bold text-gray-900">{threshold}</span>
-                    </span>
-                </div>
-
-                {/* Status Icon Indicator */}
-                <div className={`absolute top-0 right-0 p-2 rounded-full shadow-lg ${isPassed ? 'bg-green-100 text-green-600' : 'bg-red-50 text-red-500'}`}>
-                    {isPassed ? <Trophy className="w-5 h-5" /> : <Target className="w-5 h-5" />}
-                </div>
-            </div>
-
-            <h3 className="mt-4 font-bold text-gray-900 text-center max-w-[200px] leading-tight">{label}</h3>
-        </div>
-    );
-};
-
-export const TargetsPanel = ({ simulatedStats, originalStats, targetDegree, setTargetDegree, allSimulationsStats = [] }: Props) => {
-    const [isSearching, setIsSearching] = useState(false);
+    // --- State ---
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [groupBy, setGroupBy] = useState<'university' | 'field'>('university');
+    const [isEditingPrefs, setIsEditingPrefs] = useState(false);
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Extract degrees
+    // --- Data Processing ---
     const degrees = simulatedStats?.degrees || [];
 
-    // Find selected or default to nothing (so user is forced to choose/search if not set)
-    const selectedDegree = targetDegree
-        ? degrees.find((d: any) => d.name === targetDegree)
-        : null;
+    // 1. Filter Logic (Consolidated via Hook)
+    const filteredDegrees = useProgramFilters(degrees, {
+        fields: preferences?.fields || [],
+        institutionIds: preferences?.institutions || [],
+        isUndecided: preferences?.isUndecided || false,
+        searchQuery
+    }, {
+        getField: (d: any) => d.name,
+        getInstitutionId: (d: any) => d.institutionId, // Added in calculation-bridge
+        getInstitutionName: (d: any) => d.university
+    });
 
-    // Helper to parse threshold
-    const getThreshold = (desc: string) => {
-        const match = desc.match(/\d+/);
-        return match ? parseInt(match[0]) : 700; // Default fallback
+    // 2. Grouping Logic
+    const groupedDegrees = useMemo(() => {
+        const groups: Record<string, any[]> = {};
+
+        filteredDegrees.forEach((d: any) => {
+            let key = '';
+            if (groupBy === 'university') {
+                key = d.university || 'אחר';
+            } else {
+                // Try to resolve generic field name or faculty
+                // For now, we use the degree name as the "Field" key since names are normalized (e.g. "מדעי המחשב")
+                key = d.name || 'אחר';
+            }
+
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(d);
+        });
+
+        return groups;
+    }, [filteredDegrees, groupBy]);
+
+    // Helper: Toggle Group
+    const toggleGroup = (group: string) => {
+        setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
     };
 
-    const filteredDegrees = degrees.filter((d: any) =>
-        (d?.name || '').includes(searchQuery) || (d?.university || '').includes(searchQuery)
-    );
+    // Helper: Parse Threshold
+    const getThreshold = (desc: string) => {
+        const match = desc.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+    };
 
-    const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+    // Helper: Determine Group Icon
+    const getGroupIcon = (groupName: string) => {
+        if (groupBy === 'university') {
+            // Try to find logo
+            const prog = ALL_PROGRAMS.find(p => p?.program?.institution?.name === groupName);
+            return prog?.program?.institution?.logo_url || null;
+        }
+        return null; // For fields, we might use generic icons later
+    };
 
-    return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm h-full flex flex-col relative overflow-hidden">
-            <div className="p-3 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                <h2 className="text-sm font-bold flex items-center gap-1.5 text-gray-800">
-                    <Medal className="w-4 h-4 text-amber-500" />
-                    {selectedDegree ? 'היעד שלי' : 'בחר יעד'}
-                </h2>
-                {selectedDegree && (
-                    <button
-                        onClick={() => { setIsSearching(true); setSearchQuery(''); }}
-                        className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-100 transition-colors"
-                    >
-                        שנה יעד
+    // --- Render ---
+
+    // 1. Edit Preferences Mode (Expanded Panel)
+    if (isEditingPrefs && preferences && onPreferencesUpdate) {
+        return (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm h-full flex flex-col w-full lg:w-[500px] transition-all duration-300 relative z-30">
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h2 className="font-bold text-gray-800">עריכת העדפות</h2>
+                    <button onClick={() => setIsEditingPrefs(false)} className="text-gray-500 hover:text-gray-700">
+                        <ArrowRight className="w-5 h-5" />
                     </button>
-                )}
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                    <SmartPreferencesStep
+                        preferences={preferences}
+                        onUpdate={onPreferencesUpdate}
+                    />
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            onClick={() => setIsEditingPrefs(false)}
+                            className="bg-indigo-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 transition-all"
+                        >
+                            שמור וסגור
+                        </button>
+                    </div>
+                </div>
             </div>
+        );
+    }
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-
-                {/* Search Overlay / Empty State */}
-                {(!selectedDegree || isSearching) && (
-                    <div className="absolute inset-0 z-20 bg-white flex flex-col">
-                        <div className="p-3 border-b border-gray-100">
-                            <div className="relative">
-                                <Search className="absolute right-3 top-2.5 w-4 h-4 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="חפש תואר או מוסד..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 pr-9 pl-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                    autoFocus
-                                />
-                                {isSearching && selectedDegree && (
-                                    <button
-                                        onClick={() => setIsSearching(false)}
-                                        className="absolute left-3 top-2.5 text-xs text-gray-400 hover:text-gray-600"
-                                    >
-                                        ביטול
-                                    </button>
-                                )}
-                            </div>
+    // 2. Sidebar Mode
+    return (
+        <div
+            className={`
+                bg-white border text-right shadow-sm flex flex-col transition-all duration-300 ease-in-out h-full rounded-2xl overflow-hidden
+                ${isExpanded ? 'w-80 border-gray-100' : 'w-16 border-transparent bg-transparent shadow-none'}
+            `}
+        >
+            {/* Header */}
+            <div className={`p-4 border-b border-gray-50 flex items-center bg-white ${isExpanded ? 'justify-between' : 'justify-center flex-col gap-4'}`}>
+                {isExpanded ? (
+                    <div className="flex items-center gap-2">
+                        <div className="bg-indigo-50 p-1.5 rounded-lg text-indigo-600">
+                            <Layers className="w-4 h-4" />
                         </div>
-                        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                            {filteredDegrees.map((deg: any, idx: number) => {
-                                const prog = ALL_PROGRAMS.find(p => p?.program?.institution?.name === deg.university);
-                                const logoUrl = prog?.program?.institution?.logo_url;
-                                const hasError = imageErrors[`search-${idx}`];
-
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={() => {
-                                            setTargetDegree(deg.name);
-                                            setIsSearching(false);
-                                        }}
-                                        className="w-full text-right p-3 rounded-lg hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all flex items-center justify-between group"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center overflow-hidden shrink-0">
-                                                {logoUrl && !hasError ? (
-                                                    <img
-                                                        src={logoUrl}
-                                                        alt={deg.university}
-                                                        className="w-full h-full object-contain p-1"
-                                                        onError={() => setImageErrors((prev: Record<string, boolean>) => ({ ...prev, [`search-${idx}`]: true }))}
-                                                    />
-                                                ) : (
-                                                    <Building2 className="w-4 h-4 text-gray-400" />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-gray-800 text-sm group-hover:text-blue-700">{deg.university}</div>
-                                                <div className="text-xs text-gray-500">{deg.name}</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-xs font-mono font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                                            {getThreshold(deg.description)}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                            {filteredDegrees.length === 0 && (
-                                <div className="text-center py-8 text-gray-400 text-xs">
-                                    לא נמצאו תוצאות ל"{searchQuery}"
-                                </div>
-                            )}
-                        </div>
+                        <span className="font-bold text-gray-800 text-sm">תארים במעקב</span>
+                    </div>
+                ) : (
+                    <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 mb-2" title="תארים במעקב">
+                        <Layers className="w-5 h-5 text-indigo-600" />
                     </div>
                 )}
 
-                {/* The Main Watch (Featured Target) */}
-                {selectedDegree && !isSearching && (
-                    <>
-                        <div className="bg-gradient-to-b from-white to-gray-50/30 border-b border-gray-100 pb-6 pt-2">
-                            <RadialWatch
-                                score={selectedDegree.sechem[0]?.score || 0}
-                                threshold={getThreshold(selectedDegree.description)}
-                                label={`${selectedDegree.university} - ${selectedDegree.name}`}
-                                size={200}
+                <div className="flex items-center gap-1">
+                    {/* Only show 'Edit' in expanded mode for now */}
+                    {isExpanded && (
+                        <button
+                            onClick={() => setIsEditingPrefs(true)}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                            title="ערוך העדפות"
+                        >
+                            <SlidersHorizontal className="w-4 h-4" />
+                        </button>
+                    )}
+
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className={`p-1.5 hover:bg-gray-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors ${!isExpanded && 'bg-white shadow-sm border border-gray-100'}`}
+                    >
+                        {isExpanded ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Content (Only Visible When Expanded) */}
+            {isExpanded && (
+                <>
+                    {/* Controls & Search */}
+                    <div className="p-3 bg-gray-50/30 space-y-3 border-b border-gray-50">
+                        {/* Search Input */}
+                        <div className="relative">
+                            <Search className="absolute right-3 top-2.5 w-3.5 h-3.5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="סינון מהיר..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white border border-gray-200 rounded-lg py-1.5 pr-8 pl-3 text-xs focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
                             />
+                        </div>
 
-                            {/* Saved Simulations Comparison */}
-                            {allSimulationsStats && allSimulationsStats.length > 0 && (
-                                <div className="mt-4 px-4">
-                                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                        <h4 className="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">השוואה לסימולציות שמורות</h4>
-                                        <div className="space-y-1.5">
-                                            {allSimulationsStats.map((sim, idx) => {
-                                                const simDegree = sim.stats.degrees.find((d: any) => d.name === selectedDegree.name && d.university === selectedDegree.university);
-                                                if (!simDegree) return null;
+                        {/* Group By Toggle */}
+                        <div className="flex p-0.5 bg-gray-100 rounded-lg">
+                            <button
+                                onClick={() => setGroupBy('university')}
+                                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold rounded-md transition-all ${groupBy === 'university' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <Building2 className="w-3 h-3" />
+                                לפי מוסד
+                            </button>
+                            <button
+                                onClick={() => setGroupBy('field')}
+                                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold rounded-md transition-all ${groupBy === 'field' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <GraduationCap className="w-3 h-3" />
+                                לפי תחום
+                            </button>
+                        </div>
+                    </div>
 
-                                                const score = simDegree.sechem[0]?.score || 0;
-                                                const threshold = getThreshold(simDegree.description);
+                    {/* Groups List */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-3">
+                        {Object.entries(groupedDegrees).map(([groupName, groupItems]) => {
+                            const isGroupExpanded = expandedGroups[groupName] ?? true; // Default expanded
+                            const logoUrl = getGroupIcon(groupName);
+
+                            return (
+                                <div key={groupName} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                                    {/* Group Header */}
+                                    <button
+                                        onClick={() => toggleGroup(groupName)}
+                                        className="w-full flex items-center justify-between p-3 bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2.5">
+                                            {logoUrl ? (
+                                                <div className="w-5 h-5 bg-white rounded-full border border-gray-100 p-0.5 flex items-center justify-center">
+                                                    <img src={logoUrl} alt={groupName} className="w-full h-full object-contain" />
+                                                </div>
+                                            ) : (
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                                            )}
+                                            <span className="text-xs font-bold text-gray-800">{groupName}</span>
+                                            <span className="text-[10px] text-gray-400 bg-white px-1.5 py-0.5 rounded-full border border-gray-100">
+                                                {groupItems.length}
+                                            </span>
+                                        </div>
+                                        {isGroupExpanded ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                                    </button>
+
+                                    {/* Items */}
+                                    {isGroupExpanded && (
+                                        <div className="divide-y divide-gray-50">
+                                            {groupItems.map((deg: any, idx: number) => {
+                                                const threshold = getThreshold(deg.description);
+                                                const score = deg.sechem[0]?.score || 0;
                                                 const isPassed = score >= threshold;
+                                                const isSelected = deg.name === targetDegree && (groupBy === 'field' ? deg.university : deg.name); // Simple match check
 
                                                 return (
-                                                    <div key={sim.id} className="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-gray-100">
-                                                        <span className="font-medium text-gray-700">{sim.name}</span>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="font-mono font-bold">{score.toFixed(0)}</span>
-                                                            <div className={`w-2 h-2 rounded-full ${isPassed ? 'bg-green-500' : 'bg-red-400'}`} />
+                                                    <button
+                                                        key={`${groupName}-${idx}`}
+                                                        onClick={() => setTargetDegree(deg.name)}
+                                                        className={`w-full text-right p-3 hover:bg-indigo-50/30 transition-all flex items-center justify-between group ${isSelected ? 'bg-indigo-50/50' : ''}`}
+                                                    >
+                                                        <div className="min-w-0 flex-1 ml-2">
+                                                            <div className="flex items-center gap-1.5 mb-0.5">
+                                                                <span className="text-xs font-medium text-gray-700 truncate block group-hover:text-indigo-700 transition-colors">
+                                                                    {groupBy === 'university' ? deg.name : deg.university}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                                                <span>צפי: <span className="font-mono font-bold text-gray-600">{threshold}</span></span>
+                                                                <span className="text-gray-300">|</span>
+                                                                <span>שלי: <span className={`font-mono font-bold ${isPassed ? 'text-green-600' : 'text-red-500'}`}>{score.toFixed(0)}</span></span>
+                                                            </div>
                                                         </div>
-                                                    </div>
+
+                                                        {/* Status Icon */}
+                                                        <div className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${isPassed ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'}`}>
+                                                            {isPassed ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                                                        </div>
+                                                    </button>
                                                 );
                                             })}
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                            );
+                        })}
 
-                        {/* Compact List of Alternatives (Same Degree, Diff Unis) */}
-                        <div className="p-3 space-y-2 bg-gray-50/50 min-h-full">
-                            <label className="text-[10px] font-bold text-gray-400 px-1">אפשרויות נוספות</label>
-                            {degrees
-                                .filter((d: any) => d.name === selectedDegree.name && d.university !== selectedDegree.university) // Show same degree at other unis
-                                .concat(degrees.slice(0, 3).filter((d: any) => d.name !== selectedDegree.name)) // Plus a few random recommendations
-                                .slice(0, 5)
-                                .map((deg: any, idx: number) => {
-                                    const threshold = getThreshold(deg.description);
-                                    const score = deg.sechem[0]?.score || 0;
-                                    const isPassed = score >= threshold;
-
-                                    const prog = ALL_PROGRAMS.find(p => p?.program?.institution?.name === deg.university);
-                                    const logoUrl = prog?.program?.institution?.logo_url;
-                                    const hasError = imageErrors[`alt-${idx}`];
-
-                                    return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setTargetDegree(deg.name)}
-                                            className="w-full text-right bg-white p-2.5 rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all flex items-center justify-between group"
-                                        >
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center overflow-hidden shrink-0">
-                                                    {logoUrl && !hasError ? (
-                                                        <img
-                                                            src={logoUrl}
-                                                            alt={deg.university}
-                                                            className="w-full h-full object-contain p-1"
-                                                            onError={() => setImageErrors((prev: Record<string, boolean>) => ({ ...prev, [`alt-${idx}`]: true }))}
-                                                        />
-                                                    ) : (
-                                                        <Building2 className="w-4 h-4 text-gray-400" />
-                                                    )}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <div className="text-xs font-bold text-gray-800 truncate group-hover:text-blue-700">
-                                                        {deg.university}
-                                                    </div>
-                                                    <div className="text-[10px] text-gray-500 truncate">
-                                                        {deg.name}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className={`text-[10px] font-bold shrink-0 ${isPassed ? 'text-green-600' : 'text-red-500'}`}>
-                                                {isPassed ? 'מתקבל/ת' : 'לא מתקבל/ת'}
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                        </div>
-                    </>
-                )}
-            </div>
+                        {Object.keys(groupedDegrees).length === 0 && (
+                            <div className="text-center py-10 px-4">
+                                <div className="bg-gray-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                                    <Search className="w-5 h-5 text-gray-300" />
+                                </div>
+                                <p className="text-xs text-gray-500">לא נמצאו תארים התואמים את הסינון</p>
+                                <button
+                                    onClick={() => setIsEditingPrefs(true)}
+                                    className="text-[10px] text-indigo-600 font-bold mt-2 hover:underline"
+                                >
+                                    שנה העדפות
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 };
