@@ -35,9 +35,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(400).json({ error: 'No file content provided' });
         }
 
-        const apiKey = process.env.OPENROUTER_API_KEY;
+        const apiKey = process.env.GOOGLE_API_KEY;
         if (!apiKey) {
-            console.error("Missing OPENROUTER_API_KEY");
+            console.error("Missing GOOGLE_API_KEY");
             return res.status(500).json({ error: 'Server configuration error' });
         }
 
