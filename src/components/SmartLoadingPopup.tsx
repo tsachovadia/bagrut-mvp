@@ -1,6 +1,7 @@
 
-import { motion } from 'framer-motion';
-import { Loader2, Scan, FileText, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Scan, FileText, CheckCircle2, Sparkles } from 'lucide-react';
+import { InteractiveWait } from './InteractiveWait';
 
 interface SmartLoadingPopupProps {
     phase: 'scanning' | 'processing' | 'complete';

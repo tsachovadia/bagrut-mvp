@@ -1,11 +1,14 @@
 import React from 'react';
 import { AdminShell } from '../../components/Admin/AdminShell';
 import { UsersTable } from '../../components/Admin/CRM/UsersTable';
+import { SoftLeadsTable } from '../../components/Admin/CRM/SoftLeadsTable';
 
 export const CRMPage = () => {
+    const [activeTab, setActiveTab] = React.useState<'users' | 'leads'>('users');
+
     return (
         <AdminShell title="ניהול משתמשים ולידים">
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {/* KPI Cards Row */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
@@ -35,8 +38,31 @@ export const CRMPage = () => {
                     </div>
                 </div>
 
-                {/* Main Table */}
-                <UsersTable />
+                {/* Tabs & Table */}
+                <div className="space-y-4">
+                    <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-lg w-fit">
+                        <button
+                            onClick={() => setActiveTab('users')}
+                            className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'users'
+                                ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                                }`}
+                        >
+                            משתמשים רשומים
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('leads')}
+                            className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'leads'
+                                ? 'bg-white text-yellow-600 shadow-sm ring-1 ring-black/5'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                                }`}
+                        >
+                            לידים מהירים (New)
+                        </button>
+                    </div>
+
+                    {activeTab === 'users' ? <UsersTable /> : <SoftLeadsTable />}
+                </div>
             </div>
         </AdminShell>
     );

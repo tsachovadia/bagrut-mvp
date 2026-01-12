@@ -44,12 +44,12 @@ export const HomePage = ({
     const [wizardMode, setWizardMode] = useState<'manual' | 'upload'>('manual');
 
     useEffect(() => {
-        if (isFirstVisit) {
+        if (isFirstVisit && !wizardStarted) {
             // Small delay to ensure smooth entry
             const timer = setTimeout(() => setShowModal(true), 1000);
             return () => clearTimeout(timer);
         }
-    }, [isFirstVisit]);
+    }, [isFirstVisit, wizardStarted]);
 
     const handleModalClose = () => {
         setShowModal(false);

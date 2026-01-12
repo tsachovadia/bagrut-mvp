@@ -52,6 +52,8 @@ function App() {
         if (data.psychometric) setPsychometric(data.psychometric);
         if (data.preferences) setPreferences(data.preferences);
         setWizardStarted(true); // If data exists, likely returning user
+        // Sync local state to avoid re-showing modal
+        localStorage.setItem('lead_captured', 'true');
       }
       setDataLoaded(true);
     }

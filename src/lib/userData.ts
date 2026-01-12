@@ -139,6 +139,7 @@ export const loadUserData = async (): Promise<UserData | null> => {
                     isUndecided: false // Default/Not persisted explicitly
                 };
 
+                console.log('UserData loaded from Supabase session');
                 return {
                     bagrut: bagrutData,
                     psychometric: psychometric,

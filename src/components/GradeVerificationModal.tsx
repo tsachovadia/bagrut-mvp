@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button, Input } from './ui/shim';
-import { X, Plus, Check, AlertCircle } from 'lucide-react';
+import { X, Plus, Check, AlertCircle, RefreshCw } from 'lucide-react';
 import type { SubjectGrade } from '../utils/calculator';
-import { SECTOR_MANDATORY_SUBJECTS, ELECTIVE_SUBJECTS } from '../utils/subjects';
+import { SECTOR_MANDATORY_SUBJECTS, ELECTIVE_SUBJECTS, getSubjectByName } from '../utils/subjects';
 
 interface GradeVerificationModalProps {
     initialGrades: SubjectGrade[];
@@ -226,6 +226,17 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
         setGrades([...grades, { id: `new-${Date.now()}`, subject: 'מקצוע חדש', units: 3, grade: 0 }]);
     };
 
+    const handleRestoreSubject = (missingSubjectName: string) => {
+        const def = getSubjectByName(missingSubjectName);
+        const newGrade: SubjectGrade = {
+            id: `restored-${Date.now()}`,
+            subject: missingSubjectName,
+            units: def?.defaultUnits || 3,
+            grade: 0 // Default to 0 so user enters it
+        };
+        setGrades(prev => [...prev, newGrade]);
+    };
+
     const missingSubjects = MANDATORY_CHECKLIST.filter(m =>
         !grades.some(g => m.keywords.some(k => g.subject.includes(k)))
     );
@@ -377,9 +388,14 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
                             <p className="text-xs text-orange-800 mb-2">יתכן וחסרים לך מקצועות חובה לחישוב ממוצע תקין. לא תוכל להמשיך ללא השלמתם.</p>
                             <div className="flex flex-wrap gap-2">
                                 {missingSubjects.map(s => (
-                                    <span key={s.name} className="bg-white border border-orange-200 px-2 py-1 rounded text-xs text-orange-700 font-bold shadow-sm">
-                                        {s.name}
-                                    </span>
+                                    <button
+                                        key={s.name}
+                                        onClick={() => handleRestoreSubject(s.name)}
+                                        className="bg-white border border-orange-200 hover:bg-orange-100 hover:border-orange-300 px-2.5 py-1 rounded-md text-orange-700 font-bold shadow-sm transition-all flex items-center gap-1.5 group"
+                                    >
+                                        <Plus className="w-3 h-3 text-orange-500 group-hover:text-orange-700" />
+                                        <span className="text-xs">{s.name}</span>
+                                    </button>
                                 ))}
                             </div>
                         </div>
