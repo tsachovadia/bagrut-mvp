@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { loadUserData, saveUserData, type UserData } from '../../lib/userData';
 import { calculateAdmissionStats } from '../../utils/calculation-bridge';
 import type { SubjectGrade, PsychometricScores } from '../../utils/calculator';
@@ -13,6 +14,7 @@ import { Calculator } from 'lucide-react';
 
 
 export const UnifiedDashboard = () => {
+    const navigate = useNavigate();
     // ---- State ----
     const [loading, setLoading] = useState(true);
     const [originalData, setOriginalData] = useState<UserData | null>(null);
@@ -210,13 +212,36 @@ export const UnifiedDashboard = () => {
     };
 
     // ---- Render ----
-    if (loading || !originalData) {
-        // ... (loading state)
+    if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-16 h-16 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
                     <p className="text-gray-500 font-medium animate-pulse">טוען את הקוקפיט...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!originalData) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
+                <div className="flex flex-col items-center gap-6 max-w-md text-center">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Calculator className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-bold text-gray-900">אין נתונים להצגה</h2>
+                        <p className="text-gray-600">
+                            נראה שעדיין לא הזנת ציונים. כדי להשתמש בקוקפיט, יש להזין ציוני בגרות ופסיכומטרי.
+                        </p>
+                    </div>
+                    <Button
+                        onClick={() => navigate('/')}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                        מעבר למחשבון
+                    </Button>
                 </div>
             </div>
         );
