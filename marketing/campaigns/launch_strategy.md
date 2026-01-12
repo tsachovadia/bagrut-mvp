@@ -1,46 +1,75 @@
-# Campaign Strategy: "Launch MVP" 🚀
+אסטרטגיית קמפיין: השקת MVP 🚀
 
-## 1. Overview
-**Budget:** 30 NIS/day
-**Objective:** User Acquisition (Optimize for "Complete Registration" or "Lead")
-**Platform:** Instagram (via Meta Ads Manager)
+== תקציב ומטרות ==
+תקציב: 30 ש"ח ליום
+מטרה: הרשמות לאתר (לידים)
+פלטפורמה: אינסטגרם (דרך מנהל המודעות של מטא)
 
-## 2. The User Journey (Funnel Map)
-We need to track the user across these specific "Events".
+== המסע של הלקוח (המשפך) ==
 
-| Step | User Action | System Event (Pixel) | Key Success Metric |
-| :--- | :--- | :--- | :--- |
-| **1. Ad Impression** | Sees ad in Stories/Feed | `Impact` | CTR (Click Through Rate) |
-| **2. Landing** | Clicks link -> Lands on Home Page | `PageView` | Landing Page View % |
-| **3. Engagement** | Starts using the Calculator | `ViewContent` (or Custom: `Start_Calculation`) | Time on Page |
-| **4. Sign Up** | Clicks "Show Results" -> Google Login | `InitiateCheckout` | Auth Click Rate |
-| **5. Conversion** | Successful Login -> Sees Dashboard | `CompleteRegistration` / `Lead` | **CAC (Cost Per Result)** |
-| **6. Advocacy** | Shares result to IG Story | `Share` (Custom) | Viral Coefficient |
+שלב 1: חשיפה למודעה
+המשתמש רואה מודעה בסטורי או בפיד.
+המדד להצלחה: אחוזי הקלקה על המודעה.
 
-## 3. Technical Implementation Plan
-### A. Meta Pixel Setup
-- [ ] Create Pixel in Meta Business Manager.
-- [ ] Install Pixel Base Code in `index.html` (Head).
-- [ ] Implement React Tracking Events:
-    - `PageView` on route change.
-    - `CompleteRegistration` on successful Supabase Auth.
-    - `CustomEvent` for "Calculation_Started".
+שלב 2: נחיתה באתר
+המשתמש לוחץ ומגיע לדף הבית שלנו.
+המדד להצלחה: האם הדף נטען והמשתמש נשאר.
 
-### B. Data & Privacy (TOS)
-- [ ] Ensure "Terms of Service" & "Privacy Policy" links are visible on the login modal.
-- [ ] Clarify what data we save:
-    - Email/Name (from Google).
-    - Bagrut Grades (for the calculator).
-    - Target Degrees (preferences).
+שלב 3: מעורבות (שימוש במחשבון)
+המשתמש מתחיל להזין ציונים ולשחק עם המחשבון.
+המדד להצלחה: זמן שהייה באתר.
 
-## 4. Landing Experience Optimization
-**Goal:** Reduce friction between Ad and Action.
-*   **Message Match:** If Ad says "Check your chances for CS", the Landing Page should immediately show the calculator, not a generic "Welcome".
-*   **Mobile First:** Ensure the calculator keyboard covers don't break the UI.
-*   **Trust Signals:** Add "Join 50k community" text near the login button.
+שלב 4: הרשמה
+המשתמש לוחץ על "הצג תוצאות" ועובר להתחברות עם גוגל.
+המדד להצלחה: כמה לחצו על כפתור ההתחברות.
 
-## 5. Ad Creative Brief (The 3 Ads)
-*Need to match the 3 angles.*
-1.  **Ad 1 (Pain):** "Still calculating manually?" (Video of messy excel vs App). -> Direct to Calculator.
-2.  **Ad 2 (Social):** "See where your friends are studying." -> Direct to Community/Main.
-3.  **Ad 3 (FOMO/Value):** "50k Students are already optimizing their bonuses." -> Direct to Main.
+שלב 5: המרה (הצלחה)
+המשתמש התחבר בהצלחה ורואה את הדאשבורד האישי.
+המדד להצלחה: המחיר להרשמה (כמה עלה לנו להביא משתמש אחד).
+
+שלב 6: שיתוף
+המשתמש משתף את התוצאה שלו בסטורי.
+המדד להצלחה: חשיפה ויראלית בחינם.
+
+== תוכנית טכנית (מה צריך להגדיר) ==
+
+הקמת פיקסל (Pixel):
+לפתוח פיקסל חדש בביזנס מנג'ר של פייסבוק.
+להטמיע את קוד הפיקסל באתר שלנו.
+
+הגדרת אירועים למעקב (כדי שפייסבוק ידע מה קורה):
+אירוע "צפייה בדף" (Page View) - כשהמשתמש נוחת באתר.
+אירוע "הרשמה" (Complete Registration) - כשהמשתמש מסיים להתחבר עם גוגל.
+אירוע מותאם אישית "התחיל חישוב" - כשהמשתמש מתחיל להקליד ציונים.
+
+פרטיות:
+לוודא שיש קישור לתנאי שימוש ומדיניות פרטיות במסך ההרשמה.
+להיות שקופים לגבי המידע שאוספים (שם, אימייל, ציונים, תארים רצויים).
+
+== חווית הנחיתה (האתר) ==
+
+התאמת המסר:
+אם המודעה מבטיחה "בדיקת סיכויים למדעי המחשב", דף הנחיתה חייב להראות את המחשבון מיד, ולא טקסט כללי.
+
+התאמה לנייד:
+לוודא שהמקלדת בטלפון לא מסתירה את הכפתורים החשובים.
+
+אמינות:
+להוסיף טקסט ליד כפתור ההרשמה: "הצטרפו לקהילה של 50,000 מתלבטים".
+
+== המודעות (הקריאייטיב) ==
+
+מודעה 1: הכאב
+המסר: "עדיין מחשבים סיכויי קבלה ידנית באקסל?"
+הויז'ואל: סרטון שמראה אקסל מבולגן ומסובך, ואז מעבר חד לאפליקציה הנקייה שלנו.
+לאן מוביל: ישירות למחשבון.
+
+מודעה 2: החברתי
+המסר: "בואו לראות איפה החברים שלכם לומדים."
+הויז'ואל: התמקדות בקהילה ובסטודנטים האמיתיים.
+לאן מוביל: לדף הבית.
+
+מודעה 3: הערך (FOMO)
+המסר: "50,000 סטודנטים כבר משפרים את המסלול שלהם איתנו."
+הויז'ואל: לוגו נקי ועיצוב יוקרתי.
+לאן מוביל: לדף הבית.

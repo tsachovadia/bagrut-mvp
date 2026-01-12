@@ -29,24 +29,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
+        console.log("[API] /api/ocr/extract request received");
+
+        // Debug headers and body type
+        console.log("[API] Request content-length:", req.headers['content-length']);
+
         const { fileBase64 } = req.body;
-        if (!fileBase64) return res.status(400).json({ error: 'No fileBase64 provided' });
+        console.log("[API] Body parsed. fileBase64 exists?", !!fileBase64);
+        console.log("[API] fileBase64 length:", fileBase64 ? fileBase64.length : 'N/A');
+
+        if (!fileBase64) {
+            console.error("[API] Error: Missing fileBase64 in body");
+            return res.status(400).json({ error: 'No fileBase64 provided' });
+        }
 
         const apiKey = process.env.GOOGLE_API_KEY;
+        console.log("[API] Checking GOOGLE_API_KEY presence:", !!apiKey);
+
         if (!apiKey) {
-            console.error("Missing GOOGLE_API_KEY");
+            console.error("[API] Error: Missing GOOGLE_API_KEY env var");
             return res.status(500).json({ error: 'Server configuration error' });
         }
 
+        console.log("[API] Initializing GradeExtractionService...");
         const extractionService = new GradeExtractionService(apiKey);
 
-        console.log("[API] /api/ocr/extract calling Phase 1...");
+        console.log("[API] Calling extractionService.extractRawText...");
         const result = await extractionService.extractRawText(fileBase64);
+        console.log("[API] extractRawText completed successfully");
 
         return res.status(200).json({ success: true, ...result });
 
     } catch (error: any) {
-        console.error('API Error:', error);
+        console.error('[API] Critical Error in /api/ocr/extract handler:', error);
+        console.error('[API] Error Stack:', error.stack);
         return res.status(500).json({ error: error.message || 'Failed to extract text' });
     }
 }

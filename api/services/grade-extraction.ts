@@ -40,6 +40,7 @@ export class GradeExtractionService {
     async extractRawText(fileBase64: string): Promise<ExtractionResult> {
         try {
             console.log(`[GradeExtraction] Phase 1: Starting Raw Text Extraction with ${MODEL_NAME}...`);
+            console.log(`[GradeExtraction] Input fileBase64 length: ${fileBase64.length}`);
 
             // Detect MIME type from the base64 header (e.g., data:image/jpeg;base64,...)
             let mimeType = "image/png"; // Default
@@ -53,6 +54,7 @@ export class GradeExtractionService {
             console.log(`[GradeExtraction] Detected MIME Type: ${mimeType}`);
 
             const imagePart = this.fileToGenerativePart(fileBase64, mimeType);
+            console.log(`[GradeExtraction] Image part prepared.`);
 
             const prompt = `You are an expert OCR engine for Hebrew documents. 
             TASK: Transcribe the text from this Israeli Bagrut certificate EXACTLY as it appears. 
@@ -66,11 +68,14 @@ export class GradeExtractionService {
             OUTPUT:
             Return ONLY the raw markdown text.`;
 
+            console.log(`[GradeExtraction] Sending request to Google Generative AI...`);
             const result = await this.model.generateContent([prompt, imagePart]);
+            console.log(`[GradeExtraction] Received result from model.`);
+
             const response = await result.response;
             const text = response.text();
 
-            console.log(`[GradeExtraction] Phase 1 Complete. Length: ${text.length}`);
+            console.log(`[GradeExtraction] Phase 1 Complete. Text extracted successfully. Length: ${text.length}`);
             return {
                 rawText: text,
                 usedModel: MODEL_NAME
@@ -78,6 +83,7 @@ export class GradeExtractionService {
 
         } catch (error: any) {
             console.error("[GradeExtraction] Phase 1 Failed:", error);
+            console.error("[GradeExtraction] Error Details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
             throw new Error(`OCR Extraction Failed: ${error.message}`);
         }
     }
