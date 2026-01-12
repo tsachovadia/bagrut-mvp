@@ -153,3 +153,19 @@ export const loadUserData = async (): Promise<UserData | null> => {
 
     return null;
 };
+
+export const clearAllUserData = async () => {
+    // 1. Clear Local Storage
+    try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        localStorage.removeItem('lead_captured');
+        localStorage.removeItem('has_seen_welcome_v2');
+    } catch (e) { /* ignore */ }
+
+    // 2. Sign out from Supabase
+    try {
+        await supabase.auth.signOut();
+    } catch (e) {
+        console.error('Failed to sign out', e);
+    }
+};

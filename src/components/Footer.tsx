@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { BugReportWidget } from './BugReportWidget';
+import { clearAllUserData } from '../lib/userData';
 
 export function Footer() {
     return (
@@ -14,9 +16,8 @@ export function Footer() {
                         תנאי שימוש
                     </Link>
                     <button
-                        onClick={() => {
-                            localStorage.removeItem('lead_captured');
-                            localStorage.removeItem('has_seen_welcome_v2');
+                        onClick={async () => {
+                            await clearAllUserData();
                             window.location.reload();
                         }}
                         className="text-xs text-red-300 hover:text-red-500 transition-colors opacity-50 hover:opacity-100"
@@ -24,6 +25,7 @@ export function Footer() {
                     >
                         [אפס משתמש]
                     </button>
+                    <BugReportWidget />
                 </div>
             </div>
         </footer>
