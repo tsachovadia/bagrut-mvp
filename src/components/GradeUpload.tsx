@@ -8,9 +8,10 @@ import { InfoBox } from './ui/InfoBox';
 
 interface GradeUploadProps {
     onGradesExtracted: (grades: SubjectGrade[]) => void;
+    onSwitchToManual: () => void;
 }
 
-export const GradeUpload = ({ onGradesExtracted }: GradeUploadProps) => {
+export const GradeUpload = ({ onGradesExtracted, onSwitchToManual }: GradeUploadProps) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
@@ -147,6 +148,7 @@ export const GradeUpload = ({ onGradesExtracted }: GradeUploadProps) => {
                 isOpen={isVerificationModalOpen}
                 initialGrades={pendingGrades}
                 onClose={() => { setIsVerificationModalOpen(false); setIsUploading(false); }}
+                onSwitchToManual={onSwitchToManual}
                 onSave={handleModalSave}
             />
 

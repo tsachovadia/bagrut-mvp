@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, ChevronDown, ChevronRight, FileText, Code } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { SmartLoadingPopup } from './SmartLoadingPopup';
 import { Button } from './ui/shim';
 
@@ -12,19 +12,15 @@ interface ProcessModalProps {
     onClose: () => void;
 }
 
-export const ProcessModal = ({ isOpen, phase, rawText, extractedJson, error, onClose }: ProcessModalProps) => {
-    const [isDebugOpen, setIsDebugOpen] = useState(true); // Default open for development as requested
-    const [activeTab, setActiveTab] = useState<'raw' | 'json'>('raw');
-
+export const ProcessModal = ({ isOpen, phase, error, onClose }: ProcessModalProps) => {
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 max-h-[90vh]">
+    return typeof document !== 'undefined' ? createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
 
                 {/* Header with Close */}
                 <div className="p-4 flex justify-between items-center">
-                    {/* Title or Empty space */}
                     <div className="text-sm font-medium text-gray-500">
                         {error ? <span className="text-red-600 flex items-center gap-2">⚠️ שגיאה בתהליך</span> : "מעבד נתונים..."}
                     </div>
@@ -42,69 +38,14 @@ export const ProcessModal = ({ isOpen, phase, rawText, extractedJson, error, onC
                             </div>
                             <h3 className="text-lg font-bold text-red-700">אירעה שגיאה</h3>
                             <p className="text-red-600 bg-red-50 px-4 py-2 rounded-lg text-sm">{error}</p>
-                            <p className="text-xs text-gray-500 pt-2">ניתן לצפות בנתונים הטכניים למטה לאבחון הבעיה.</p>
+                            <p className="text-xs text-gray-500 pt-2">אנא נסה שנית עם תמונה ברורה יותר.</p>
                         </div>
                     ) : (
                         <SmartLoadingPopup phase={phase} />
                     )}
                 </div>
-
-                {/* Debug / Details Section */}
-                <div className="border-t border-gray-100 bg-gray-50/50 flex flex-col flex-1 min-h-0">
-                    <button
-                        onClick={() => setIsDebugOpen(!isDebugOpen)}
-                        className="flex items-center gap-2 p-4 text-xs font-semibold text-gray-500 hover:text-gray-800 w-full text-right"
-                    >
-                        {isDebugOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        נתונים טכניים (Debug View)
-                    </button>
-
-                    {isDebugOpen && (
-                        <div className="flex-1 flex flex-col min-h-0 animate-in slide-in-from-top-2">
-                            {/* Tabs */}
-                            <div className="flex border-b border-gray-200 px-4">
-                                <button
-                                    onClick={() => setActiveTab('raw')}
-                                    className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'raw'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                                        }`}
-                                >
-                                    <FileText className="w-3 h-3" />
-                                    Phase 1: Raw Text
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('json')}
-                                    className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'json'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                                        }`}
-                                >
-                                    <Code className="w-3 h-3" />
-                                    Phase 2: JSON
-                                </button>
-                            </div>
-
-                            {/* Content Area */}
-                            <div className="flex-1 overflow-auto p-4 bg-gray-100 font-mono text-[10px] leading-relaxed text-gray-700 dir-ltr text-left">
-                                {activeTab === 'raw' ? (
-                                    rawText ? (
-                                        <pre className="whitespace-pre-wrap break-all">{rawText}</pre>
-                                    ) : (
-                                        <div className="text-gray-400 italic p-4 text-center">Waiting for Phase 1 output...</div>
-                                    )
-                                ) : (
-                                    extractedJson ? (
-                                        <pre className="whitespace-pre-wrap">{JSON.stringify(extractedJson, null, 2)}</pre>
-                                    ) : (
-                                        <div className="text-gray-400 italic p-4 text-center">Waiting for Phase 2 output...</div>
-                                    )
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
             </div>
-        </div>
-    );
+        </div>,
+        document.body
+    ) : null;
 };

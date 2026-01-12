@@ -1,12 +1,12 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { ProgramsExplorer } from '../components/ProgramsExplorer/ProgramsExplorer';
 import { Header } from '../components/Header';
-import { HeroOverlay } from '../components/HeroOverlay';
+import { ConversationalHero } from '../components/marketing/ConversationalHero';
 import { WizardContainer } from '../components/Wizard/WizardContainer';
 import { AccessibilityWidget } from '../components/AccessibilityWidget';
 import { CookieConsent } from '../components/CookieConsent';
 import type { SubjectGrade, PsychometricScores } from '../utils/calculator';
-import { LeadCaptureModal } from '../components/LeadCaptureModal';
+import { SmartWelcomeModal } from '../components/marketing/SmartWelcomeModal';
 import { GuidedTour } from '../components/GuidedTour';
 import { useFirstVisit } from '../hooks/useFirstVisit';
 import { useState, useEffect } from 'react';
@@ -82,7 +82,7 @@ export const HomePage = ({
                     </a>
                 </div>
 
-                <LeadCaptureModal isOpen={showModal} onClose={handleModalClose} />
+                <SmartWelcomeModal isOpen={showModal} onClose={handleModalClose} />
                 <GuidedTour startTrigger={startTour} onEnd={() => setStartTour(false)} />
 
                 {/* WhatsApp Group CTA - Visible always or conditionally */}
@@ -102,7 +102,10 @@ export const HomePage = ({
 
                 {!wizardStarted && (
                     <section id="hero-section" className="animate-in fade-in zoom-in-95 duration-500">
-                        <HeroOverlay onStart={() => setWizardStarted(true)} />
+                        <ConversationalHero
+                            onUploaded={() => setWizardStarted(true)}
+                            onManual={() => setWizardStarted(true)}
+                        />
                     </section>
                 )}
 

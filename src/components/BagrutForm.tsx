@@ -260,7 +260,10 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
     };
 
     const renderUpload = () => (
-        <GradeUpload onGradesExtracted={handleExtractedGrades} />
+        <GradeUpload
+            onGradesExtracted={handleExtractedGrades}
+            onSwitchToManual={() => setActiveTab('manual')}
+        />
     );
 
     const renderLink = () => (
