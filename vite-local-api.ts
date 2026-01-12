@@ -3,7 +3,7 @@ import { loadEnv } from 'vite';
 import { GradeExtractionService } from './api/services/grade-extraction';
 
 // Increase payload limit for images
-const PAYLOAD_LIMIT = '10mb';
+
 
 export function extractGradesMiddleware() {
     // Load env vars from .env file

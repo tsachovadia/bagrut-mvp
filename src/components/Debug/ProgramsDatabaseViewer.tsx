@@ -109,10 +109,10 @@ export const ProgramsDatabaseViewer: React.FC = () => {
                                             {prog.admission_rules?.map(rule => (
                                                 <div key={rule.year} className="mt-2 text-sm bg-blue-50 p-2 rounded">
                                                     <div className="font-mono text-xs text-blue-600">RULESET {rule.year}</div>
-                                                    <div>Min Sekem: <b>{rule.min_sekem}</b></div>
-                                                    <div>Min Psychometric: <b>{rule.min_psychometric || 'N/A'}</b></div>
-                                                    {rule.logic_config && (
-                                                        <pre className="text-xs text-gray-600 mt-1">{JSON.stringify(rule.logic_config)}</pre>
+                                                    <div>Min Score: <b>{rule.min_score || 'N/A'}</b></div>
+                                                    <div>Operator: <b>{rule.logic_operator || 'N/A'}</b></div>
+                                                    {rule.raw_json && (
+                                                        <pre className="text-xs text-gray-600 mt-1">{JSON.stringify(rule.raw_json, null, 2)}</pre>
                                                     )}
                                                 </div>
                                             ))}

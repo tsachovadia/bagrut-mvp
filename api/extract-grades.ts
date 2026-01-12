@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { fileBase64, fileType } = req.body;
+        const { fileBase64 } = req.body;
 
         if (!fileBase64) {
             return res.status(400).json({ error: 'No file content provided' });

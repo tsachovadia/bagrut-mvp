@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from './ui/shim';
+import { WhatsAppIcon } from './icons/WhatsAppIcon';
 import { Badge } from './ui/shim';
 import {
     CheckCircle2,
@@ -25,6 +26,8 @@ interface ProgramDetailsCardProps {
 const isGroup = (node: LogicGroup | LogicCondition): node is LogicGroup => {
     return 'AND' in node || 'OR' in node;
 };
+
+
 
 const ConditionItem = ({ condition }: { condition: LogicCondition }) => {
     return (
@@ -191,12 +194,23 @@ export const ProgramDetailsCard: React.FC<ProgramDetailsCardProps> = ({ program,
                             </section>
                         )}
 
-                        <div className="flex justify-start">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 mt-8 pt-6 border-t border-gray-100">
+                            <button
+                                onClick={() => {
+                                    // Todo: Connect to real WhatsApp group/bot
+                                    console.log('Connect to community clicked');
+                                }}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#128C7E] transition-all shadow-sm hover:shadow-md group"
+                            >
+                                <WhatsAppIcon className="w-5 h-5 fill-current" />
+                                <span>חבר אותי לאנשים שמתלבטים כמוני ולסטודנטים שלומדים את התואר הזה</span>
+                            </button>
+
                             <a
                                 href={program.institution?.website_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
+                                className="inline-flex items-center gap-2 text-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
                             >
                                 <Globe className="w-4 h-4" />
                                 מעבר לאתר התוכנית

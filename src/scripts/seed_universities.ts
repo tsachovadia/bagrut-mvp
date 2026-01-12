@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
-import { Database } from '../types/supabase'; // Assuming types are generated, or we use 'any' for seed script flexibilty
+import type { Database } from '../types/database.types'; // Assuming types are generated, or we use 'any' for seed script flexibilty
 
 dotenv.config();
 

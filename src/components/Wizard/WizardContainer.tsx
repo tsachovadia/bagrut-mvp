@@ -171,7 +171,7 @@ export function WizardContainer({
                                     key={`bagrut-${formKey}`}
                                     onDataUpdate={onBagrutUpdate}
                                     initialData={bagrutData}
-                                    onAutoFill={handleAutoFill}
+                                    fillSampleData={handleAutoFill}
                                     sector={sector}
                                     onSectorChange={setSector}
                                     variant="compact"

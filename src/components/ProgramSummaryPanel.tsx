@@ -1,4 +1,5 @@
 import { Building2, Clock, CheckCircle2, AlertCircle, ExternalLink, GraduationCap, X } from 'lucide-react';
+import { WhatsAppIcon } from './icons/WhatsAppIcon';
 import type { Program, AdmissionRequirement } from '../types/admission';
 import { checkReachable, type UserAdmissionStats } from '../utils/admission-evaluation';
 import { Button, Badge } from './ui/shim';
@@ -160,6 +161,18 @@ export const ProgramSummaryPanel = ({ program, admission, userStats, onClose, cl
                         <CheckCircle2 className="w-4 h-4" />
                         הוסף למעקב
                     </Button>
+
+                    <button
+                        onClick={() => {
+                            // Todo: Connect to real WhatsApp
+                            console.log('Connect to community clicked');
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#128C7E] transition-all shadow-sm hover:shadow-md h-10"
+                    >
+                        <WhatsAppIcon className="w-4 h-4 fill-current" />
+                        <span>חבר אותי לסטודנטים</span>
+                    </button>
+
                     {program.institution?.website_url && (
                         <Button variant="outline" className="w-full gap-2 text-gray-600 border-gray-200 hover:bg-gray-50" onClick={() => window.open(program.institution?.website_url, '_blank')}>
                             <ExternalLink className="w-4 h-4" />
