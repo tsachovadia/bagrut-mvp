@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useAnalytics } from '../../hooks/useAnalytics';
 import { useNavigate } from 'react-router-dom';
 import { WizardProgress } from './WizardProgress';
 import { BagrutForm } from '../BagrutForm';
@@ -9,7 +10,6 @@ import { Button } from '../ui/shim';
 import { AverageDisplay } from '../AverageDisplay';
 import { SekemDisplay } from '../SekemDisplay';
 import { calculateOptimalAverage, type SubjectGrade, type PsychometricScores } from '../../utils/calculator';
-import { useMemo } from 'react';
 
 interface WizardContainerProps {
     bagrutData: SubjectGrade[];
@@ -19,6 +19,7 @@ interface WizardContainerProps {
     preferences: { fields: string[]; institutions: string[]; isUndecided: boolean; };
     onPreferencesUpdate: (prefs: { fields: string[]; institutions: string[]; isUndecided: boolean; }) => void;
     results: any[];
+    initialTab?: 'manual' | 'upload' | 'link';
 }
 
 const STEPS = [
@@ -35,8 +36,10 @@ export function WizardContainer({
     onPsychometricUpdate,
     results,
     preferences,
-    onPreferencesUpdate
+    onPreferencesUpdate,
+    initialTab = 'manual'
 }: WizardContainerProps) {
+    const { trackEvent } = useAnalytics();
     const [currentStep, setCurrentStep] = useState(0);
 
     const [formKey, setFormKey] = useState(0);
@@ -46,6 +49,10 @@ export function WizardContainer({
     // Auto-redirect logic for the final step
     useEffect(() => {
         if (currentStep === 3) {
+            trackEvent('results_viewed', {
+                bagrut_avg: currentBagrutStats.average,
+                psycho_score: psychometricData.general
+            });
             const timer = setTimeout(() => {
                 navigate('/dashboard');
             }, 5000);
@@ -80,9 +87,6 @@ export function WizardContainer({
         }
         return false;
     };
-
-
-
 
 
     // Auto-fill logic for demo
@@ -175,6 +179,7 @@ export function WizardContainer({
                                     sector={sector}
                                     onSectorChange={setSector}
                                     variant="compact"
+                                    initialTab={initialTab}
                                 />
                             </div>
                         )}

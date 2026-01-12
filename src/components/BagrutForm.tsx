@@ -18,12 +18,13 @@ interface BagrutFormProps {
     variant?: 'default' | 'compact';
     sector: Sector;
     onSectorChange: (sector: Sector) => void;
+    initialTab?: InputMethod;
 }
 
 type InputMethod = 'manual' | 'upload' | 'link';
 
-export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant = 'default', sector, onSectorChange }: BagrutFormProps) => {
-    const [activeTab, setActiveTab] = useState<InputMethod>('manual');
+export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant = 'default', sector, onSectorChange, initialTab = 'manual' }: BagrutFormProps) => {
+    const [activeTab, setActiveTab] = useState<InputMethod>(initialTab);
     // const [sector, setSector] = useState<Sector>('mamlachti'); // Lifted
 
     const [grades, setGrades] = useState<SubjectGrade[]>(initialData || []);

@@ -41,6 +41,7 @@ export const HomePage = ({
     const isFirstVisit = useFirstVisit();
     const [showModal, setShowModal] = useState(false);
     const [startTour, setStartTour] = useState(false);
+    const [wizardMode, setWizardMode] = useState<'manual' | 'upload'>('manual');
 
     useEffect(() => {
         if (isFirstVisit) {
@@ -103,8 +104,8 @@ export const HomePage = ({
                 {!wizardStarted && (
                     <section id="hero-section" className="animate-in fade-in zoom-in-95 duration-500">
                         <ConversationalHero
-                            onUploaded={() => setWizardStarted(true)}
-                            onManual={() => setWizardStarted(true)}
+                            onUploaded={() => { setWizardMode('upload'); setWizardStarted(true); }}
+                            onManual={() => { setWizardMode('manual'); setWizardStarted(true); }}
                         />
                     </section>
                 )}
@@ -119,6 +120,7 @@ export const HomePage = ({
                             results={results}
                             preferences={preferences}
                             onPreferencesUpdate={onPreferencesUpdate}
+                            initialTab={wizardMode}
                         />
                     </div>
                 )}

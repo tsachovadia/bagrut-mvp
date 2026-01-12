@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import { trackEvent } from '../../utils/gtm';
+import { useAnalytics } from '../../hooks/useAnalytics';
 
 interface SmartWelcomeModalProps {
     isOpen: boolean;
@@ -9,6 +9,7 @@ interface SmartWelcomeModalProps {
 }
 
 export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
+    const { trackEvent } = useAnalytics();
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
         if (!name || !phone) return;
 
         setIsSubmitting(true);
-        trackEvent('soft_lead_submit_attempt', { source: 'welcome_modal' });
+        // trackEvent('soft_lead_submit_attempt', { source: 'welcome_modal' });
 
         try {
             const { error } = await supabase
@@ -41,10 +42,9 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
             localStorage.setItem('has_seen_welcome_v2', 'true');
             localStorage.setItem('lead_captured', 'true');
 
-            trackEvent('soft_lead_captured', {
-                source: 'welcome_modal',
-                has_email: !!email,
-                has_interest: !!interest
+            trackEvent('lead_generated', {
+                lead_type: 'soft',
+                user_interest: interest || 'undecided'
             });
 
             setTimeout(() => {
@@ -60,7 +60,7 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
     };
 
     const handleSkip = () => {
-        trackEvent('soft_lead_skipped', { source: 'welcome_modal' });
+        trackEvent('lead_skipped', { source: 'welcome_modal' });
         localStorage.setItem('has_seen_welcome_v2', 'true');
         localStorage.setItem('lead_captured', 'skipped');
         onClose();

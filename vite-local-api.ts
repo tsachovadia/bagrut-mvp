@@ -49,7 +49,13 @@ export function extractGradesMiddleware() {
                         return sendJson({ success: true, ...result });
 
                     } catch (e: any) {
-                        return sendError(500, e.message);
+                        console.error("[Local API] /api/ocr/extract Failed:", e);
+                        res.statusCode = 500;
+                        res.end(JSON.stringify({
+                            error: e.message,
+                            details: e,
+                            stack: e.stack
+                        }));
                     }
                 }
 
@@ -64,7 +70,13 @@ export function extractGradesMiddleware() {
                         return sendJson({ success: true, ...result });
 
                     } catch (e: any) {
-                        return sendError(500, e.message);
+                        console.error("[Local API] /api/ocr/normalize Failed:", e);
+                        res.statusCode = 500;
+                        res.end(JSON.stringify({
+                            error: e.message,
+                            details: e,
+                            stack: e.stack
+                        }));
                     }
                 }
 
