@@ -63,6 +63,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch (error: any) {
         console.error('[API] Critical Error in /api/ocr/extract handler:', error);
         console.error('[API] Error Stack:', error.stack);
-        return res.status(500).json({ error: error.message || 'Failed to extract text' });
+        return res.status(500).json({
+            error: error.message || 'Failed to extract text',
+            details: error, // Return full error object
+            stack: error.stack // Return stack trace
+        });
     }
 }
