@@ -15,6 +15,7 @@ interface GradeVerificationModalProps {
 
 export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitchToManual, onSave }: GradeVerificationModalProps) => {
     const [grades, setGrades] = useState<SubjectGrade[]>(initialGrades);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     // Prepare lists
     const mandatorySubjectsList = SECTOR_MANDATORY_SUBJECTS['mamlachti']; // Default for now
@@ -32,6 +33,71 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
 
     // Filter lists for dropdowns
     const electiveDropdownOptions = ELECTIVE_SUBJECTS.map(s => s.name).filter(n => !mandatorySubjectsList.includes(n));
+
+    // Mandatory subjects check for Alert
+    // We use the simpler checklist approach for the top banner
+    const MANDATORY_CHECKLIST = [
+        { name: 'מתמטיקה', keywords: ['מתמטיקה'] },
+        { name: 'אנגלית', keywords: ['אנגלית'] },
+        { name: 'לשון/הבעה', keywords: ['עברית', 'הבעה', 'לשון'] },
+        { name: 'ספרות', keywords: ['ספרות'] },
+        { name: 'היסטוריה', keywords: ['היסטוריה'] },
+        { name: 'אזרחות', keywords: ['אזרחות'] },
+        { name: 'תנ״ך', keywords: ['תנ"ך', 'תנ״ך', 'מקרא'] },
+    ];
+
+    const validateGrades = () => {
+        // 1. Check for missing mandatory subjects
+        const missing = MANDATORY_CHECKLIST.filter(m =>
+            !grades.some(g => m.keywords.some(k => g.subject.includes(k)))
+        );
+
+        if (missing.length > 0) {
+            return {
+                valid: false,
+                message: `חסרים מקצועות חובה: ${missing.map(m => m.name).join(', ')}. לא ניתן להמשיך ללא הזנת כל מקצועות החובה.`
+            };
+        }
+
+        // 2. Check for failing grades (under 55) in mandatory subjects
+        const failingMandatory = grades.filter(g => {
+            // Is it a mandatory subject?
+            const isMan = MANDATORY_CHECKLIST.some(m => m.keywords.some(k => g.subject.includes(k)));
+            return isMan && g.grade < 55;
+        });
+
+        if (failingMandatory.length > 0) {
+            return {
+                valid: false,
+                message: `נמצאו ציונים נכשלים (מתחת ל-55) במקצועות חובה: ${failingMandatory.map(g => g.subject).join(', ')}. חובה עובר בבגרות מלאה.`
+            };
+        }
+
+        // 3. Check specific unit requirements (Basic check)
+        // Math must be at least 3 units
+        const math = grades.find(g => g.subject.includes('מתמטיקה'));
+        if (math && math.units < 3) {
+            return { valid: false, message: 'מתמטיקה חייבת להיות ברמה של 3 יחידות לימוד לפחות.' };
+        }
+
+        // English must be at least 3 units
+        const english = grades.find(g => g.subject.includes('אנגלית'));
+        if (english && english.units < 3) {
+            return { valid: false, message: 'אנגלית חייבת להיות ברמה של 3 יחידות לימוד לפחות.' };
+        }
+
+        return { valid: true };
+    };
+
+    const handleSaveAttempt = () => {
+        setErrorMsg(null);
+        const result = validateGrades();
+        if (!result.valid && result.message) {
+            setErrorMsg(result.message);
+            return;
+        }
+        onSave(grades);
+    };
 
     // Update local state when props change, with Smart Merging
     useEffect(() => {
@@ -160,18 +226,6 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
         setGrades([...grades, { id: `new-${Date.now()}`, subject: 'מקצוע חדש', units: 3, grade: 0 }]);
     };
 
-    // Mandatory subjects check for Alert
-    // We use the simpler checklist approach for the top banner
-    const MANDATORY_CHECKLIST = [
-        { name: 'מתמטיקה', keywords: ['מתמטיקה'] },
-        { name: 'אנגלית', keywords: ['אנגלית'] },
-        { name: 'לשון/הבעה', keywords: ['עברית', 'הבעה', 'לשון'] },
-        { name: 'ספרות', keywords: ['ספרות'] },
-        { name: 'היסטוריה', keywords: ['היסטוריה'] },
-        { name: 'אזרחות', keywords: ['אזרחות'] },
-        { name: 'תנ״ך', keywords: ['תנ"ך', 'תנ״ך', 'מקרא'] },
-    ];
-
     const missingSubjects = MANDATORY_CHECKLIST.filter(m =>
         !grades.some(g => m.keywords.some(k => g.subject.includes(k)))
     );
@@ -298,15 +352,29 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
                     </Button>
                 </div>
 
-                {/* Missing Subjects Alert */}
-                {missingSubjects.length > 0 && (
+                {/* Validation Error Alert (Blocking) */}
+                {errorMsg && (
+                    <div className="bg-red-50 border-b border-red-100 p-4 flex items-start gap-4 animate-in slide-in-from-top-2">
+                        <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                        <div>
+                            <h3 className="font-bold text-red-900 text-sm">שגיאה באימות נתונים</h3>
+                            <p className="text-sm text-red-700">{errorMsg}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => setErrorMsg(null)} className="mr-auto text-red-500 hover:bg-red-100 h-6 w-6 p-0 rounded-full">
+                            <X className="w-3 h-3" />
+                        </Button>
+                    </div>
+                )}
+
+                {/* Missing Subjects Warning (Non-blocking advice, but validation stops next step) */}
+                {!errorMsg && missingSubjects.length > 0 && (
                     <div className="bg-orange-50 px-6 py-4 border-b border-orange-100 flex items-start gap-4">
                         <div className="bg-orange-100 p-2 rounded-full shrink-0">
                             <AlertCircle className="w-5 h-5 text-orange-600" />
                         </div>
                         <div>
                             <span className="font-bold text-orange-900 block mb-1 text-sm">חסרים מקצועות חובה בתעודה!</span>
-                            <p className="text-xs text-orange-800 mb-2">יתכן וחסרים לך מקצועות חובה לחישוב ממוצע תקין. אנא בדוק אם חסר:</p>
+                            <p className="text-xs text-orange-800 mb-2">יתכן וחסרים לך מקצועות חובה לחישוב ממוצע תקין. לא תוכל להמשיך ללא השלמתם.</p>
                             <div className="flex flex-wrap gap-2">
                                 {missingSubjects.map(s => (
                                     <span key={s.name} className="bg-white border border-orange-200 px-2 py-1 rounded text-xs text-orange-700 font-bold shadow-sm">
@@ -360,7 +428,7 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
                         >
                             חזור להזנה ידנית
                         </Button>
-                        <Button onClick={() => onSave(grades)} className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-11 text-base shadow-lg shadow-blue-200">
+                        <Button onClick={handleSaveAttempt} className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-11 text-base shadow-lg shadow-blue-200">
                             <Check className="w-5 h-5 ml-2" />
                             אשר והזן ציונים
                         </Button>
