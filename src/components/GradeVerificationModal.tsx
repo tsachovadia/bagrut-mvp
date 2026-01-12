@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button, Input } from './ui/shim';
-import { X, Plus, Trash2, Check, AlertCircle } from 'lucide-react';
+import { X, Plus, Check, AlertCircle } from 'lucide-react';
 import type { SubjectGrade } from '../utils/calculator';
-import { SECTOR_MANDATORY_SUBJECTS, ELECTIVE_SUBJECTS, ALL_SUBJECTS } from '../utils/subjects';
+import { SECTOR_MANDATORY_SUBJECTS, ELECTIVE_SUBJECTS } from '../utils/subjects';
 
 interface GradeVerificationModalProps {
     initialGrades: SubjectGrade[];
@@ -15,11 +15,23 @@ interface GradeVerificationModalProps {
 
 export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitchToManual, onSave }: GradeVerificationModalProps) => {
     const [grades, setGrades] = useState<SubjectGrade[]>(initialGrades);
-    const [reviewedIndices, setReviewedIndices] = useState<Set<number>>(new Set());
 
     // Prepare lists
-    const mandatorySubjects = SECTOR_MANDATORY_SUBJECTS['mamlachti']; // Default for now
-    const electiveSubjects = ELECTIVE_SUBJECTS.map(s => s.name).filter(n => !mandatorySubjects.includes(n));
+    const mandatorySubjectsList = SECTOR_MANDATORY_SUBJECTS['mamlachti']; // Default for now
+
+    // Helper to check if a subject is mandatory
+    // We check via exact match or keyword match for the alert, but for grouping we prefer exact match or flexible logic
+    const isMandatory = (subjectName: string) => {
+        if (!subjectName) return false;
+        // Check exact match in list
+        if (mandatorySubjectsList.includes(subjectName)) return true;
+        // Check keywords for extracted subjects that might not match exactly yet
+        const keywords = ['מתמטיקה', 'אנגלית', 'עברית', 'הבעה', 'לשון', 'ספרות', 'היסטוריה', 'אזרחות', 'תנ"ך', 'תנ״ך', 'מקרא'];
+        return keywords.some(k => subjectName.includes(k));
+    };
+
+    // Filter lists for dropdowns
+    const electiveDropdownOptions = ELECTIVE_SUBJECTS.map(s => s.name).filter(n => !mandatorySubjectsList.includes(n));
 
     // Update local state when props change
     useEffect(() => {
@@ -44,8 +56,9 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
         setGrades([...grades, { id: `new-${Date.now()}`, subject: 'מקצוע חדש', units: 3, grade: 0 }]);
     };
 
-    // Mandatory subjects check
-    const MANDATORY_SUBJECTS = [
+    // Mandatory subjects check for Alert
+    // We use the simpler checklist approach for the top banner
+    const MANDATORY_CHECKLIST = [
         { name: 'מתמטיקה', keywords: ['מתמטיקה'] },
         { name: 'אנגלית', keywords: ['אנגלית'] },
         { name: 'לשון/הבעה', keywords: ['עברית', 'הבעה', 'לשון'] },
@@ -55,8 +68,112 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
         { name: 'תנ״ך', keywords: ['תנ"ך', 'תנ״ך', 'מקרא'] },
     ];
 
-    const missingSubjects = MANDATORY_SUBJECTS.filter(m =>
+    const missingSubjects = MANDATORY_CHECKLIST.filter(m =>
         !grades.some(g => m.keywords.some(k => g.subject.includes(k)))
+    );
+
+    // Group grades for rendering (keeping original index for updates)
+    const gradesWithIndex = grades.map((g, i) => ({ ...g, originalIndex: i }));
+    const mandatoryRows = gradesWithIndex.filter(g => isMandatory(g.subject));
+    const electiveRows = gradesWithIndex.filter(g => !isMandatory(g.subject));
+
+    const renderTableSection = (rows: typeof gradesWithIndex, title: string, emptyText: string) => (
+        <div className="mb-8">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 border-r-4 border-blue-500 pr-3">
+                {title}
+            </h3>
+            {rows.length === 0 ? (
+                <div className="text-gray-400 text-sm italic pr-4 mb-4">{emptyText}</div>
+            ) : (
+                <div className="border rounded-lg overflow-hidden shadow-sm bg-white">
+                    <table className="w-full text-sm text-right">
+                        <thead className="bg-gray-50 text-gray-600 font-medium">
+                            <tr>
+                                <th className="p-3 w-10">#</th>
+                                <th className="p-3">מקצוע</th>
+                                <th className="p-3 w-24 text-center">סמל</th>
+                                <th className="p-3 w-32 text-center">מועד</th>
+                                <th className="p-3 w-20 text-center">יח״ל</th>
+                                <th className="p-3 w-24 text-center">ציון</th>
+                                <th className="p-3 w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {rows.map((row) => (
+                                <tr key={row.originalIndex} className="hover:bg-blue-50/30 transition-colors group">
+                                    <td className="p-3 text-center text-gray-300 text-xs">{row.originalIndex + 1}</td>
+                                    <td className="p-2 relative">
+                                        <select
+                                            value={row.subject}
+                                            onChange={(e) => handleUpdate(row.originalIndex, 'subject', e.target.value)}
+                                            className="appearance-none border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 w-full text-right font-medium pr-2 pl-2 cursor-pointer text-gray-900 rounded transition-all"
+                                        >
+                                            {/* Custom value option if not in lists */}
+                                            {!mandatorySubjectsList.includes(row.subject) && !electiveDropdownOptions.includes(row.subject) && row.subject !== 'מקצוע חדש' && (
+                                                <option value={row.subject}>{row.subject}</option>
+                                            )}
+                                            <option value="מקצוע חדש" disabled>בחר מקצוע...</option>
+
+                                            <optgroup label="מקצועות חובה">
+                                                {mandatorySubjectsList.map(s => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </optgroup>
+                                            <optgroup label="מקצועות הגבר">
+                                                {electiveDropdownOptions.map(s => (
+                                                    <option key={s} value={s}>{s}</option>
+                                                ))}
+                                            </optgroup>
+                                        </select>
+                                    </td>
+                                    <td className="p-2">
+                                        <Input
+                                            value={row.semel || ''}
+                                            placeholder="-"
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(row.originalIndex, 'semel', e.target.value)}
+                                            className="border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center w-full font-mono text-xs text-gray-500 rounded"
+                                        />
+                                    </td>
+                                    <td className="p-2">
+                                        <Input
+                                            value={row.examDate || ''}
+                                            placeholder="-"
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(row.originalIndex, 'examDate', e.target.value)}
+                                            className="border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center w-full rounded"
+                                        />
+                                    </td>
+                                    <td className="p-2">
+                                        <Input
+                                            type="number"
+                                            value={row.units}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(row.originalIndex, 'units', Number(e.target.value))}
+                                            className="border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center font-bold w-full rounded"
+                                        />
+                                    </td>
+                                    <td className="p-2">
+                                        <Input
+                                            type="number"
+                                            value={row.grade}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(row.originalIndex, 'grade', Number(e.target.value))}
+                                            className={`border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center font-bold w-full text-lg rounded
+                                                ${row.grade >= 90 ? 'text-green-600' : row.grade < 55 ? 'text-red-600' : 'text-blue-900'}`}
+                                        />
+                                    </td>
+                                    <td className="p-2 text-center">
+                                        <button
+                                            onClick={() => handleDelete(row.originalIndex)}
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 text-xs font-medium px-3 py-1.5 rounded transition-all"
+                                        >
+                                            מחק
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
     );
 
     return typeof document !== 'undefined' ? createPortal(
@@ -70,7 +187,7 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
                             <Check className="w-6 h-6 text-green-600" />
                             אימות נתונים מסכם
                         </h2>
-                        <p className="text-sm text-gray-500 mt-1">המערכת סיננה רכיבי משנה והשאירה רק ציונים סופיים. אנא אשר את הנתונים.</p>
+                        <p className="text-sm text-gray-500 mt-1">אנא וודא שהציונים שנקלטו תואמים לתעודת הבגרות שלך.</p>
                     </div>
                     <Button variant="ghost" onClick={onClose} className="hover:bg-gray-200 rounded-full w-10 h-10 p-0">
                         <X className="w-5 h-5" />
@@ -79,13 +196,16 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
 
                 {/* Missing Subjects Alert */}
                 {missingSubjects.length > 0 && (
-                    <div className="bg-orange-50 px-6 py-3 border-b border-orange-100 flex items-start gap-3 text-sm text-orange-800">
-                        <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                    <div className="bg-orange-50 px-6 py-4 border-b border-orange-100 flex items-start gap-4">
+                        <div className="bg-orange-100 p-2 rounded-full shrink-0">
+                            <AlertCircle className="w-5 h-5 text-orange-600" />
+                        </div>
                         <div>
-                            <span className="font-bold block mb-1">שים לב! נראה שחסרים מקצועות חובה:</span>
+                            <span className="font-bold text-orange-900 block mb-1 text-sm">חסרים מקצועות חובה בתעודה!</span>
+                            <p className="text-xs text-orange-800 mb-2">יתכן וחסרים לך מקצועות חובה לחישוב ממוצע תקין. אנא בדוק אם חסר:</p>
                             <div className="flex flex-wrap gap-2">
                                 {missingSubjects.map(s => (
-                                    <span key={s.name} className="bg-white border border-orange-200 px-2 py-0.5 rounded text-xs text-orange-700 font-medium">
+                                    <span key={s.name} className="bg-white border border-orange-200 px-2 py-1 rounded text-xs text-orange-700 font-bold shadow-sm">
                                         {s.name}
                                     </span>
                                 ))}
@@ -94,118 +214,17 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
                     </div>
                 )}
 
-                {/* Alert Bar */}
-                <div className="bg-yellow-50 px-6 py-3 border-b border-yellow-100 flex items-center gap-3 text-sm text-yellow-800">
-                    <AlertCircle className="w-4 h-4 text-yellow-600" />
-                    <span>טיפ: וודא שמופיעים רק ציונים סופיים. מחק שורות כפולות אם יש.</span>
-                </div>
-
                 {/* Table - Scrollable Body */}
-                <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent bg-gray-50/50">
                     {grades.length === 0 ? (
                         <div className="text-center py-10 text-gray-400">
                             לא נמצאו ציונים. נסה להוסיף שורה ידנית.
                         </div>
                     ) : (
-                        <div className="border rounded-lg overflow-hidden shadow-sm">
-                            <table className="w-full text-sm text-right">
-                                <thead className="bg-gray-100 text-gray-600 font-medium">
-                                    <tr>
-                                        <th className="p-3 w-10"></th>
-                                        <th className="p-3">מקצוע (חובה/בחירה)</th>
-                                        <th className="p-3 w-24 text-center">סמל שאלון</th>
-                                        <th className="p-3 w-32 text-center">מועד</th>
-                                        <th className="p-3 w-20 text-center">יח״ל</th>
-                                        <th className="p-3 w-24 text-center flex flex-col items-center gap-1">
-                                            <span>ציון סופי</span>
-                                            <div className="text-[10px] font-normal text-gray-400 flex gap-1">
-                                                <span className="text-green-600">90+</span>
-                                                <span>/</span>
-                                                <span className="text-red-500">&lt;55</span>
-                                            </div>
-                                        </th>
-                                        <th className="p-3 w-16"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y bg-white">
-                                    {grades.map((grade, index) => (
-                                        <tr key={index} className="hover:bg-blue-50/30 transition-colors group">
-                                            <td className="p-3 text-center text-gray-300 text-xs">{index + 1}</td>
-                                            <td className="p-2">
-                                                {/* Subject Select */}
-                                                <div className="relative">
-                                                    <select
-                                                        value={grade.subject}
-                                                        onChange={(e) => handleUpdate(index, 'subject', e.target.value)}
-                                                        className="appearance-none border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 w-full text-right font-medium pr-2 pl-8 cursor-pointer text-gray-900"
-                                                    >
-                                                        {/* Force current value option if not in lists, to preserve extracted text */}
-                                                        {!mandatorySubjects.includes(grade.subject) && !electiveSubjects.includes(grade.subject) && grade.subject !== 'מקצוע חדש' && (
-                                                            <option value={grade.subject}>{grade.subject} (מזוהה)</option>
-                                                        )}
-                                                        <option value="מקצוע חדש" disabled>בחר מקצוע...</option>
-
-                                                        <optgroup label="מקצועות חובה">
-                                                            {mandatorySubjects.map(s => (
-                                                                <option key={s} value={s}>{s}</option>
-                                                            ))}
-                                                        </optgroup>
-                                                        <optgroup label="מקצועות הגבר">
-                                                            {electiveSubjects.map(s => (
-                                                                <option key={s} value={s}>{s}</option>
-                                                            ))}
-                                                        </optgroup>
-                                                    </select>
-                                                </div>
-                                            </td>
-                                            <td className="p-2">
-                                                <Input
-                                                    value={grade.semel || ''}
-                                                    placeholder="-"
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(index, 'semel', e.target.value)}
-                                                    className="border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center w-full font-mono text-xs text-gray-500"
-                                                />
-                                            </td>
-                                            <td className="p-2">
-                                                <Input
-                                                    value={grade.examDate || ''}
-                                                    placeholder="-"
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(index, 'examDate', e.target.value)}
-                                                    className="border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center w-full"
-                                                />
-                                            </td>
-                                            <td className="p-2">
-                                                <Input
-                                                    type="number"
-                                                    value={grade.units}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(index, 'units', Number(e.target.value))}
-                                                    className="border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center font-bold w-full"
-                                                />
-                                            </td>
-                                            <td className="p-2">
-                                                <Input
-                                                    type="number"
-                                                    value={grade.grade}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleUpdate(index, 'grade', Number(e.target.value))}
-                                                    className={`border-transparent bg-transparent hover:bg-gray-50 focus:bg-white focus:border-blue-500 h-9 text-center font-bold w-full text-lg
-                                                        ${grade.grade >= 90 ? 'text-green-600' : grade.grade < 55 ? 'text-red-600' : 'text-blue-900'}`}
-                                                />
-                                            </td>
-                                            <td className="p-2 text-center">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(index)}
-                                                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 p-0 transition-all opacity-100"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <>
+                            {renderTableSection(mandatoryRows, 'מקצועות חובה', 'לא נמצאו מקצועות חובה. (זה לא תקין)')}
+                            {renderTableSection(electiveRows, 'מקצועות הרחבה (מגמות)', 'לא נמצאו מקצועות הרחבה.')}
+                        </>
                     )}
 
                     <Button variant="outline" onClick={handleAddRow} className="mt-4 w-full border-dashed border-gray-300 text-gray-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 py-4 h-auto">
@@ -217,8 +236,14 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
                 {/* Footer */}
                 <div className="p-6 border-t bg-white rounded-b-2xl flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-10 relative">
                     <div className="text-xs text-gray-400 flex flex-col gap-1">
-                        <span>* המערכת סיננה אוטומטית כפילויות.</span>
-                        <span>* לחץ על "אשר והזן" כדי לחשב את הממוצע.</span>
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span>ציון מעל 90</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                            <span>ציון נכשל (מתחת ל-55)</span>
+                        </div>
                     </div>
                     <div className="flex gap-3">
                         <Button
