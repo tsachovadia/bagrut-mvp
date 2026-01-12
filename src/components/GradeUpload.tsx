@@ -9,9 +9,10 @@ import { InfoBox } from './ui/InfoBox';
 interface GradeUploadProps {
     onGradesExtracted: (grades: SubjectGrade[]) => void;
     onSwitchToManual: () => void;
+    onScanError?: (error: string) => void;
 }
 
-export const GradeUpload = ({ onGradesExtracted, onSwitchToManual }: GradeUploadProps) => {
+export const GradeUpload = ({ onGradesExtracted, onSwitchToManual, onScanError }: GradeUploadProps) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
@@ -116,11 +117,20 @@ export const GradeUpload = ({ onGradesExtracted, onSwitchToManual }: GradeUpload
 
         } catch (err: any) {
             console.error(err);
-            setError(err.message || 'אירעה שגיאה בעת הפענוח. נסה שנית.');
+            // setError(err.message || 'אירעה שגיאה בעת הפענוח. נסה שנית.');
             setIsUploading(false);
-            // User requirement: "All this thing to happen in modal".
-            // We KEEP the process modal open so they can see the error and the Debug View (Raw Text).
-            setIsProcessModalOpen(true);
+
+            if (onScanError) {
+                // If parent provided error handler, use it:
+                // 1. Close modal
+                setIsProcessModalOpen(false);
+                // 2. Notify parent (which will switch tab and show banner)
+                onScanError('אופס, נתקלנו בבעיה זמנית בסריקת הקובץ. לא נורא, אפשר להזין את הציונים ידנית 👇');
+            } else {
+                // Fallback to old behavior (keep modal open with error)
+                setError(err.message || 'אירעה שגיאה בעת הפענוח. נסה שנית.');
+                setIsProcessModalOpen(true);
+            }
         } finally {
             setIsUploading(false);
         }

@@ -8,7 +8,7 @@ import { GradeExtractionService } from './api/services/grade-extraction';
 export function extractGradesMiddleware() {
     // Load env vars from .env file
     const env = loadEnv('', process.cwd(), '');
-    const GOOGLE_API_KEY = env.GOOGLE_API_KEY;
+    const GOOGLE_API_KEY = env.GEMINI_API_KEY;
 
     // Initialize Service
     const extractionService = new GradeExtractionService(GOOGLE_API_KEY);

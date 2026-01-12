@@ -43,11 +43,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(400).json({ error: 'No fileBase64 provided' });
         }
 
-        const apiKey = process.env.GOOGLE_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
         console.log("[API] Checking GOOGLE_API_KEY presence:", !!apiKey);
 
         if (!apiKey) {
-            console.error("[API] Error: Missing GOOGLE_API_KEY env var");
+            console.error("[API] Error: Missing GEMINI_API_KEY env var");
             return res.status(500).json({ error: 'Server configuration error' });
         }
 

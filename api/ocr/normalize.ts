@@ -24,9 +24,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { rawText } = req.body;
         if (!rawText) return res.status(400).json({ error: 'No rawText provided' });
 
-        const apiKey = process.env.GOOGLE_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            console.error("Missing GOOGLE_API_KEY");
+            console.error("Missing GEMINI_API_KEY");
             return res.status(500).json({ error: 'Server configuration error' });
         }
 

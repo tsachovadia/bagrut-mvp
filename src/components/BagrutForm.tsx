@@ -33,6 +33,7 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
     const [selectedElective, setSelectedElective] = useState<string>('');
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [scanError, setScanError] = useState<string | null>(null);
 
     // Sync to parent
     useEffect(() => {
@@ -100,10 +101,33 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         }));
     };
 
+
+    const handleScanError = (errorMessage: string) => {
+        setScanError(errorMessage);
+        setActiveTab('manual');
+    };
+
     const renderManualInput = () => {
         // Main Content - Form inputs (Right side on PC)
         const formContent = (
             <div className={`space-y-4 ${variant === 'compact' ? 'space-y-2' : ''}`}>
+                {scanError && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 relative group">
+                        <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-orange-800">
+                                {scanError}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setScanError(null)}
+                            className="text-orange-400 hover:text-orange-600 transition-colors"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
                 {/* Mobile Average Display - Removed (Lifted to Wizard) */}
 
                 {/* Sector Selection (Dropdown Picker) */}
@@ -264,6 +288,7 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         <GradeUpload
             onGradesExtracted={handleExtractedGrades}
             onSwitchToManual={() => setActiveTab('manual')}
+            onScanError={handleScanError}
         />
     );
 
