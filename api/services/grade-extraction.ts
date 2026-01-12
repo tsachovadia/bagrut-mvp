@@ -122,21 +122,21 @@ export class GradeExtractionService {
              2. **HEURISTICS FOR FINAL GRADE**:
                 - Look for Exam Codes (Semel/שאלון) ending in **"00"** (e.g., 035500, 022200, 034200, 899300). These are usually the Final Grades.
                 - If you see "Math 806" (035806) and "Math 807" (035807) AND "Math" (035500) -> OUTPUT ONLY 035500.
-             3. **MANDATORY SUBJECTS (Find these even if code doesn't end in 00)**:
-                - **Hebrew/Language (עברית/הבעה/לשון)**: Look for codes starting with 011 (e.g. 011100, 011107, 011108). Pick the one with the highest units or "Final" status.
-                - **Literature (ספרות)**: Look for codes like 008100, 008...
+             3. **MANDATORY SUBJECTS - CANONICAL MAPPING (Prevent Duplicates)**:
+                - **MUST MAP** the following variations to EXACTLY these subject names:
+                  - "תנ״ך", "תנ\"ך כללי", "מקרא", "תנך" -> **"תנ\״ך"**
+                  - "ספרות", "ספרות עברית", "ספרות (כללי)", "ספרות שאלון" -> **"ספרות"**
+                  - "עברית", "הבעה", "הבעה עברית", "לשון", "עברית - הבעה ולשון" -> **"עברית - הבעה ולשון"**
+                  - "היסטוריה", "היסטוריה (חובה)", "היסטוריה ממלכתי", "היסטוריה כללית" -> **"היסטוריה"**
+                  - "אזרחות", "אזרחות (חובה)" -> **"אזרחות"**
+                  - "אנגלית" -> **"אנגלית"**
+                  - "מתמטיקה" -> **"מתמטיקה"**
+                - **Detecting Mandatory Subjects**: Use these keywords even if the exam code does NOT end in "00".
              4. **IGNORE MODULES**: Do NOT output individual modules like 035806, 035807 unless no final grade row exists.
-             5. **FINAL OUTPUT**: Return a clean list of ~10-15 subjects containing:
-                - Bible (תנ״ך)
-                - Literature (ספרות) - MANDATORY
-                - Hebrew/Grammar (הבעה/עברית/לשון) - MANDATORY
-                - History (היסטוריה)
-                - Civics (אזרחות)
-                - Math (מתמטיקה)
-                - English (אנגלית)
-                - Plus any Electives (Physics, CS, Chemistry, etc.)
+             5. **FINAL OUTPUT**: Return a clean list of unique subjects. NO DUPLICATES. If multiple rows map to "History", pick the one with the highest units or final grade status.
              6. **Semel**: Extract the Exam Code (סמל שאלון).
              7. **Units**: Extract units (יח״ל).
+             8. **Grade**: Final Numeric Grade (0-100).
 
              Return ONLY the valid JSON array.`;
 
