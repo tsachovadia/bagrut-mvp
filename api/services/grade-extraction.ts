@@ -73,6 +73,13 @@ export class GradeExtractionService {
             console.log(`[GradeExtraction] Received result from model.`);
 
             const response = await result.response;
+
+            // Check for safety blocks
+            if (response.promptFeedback?.blockReason) {
+                console.error("[GradeExtraction] Blocked. Reason:", response.promptFeedback.blockReason);
+                throw new Error(`AI Model Blocked Request: ${response.promptFeedback.blockReason}`);
+            }
+
             const text = response.text();
 
             console.log(`[GradeExtraction] Phase 1 Complete. Text extracted successfully. Length: ${text.length}`);
