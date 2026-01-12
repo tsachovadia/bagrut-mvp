@@ -33,10 +33,114 @@ export const GradeVerificationModal = ({ initialGrades, isOpen, onClose, onSwitc
     // Filter lists for dropdowns
     const electiveDropdownOptions = ELECTIVE_SUBJECTS.map(s => s.name).filter(n => !mandatorySubjectsList.includes(n));
 
-    // Update local state when props change
+    // Update local state when props change, with Smart Merging
     useEffect(() => {
         if (isOpen) {
-            setGrades(initialGrades);
+            const smartMerge = (rawGrades: SubjectGrade[]) => {
+                const mergedMap = new Map<string, SubjectGrade>();
+                const mandatoryList = SECTOR_MANDATORY_SUBJECTS['mamlachti'];
+
+                // 1. First pass: Map existing grades
+                rawGrades.forEach(g => {
+                    mergedMap.set(g.subject, g);
+                });
+
+                // 2. Scan for variations and merge into canonical mandatory subjects
+                // If we have "Bible General" (85) and "Bible" (0), we want "Bible" (85)
+                const variationsMap: Record<string, string> = {
+                    'תנ"ך': 'תנ"ך',
+                    'תנ״ך': 'תנ"ך',
+                    'תנ"ך כללי': 'תנ"ך',
+                    'תנ״ך כללי': 'תנ"ך',
+                    'מקרא': 'תנ"ך',
+                    'ספרות': 'ספרות',
+                    'ספרות כללי': 'ספרות',
+                    'ספרות עברית': 'ספרות',
+                    'ספרות (כללי)': 'ספרות',
+                    'היסטוריה': 'היסטוריה',
+                    'היסטוריה כללית': 'היסטוריה',
+                    'היסטוריה (כללי)': 'היסטוריה',
+                    'היסטוריה ממלכתי': 'היסטוריה',
+                    'אזרחות': 'אזרחות',
+                    'עברית - הבעה ולשון': 'עברית - הבעה ולשון',
+                    'הבעה עברית': 'עברית - הבעה ולשון',
+                    'הבעה ולשון': 'עברית - הבעה ולשון',
+                    'לשון עברית': 'עברית - הבעה ולשון',
+                    'אנגלית': 'אנגלית',
+                    'מתמטיקה': 'מתמטיקה'
+                };
+
+                const result: SubjectGrade[] = [];
+                const processedIndices = new Set<string>();
+
+                // Helper to get grade value
+                const getGradeVal = (s: string) => mergedMap.get(s)?.grade || 0;
+
+                // Go through all raw grades
+                rawGrades.forEach((g) => {
+                    // Normalize name
+                    let canonicalName = g.subject;
+                    // Check direct map or fuzzy contains
+                    for (const [variation, target] of Object.entries(variationsMap)) {
+                        if (g.subject.includes(variation) && mandatoryList.includes(target)) {
+                            canonicalName = target;
+                            break;
+                        }
+                    }
+
+                    // If we already have this canonical name in our result map (or state), check if we should overwrite
+                    // But here we are building a fresh list. 
+                    // We need to check if we already processed a grade designated for this canonical name.
+                });
+
+                // Simpler approach:
+                // 1. Identify "Generic Mandatories" that are empty (grade 0)
+                // 2. Identify "Specific Variations" that have grades
+                // 3. Move Specific data to Generic slot
+                // 4. Filter out Specifics
+
+                let processedGrades = [...rawGrades];
+
+                // Iterate backwards to safely splice if needed, or just map/filter
+                // We'll create a new list
+
+                const finalGrades: SubjectGrade[] = [];
+                const handledMandatories = new Set<string>();
+
+                // Prioritize: Actual Mandatory entries with grades > Empty Mandatory > Variations with grades
+
+                // Actually, best way is to bucket them
+                const bucket: Record<string, SubjectGrade[]> = {};
+
+                processedGrades.forEach(g => {
+                    let key = g.subject;
+                    // Normalize key if it matches a mandatory variation
+                    for (const [variation, target] of Object.entries(variationsMap)) {
+                        if (g.subject === target || g.subject === variation || (g.subject.includes(variation) && variation.length > 3)) {
+                            // Only strictly map if it's a known variation or contains the core keyword
+                            key = target;
+                            break;
+                        }
+                    }
+                    if (!bucket[key]) bucket[key] = [];
+                    bucket[key].push(g);
+                });
+
+                // Reconstruct
+                Object.entries(bucket).forEach(([key, items]) => {
+                    if (items.length === 1) {
+                        finalGrades.push({ ...items[0], subject: key });
+                    } else {
+                        // Conflict resolution: take the one with highest grade or first non-zero
+                        const best = items.reduce((prev, curr) => (curr.grade > prev.grade ? curr : prev), items[0]);
+                        finalGrades.push({ ...best, subject: key });
+                    }
+                });
+
+                return finalGrades;
+            };
+
+            setGrades(smartMerge(initialGrades));
         }
     }, [initialGrades, isOpen]);
 
