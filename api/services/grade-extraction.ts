@@ -109,11 +109,11 @@ export class GradeExtractionService {
              REQUIRED JSON SCHEMA:
              [
                {
-                 "subject": string, // Hebrew Name
-                 "semel": string, // Exam Code (e.g., "035581") - Optional but preferred
-                 "units": number, // Units (e.g., 5, 4, 3)
-                 "grade": number, // Final Grade (ציון סופי) - numeric only
-                 "examDate": string // format "MM/YYYY" or "YYYY"
+                 "subject": "string (Hebrew Name)",
+                 "semel": "string (Exam Code e.g. 035581)",
+                 "units": "number (e.g. 5, 4, 3)",
+                 "grade": "number (Final Grade 0-100)",
+                 "examDate": "string (MM/YYYY)"
                }
              ]
 
@@ -138,13 +138,22 @@ export class GradeExtractionService {
              7. **Units**: Extract units (יח״ל).
              8. **Grade**: Final Numeric Grade (0-100).
 
-             Return ONLY the valid JSON array.`;
+             Return ONLY the valid JSON array. Do not include comments or markdown.`;
 
             const result = await normalizationModel.generateContent(prompt);
             const response = await result.response;
-            const jsonString = response.text();
+            let jsonString = response.text();
 
-            const parsedGrades = JSON.parse(jsonString);
+            // Sanitize Markdown
+            jsonString = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
+
+            let parsedGrades;
+            try {
+                parsedGrades = JSON.parse(jsonString);
+            } catch (e) {
+                console.error("[GradeExtraction] Failed to parse JSON:", jsonString);
+                throw new Error("Model returned invalid JSON");
+            }
 
             console.log(`[GradeExtraction] Phase 2 Complete. Items found: ${parsedGrades.length}`);
             return {
