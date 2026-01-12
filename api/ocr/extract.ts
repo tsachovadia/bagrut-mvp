@@ -1,6 +1,6 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GradeExtractionService } from '../services/grade-extraction';
+import { GradeExtractionService } from './grade-extraction';
 
 export const config = {
     api: {
