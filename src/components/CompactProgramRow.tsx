@@ -1,7 +1,8 @@
-import React from 'react';
-import { Building2, CheckCircle2, AlertCircle, ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
+import { Building2, CheckCircle2, AlertCircle, ChevronLeft, Heart } from 'lucide-react';
 import type { Program, AdmissionRequirement } from '../types/admission';
 import { checkReachable, type UserAdmissionStats } from '../utils/admission-evaluation';
+import { useTrackedDegrees } from '../context/TrackedDegreesContext';
 import { cn } from '../lib/utils';
 
 interface CompactProgramRowProps {
@@ -19,7 +20,9 @@ export const CompactProgramRow: React.FC<CompactProgramRowProps> = ({
     isSelected,
     onClick
 }) => {
-    const [imageError, setImageError] = React.useState(false);
+    const [imageError, setImageError] = useState(false);
+    const { isTracked, toggleTrack } = useTrackedDegrees();
+    const isHearted = isTracked(program.id);
 
     // Calculate reachability
     const isReachable = userStats ? checkReachable(userStats, admission) : null;
@@ -70,6 +73,18 @@ export const CompactProgramRow: React.FC<CompactProgramRowProps> = ({
 
             {/* 3. Duration & Status (Right Side) */}
             <div className="shrink-0 flex items-center gap-3">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTrack(program.id);
+                    }}
+                    className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                    <Heart
+                        className={cn("w-4 h-4 transition-all", isHearted ? "fill-red-500 text-red-500" : "text-gray-400")}
+                    />
+                </button>
+
                 <span className="hidden sm:inline-block text-[10px] text-gray-400 font-medium bg-gray-50 px-1.5 py-0.5 rounded">
                     {program.duration_years} שנים
                 </span>

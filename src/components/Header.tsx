@@ -1,5 +1,5 @@
 import { Button } from './ui/shim';
-import { Menu, X, GraduationCap, Users, HelpCircle, TrendingUp, ShoppingBag, MessageCircle, LogOut, User, BookOpen } from 'lucide-react';
+import { Menu, X, GraduationCap, Users, HelpCircle, TrendingUp, ShoppingBag, MessageCircle, LogOut, User, BookOpen, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { isProduction } from '../utils/env';
@@ -55,6 +55,7 @@ export function Header() {
                     <nav className="hidden md:flex flex-1 items-center justify-center space-x-1 space-x-reverse">
                         <NavItem onClick={() => navigate('/')} icon={<GraduationCap className="w-4 h-4" />} text="מחשבון בגרויות" />
                         <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
+                        <NavItem onClick={() => navigate('/tracking')} icon={<Heart className="w-4 h-4 text-pink-500" />} text="התארים שלי" />
                         <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="הקוקפיט (סימולטור)" />
                         <NavItem icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />
                         {!isProduction && (
@@ -143,6 +144,7 @@ export function Header() {
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                         <MobileNavItem onClick={() => { navigate('/'); setIsMenuOpen(false); }} text="לאן אני מתקבל" />
                         <MobileNavItem onClick={() => { navigate('/programs'); setIsMenuOpen(false); }} text="חיפוש תארים" />
+                        <MobileNavItem onClick={() => { navigate('/tracking'); setIsMenuOpen(false); }} text="התארים שלי" />
                         <MobileNavItem text="איך לשפר את הסכם" />
                         <MobileNavItem text="דעות אמיתיות של סטודנטים" />
                         <MobileNavItem text="קהילה בוואטסאפ" />

@@ -8,6 +8,9 @@ import {
 } from '../utils/calculator';
 import { type Sector } from '../utils/subjects';
 import { cn } from '../lib/utils';
+import { calculateUniversityBonuses } from '../utils/bonuses';
+import { BonusBreakdown } from './Dashboard/BonusBreakdown';
+import { BugReportWidget } from './BugReportWidget';
 
 interface AverageDisplayProps {
     grades: SubjectGrade[];
@@ -37,6 +40,8 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, 
             bgu: bguOptimal
         };
     }, [grades, sector]);
+
+    const bonuses = useMemo(() => calculateUniversityBonuses(grades), [grades]);
 
     const currentOptimal = averages[activeTab];
 
@@ -122,41 +127,53 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, 
                         </span>
                     </div>
                 </div>
+                {/* Bonus Breakdown */}
+                {activeTab === 'general' && (
+                    <div className="mt-4 border-t border-slate-100 pt-2">
+                        <BonusBreakdown bonuses={bonuses} />
+                    </div>
+                )}
             </div>
 
             {/* Dropped Subjects Info (Collapsible) */}
-            {(currentOptimal.subjects_dropped as DroppedSubject[]).length > 0 && (
-                <div className="bg-slate-50 border-t border-slate-100 transition-colors hover:bg-slate-100/50">
-                    <button
-                        onClick={() => setIsExpanded(!isExpanded)}
-                        className="w-full p-3 flex items-center justify-between text-xs text-slate-500"
-                    >
-                        <span className="flex items-center gap-2">
-                            <Info size={14} className="text-amber-500" />
-                            <span>
-                                {currentOptimal.subjects_dropped.length} מקצועות הושמטו לטובת הממוצע
-                                {!isExpanded && <span className="text-slate-400 mr-1 font-light">(לחץ לפירוט)</span>}
+            {
+                (currentOptimal.subjects_dropped as DroppedSubject[]).length > 0 && (
+                    <div className="bg-slate-50 border-t border-slate-100 transition-colors hover:bg-slate-100/50">
+                        <button
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="w-full p-3 flex items-center justify-between text-xs text-slate-500"
+                        >
+                            <span className="flex items-center gap-2">
+                                <Info size={14} className="text-amber-500" />
+                                <span>
+                                    {currentOptimal.subjects_dropped.length} מקצועות הושמטו לטובת הממוצע
+                                    {!isExpanded && <span className="text-slate-400 mr-1 font-light">(לחץ לפירוט)</span>}
+                                </span>
                             </span>
-                        </span>
-                        <ChevronDown size={14} className={cn("transition-transform duration-300 text-slate-400", isExpanded && "rotate-180")} />
-                    </button>
+                            <ChevronDown size={14} className={cn("transition-transform duration-300 text-slate-400", isExpanded && "rotate-180")} />
+                        </button>
 
-                    {isExpanded && (
-                        <div className="px-3 pb-3 space-y-2 animate-in slide-in-from-top-2 fade-in duration-200">
-                            {(currentOptimal.subjects_dropped as DroppedSubject[]).map((s) => (
-                                <div key={s.id} className="text-[11px] bg-white border border-slate-200 rounded-lg p-2.5 flex items-start gap-3 shadow-sm">
-                                    <div className="font-bold text-slate-700 whitespace-nowrap bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
-                                        {s.subject}
+                        {isExpanded && (
+                            <div className="px-3 pb-3 space-y-2 animate-in slide-in-from-top-2 fade-in duration-200">
+                                {(currentOptimal.subjects_dropped as DroppedSubject[]).map((s) => (
+                                    <div key={s.id} className="text-[11px] bg-white border border-slate-200 rounded-lg p-2.5 flex items-start gap-3 shadow-sm">
+                                        <div className="font-bold text-slate-700 whitespace-nowrap bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
+                                            {s.subject}
+                                        </div>
+                                        <div className="text-slate-500 leading-snug">
+                                            {s.reasonDescription || 'הושמט לשיפור הממוצע'}
+                                        </div>
                                     </div>
-                                    <div className="text-slate-500 leading-snug">
-                                        {s.reasonDescription || 'הושמט לשיפור הממוצע'}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+            {/* Feedback Widget moved inside */}
+            <div className="border-t border-slate-100 p-4 bg-slate-50/30">
+                <BugReportWidget />
+            </div>
+        </div >
     );
 };

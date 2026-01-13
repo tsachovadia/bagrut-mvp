@@ -2,9 +2,10 @@ import React from 'react';
 import { AdminShell } from '../../components/Admin/AdminShell';
 import { UsersTable } from '../../components/Admin/CRM/UsersTable';
 import { SoftLeadsTable } from '../../components/Admin/CRM/SoftLeadsTable';
+import { FeedbackTable } from '../../components/Admin/CRM/FeedbackTable';
 
 export const CRMPage = () => {
-    const [activeTab, setActiveTab] = React.useState<'users' | 'leads'>('users');
+    const [activeTab, setActiveTab] = React.useState<'users' | 'leads' | 'feedback'>('users');
 
     return (
         <AdminShell title="ניהול משתמשים ולידים">
@@ -59,9 +60,18 @@ export const CRMPage = () => {
                         >
                             לידים מהירים (New)
                         </button>
+                        <button
+                            onClick={() => setActiveTab('feedback')}
+                            className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'feedback'
+                                ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                                }`}
+                        >
+                            משוב ותקלות 🐛
+                        </button>
                     </div>
 
-                    {activeTab === 'users' ? <UsersTable /> : <SoftLeadsTable />}
+                    {activeTab === 'users' ? <UsersTable /> : activeTab === 'leads' ? <SoftLeadsTable /> : <FeedbackTable />}
                 </div>
             </div>
         </AdminShell>

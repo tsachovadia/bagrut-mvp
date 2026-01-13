@@ -3,6 +3,8 @@ import path from 'path';
 import { exec } from 'child_process';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleAIFileManager } from '@google/generative-ai/server';
 
 // Load environment variables
 const __filename = fileURLToPath(import.meta.url);
@@ -11,7 +13,7 @@ const rootDir = path.resolve(__dirname, '../../');
 dotenv.config({ path: path.join(rootDir, '.env') });
 
 const ASSETS_DIR = path.join(rootDir, 'marketing/assets/reels');
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
+const GOOGLE_API_KEY = process.env.GEMINI_API_KEY;
 
 // Check if directory exists
 if (!fs.existsSync(ASSETS_DIR)) {
@@ -20,7 +22,7 @@ if (!fs.existsSync(ASSETS_DIR)) {
 }
 
 console.log(`📂 Scanning: ${ASSETS_DIR}`);
-console.log(`🔑 API Key Present: ${!!OPENAI_API_KEY}`);
+console.log(`🔑 API Key Present: ${!!GOOGLE_API_KEY}`);
 
 async function extractAudio(videoPath) {
     const audioPath = videoPath.replace(/\.(mp4|mov|avi)$/i, '.mp3');
@@ -46,38 +48,44 @@ async function transcribeAudio(audioPath) {
         return;
     }
 
-    if (!OPENAI_API_KEY) {
-        console.warn(`   ⚠️ Skipping transcription: No API Key (OPENAI_API_KEY/OPENROUTER_API_KEY) found.`);
+    if (!GOOGLE_API_KEY) {
+        console.warn(`   ⚠️ Skipping transcription: No API Key (GEMINI_API_KEY) found.`);
         return;
     }
 
-    console.log(`   🎙️ Transcribing: ${path.basename(audioPath)}...`);
-
-    const formData = new FormData();
-    const fileBuffer = fs.readFileSync(audioPath);
-    const blob = new Blob([fileBuffer], { type: 'audio/mpeg' });
-    formData.append('file', blob, path.basename(audioPath));
-    formData.append('model', 'whisper-1');
+    console.log(`   🎙️ Transcribing with Gemini: ${path.basename(audioPath)}...`);
 
     try {
-        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: formData
+        const fileManager = new GoogleAIFileManager(GOOGLE_API_KEY);
+        const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+
+        // Upload file
+        const uploadResult = await fileManager.uploadFile(audioPath, {
+            mimeType: "audio/mp3",
+            displayName: path.basename(audioPath),
         });
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`API Error: ${response.status} ${errText}`);
-        }
+        console.log(`      Upload successful: ${uploadResult.file.uri}`);
 
-        const data = await response.json();
+        // Wait for processing? Usually audio is fast, but let's just generate.
+        // Prompt for transcription
+        const result = await model.generateContent([
+            "Transcribe this audio file verbatim. Output only the text.",
+            {
+                fileData: {
+                    fileUri: uploadResult.file.uri,
+                    mimeType: uploadResult.file.mimeType,
+                },
+            },
+        ]);
+
+        const text = result.response.text();
+
         const analysis = {
             filename: path.basename(audioPath),
-            text: data.text,
-            duration: data.duration, // Whisper usually returns duration, if not we might need ffmpeg for it
+            text: text,
+            provider: 'gemini-1.5-flash',
             timestamp: new Date().toISOString()
         };
 
@@ -85,7 +93,7 @@ async function transcribeAudio(audioPath) {
         console.log(`   ✅ Saved analysis to: ${path.basename(jsonPath)}`);
 
     } catch (error) {
-        console.error(`   ❌ Transcription failed:`, error.message);
+        console.error(`   ❌ Transcription failed:`, error);
     }
 }
 

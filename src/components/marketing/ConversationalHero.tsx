@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 import { trackEvent } from '../../utils/gtm';
 
 interface ConversationalHeroProps {
-    onUploaded: (text: string) => void;
+    onStartUpload: () => void;
     onManual: () => void;
 }
 
-export function ConversationalHero({ onUploaded, onManual }: ConversationalHeroProps) {
+export function ConversationalHero({ onStartUpload, onManual }: ConversationalHeroProps) {
 
     // Simple handler to trigger the file input (reusing existing logic if possible, 
     // or we can implement a drag-zone here later. For now, let's keep it simple: 
@@ -35,37 +35,68 @@ export function ConversationalHero({ onUploaded, onManual }: ConversationalHeroP
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg mx-auto">
+                <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+                    {/* Option 1: Have PDF - Primary Action */}
                     <button
                         onClick={() => {
-                            trackEvent('survey_has_pdf', { value: 'yes' });
-                            onManual(); // Ideally this opens the wizard in "Upload Mode"
+                            trackEvent('hero_action', { action: 'upload_pdf' });
+                            onStartUpload();
                         }}
-                        className="group relative flex flex-col items-center justify-center p-6 bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-100 hover:border-indigo-300 rounded-2xl transition-all duration-300 hover:scale-105"
+                        className="group relative flex items-center justify-between p-4 bg-[#1877F2] hover:bg-[#1559B2] text-white rounded-2xl shadow-lg shadow-blue-200 transition-all duration-300 hover:scale-[1.02] border border-blue-600"
                     >
-                        <div className="bg-indigo-600 text-white rounded-full p-3 mb-3 shadow-lg group-hover:shadow-indigo-300/50 transition-shadow">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        <div className="flex items-center gap-4">
+                            <div className="bg-white/20 p-2 rounded-xl">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </div>
+                            <div className="text-right">
+                                <span className="block text-lg font-bold">כן, יש לי!</span>
+                                <span className="text-xs text-blue-100 opacity-90">גרור אותו למחשבון</span>
+                            </div>
+                        </div>
+                        <div className="bg-white/10 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </div>
-                        <span className="text-lg font-bold text-gray-900">כן, יש לי!</span>
-                        <span className="text-sm text-gray-500 mt-1">גרור אותו למחשבון</span>
                     </button>
 
-                    <button
-                        onClick={() => {
-                            trackEvent('survey_has_pdf', { value: 'no' });
-                            onManual(); // Opens the wizard in "Manual Mode"
-                        }}
-                        className="group relative flex flex-col items-center justify-center p-6 bg-white hover:bg-gray-50 border-2 border-gray-100 hover:border-gray-200 rounded-2xl transition-all duration-300 hover:scale-105"
+                    {/* Option 2: Ministry Link - Secondary Action */}
+                    <a
+                        href="https://students.education.gov.il/matriculation-exams/grades"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackEvent('hero_action', { action: 'ministry_link' })}
+                        className="group relative flex items-center justify-between p-4 bg-white hover:bg-gray-50 text-gray-700 rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm transition-all duration-300 hover:scale-[1.02]"
                     >
-                        <div className="bg-gray-200 text-gray-600 rounded-full p-3 mb-3">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        <div className="flex items-center gap-4">
+                            <div className="bg-gray-100 p-2 rounded-xl text-gray-500 group-hover:text-[#1877F2] transition-colors">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <div className="text-right">
+                                <span className="block text-lg font-bold">אין לי את הקובץ</span>
+                                <span className="text-xs text-gray-500">קח אותי למשרד החינוך להנפיק</span>
+                            </div>
+                        </div>
+                        <div className="text-gray-300 group-hover:text-[#1877F2] transition-colors">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
                         </div>
-                        <span className="text-lg font-bold text-gray-900">לא, אין לי</span>
-                        <span className="text-sm text-gray-500 mt-1">אזין ידנית / אוריד מהמשרד</span>
+                    </a>
+
+                    {/* Option 3: Manual Entry - Tertiary Action */}
+                    <button
+                        onClick={() => {
+                            trackEvent('hero_action', { action: 'manual_entry' });
+                            onManual();
+                        }}
+                        className="text-sm text-gray-400 hover:text-gray-600 font-medium py-2 transition-colors underline decoration-gray-300 hover:decoration-gray-500 underline-offset-4"
+                    >
+                        אני מעדיף להקליד ידנית
                     </button>
                 </div>
 

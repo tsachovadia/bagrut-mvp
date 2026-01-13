@@ -53,8 +53,8 @@ export const HomePage = ({
 
     const handleModalClose = () => {
         setShowModal(false);
-        // Start tour after modal closes
-        setStartTour(true);
+        // Tour disabled for v2 flow
+        // setStartTour(true);
     };
 
     return (
@@ -84,7 +84,7 @@ export const HomePage = ({
                 </div>
 
                 <SmartWelcomeModal isOpen={showModal} onClose={handleModalClose} />
-                <GuidedTour startTrigger={startTour} onEnd={() => setStartTour(false)} />
+                {/* <GuidedTour startTrigger={startTour} onEnd={() => setStartTour(false)} /> */}
 
                 {/* WhatsApp Group CTA - Visible always or conditionally */}
                 <div className="flex justify-center my-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
@@ -104,7 +104,7 @@ export const HomePage = ({
                 {!wizardStarted && (
                     <section id="hero-section" className="animate-in fade-in zoom-in-95 duration-500">
                         <ConversationalHero
-                            onUploaded={() => { setWizardMode('upload'); setWizardStarted(true); }}
+                            onStartUpload={() => { setWizardMode('upload'); setWizardStarted(true); }}
                             onManual={() => { setWizardMode('manual'); setWizardStarted(true); }}
                         />
                     </section>

@@ -21,6 +21,7 @@ export interface UserData {
     preferences: UserPreferences;
     sector?: string; // Persist sector choice
     savedSimulations?: SavedSimulation[];
+    trackedPrograms?: string[];
 }
 
 const LOCAL_STORAGE_KEY = 'bagrut_plus_data';
@@ -63,6 +64,7 @@ export const saveUserData = async (data: UserData) => {
                     // Map Preferences
                     institution_pref: data.preferences.institutions,
                     major_subjects: data.preferences.fields,
+                    tracked_programs: data.trackedPrograms || [],
                     updated_at: new Date().toISOString()
                 };
 
@@ -145,14 +147,18 @@ export const loadUserData = async (): Promise<UserData | null> => {
                     psychometric: psychometric,
                     preferences: preferences,
                     sector: undefined, // Sector not in user_profiles explicitly (maybe via school?)
-                    savedSimulations: savedSims
+                    savedSimulations: savedSims,
+                    trackedPrograms: (data.tracked_programs as string[]) || []
                 };
             }
         }
     } catch (e) { /* ignore */ }
 
+    // Fallback or default return
     return null;
 };
+
+
 
 export const clearAllUserData = async () => {
     // 1. Clear Local Storage

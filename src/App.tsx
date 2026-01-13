@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { TrackedDegreesProvider } from './context/TrackedDegreesContext';
 import './App.css';
 import { HomePage } from './pages/HomePage';
 import { ProgramPage } from './pages/ProgramPage';
@@ -10,6 +11,7 @@ import { loadUserData, saveUserData } from './lib/userData';
 import { TermsOfUse } from './components/TermsOfUse';
 import { CookieConsent } from './components/CookieConsent';
 import { AccessibilityWidget } from './components/AccessibilityWidget';
+import { TrackedDegreesFloatingMenu } from './components/TrackedDegreesFloatingMenu';
 import { useNavigate } from 'react-router-dom';
 
 import { ProgramsExplorer } from './components/ProgramsExplorer/ProgramsExplorer';
@@ -22,6 +24,7 @@ import { SignalsPage } from './pages/Admin/SignalsPage';
 import { GroupsPage } from './pages/Admin/GroupsPage';
 import { PartnersPage } from './pages/Admin/PartnersPage';
 import { isProduction } from './utils/env';
+import { TrackedDegreesPage } from './pages/TrackedDegreesPage';
 
 function App() {
   const navigate = useNavigate();
@@ -39,6 +42,7 @@ function App() {
   const [formKey, setFormKey] = useState(0); // Kept for forced re-renders if needed
   const [wizardStarted, setWizardStarted] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [userData, setUserData] = useState<any>(null); // Store full user data for context
 
   // Load initial data
   useEffect(() => {
@@ -54,6 +58,7 @@ function App() {
         setWizardStarted(true); // If data exists, likely returning user
         // Sync local state to avoid re-showing modal
         localStorage.setItem('lead_captured', 'true');
+        setUserData(data); // Save for provider
       }
       setDataLoaded(true);
     }
@@ -103,42 +108,47 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route path="/" element={
-        <HomePage
-          wizardStarted={wizardStarted}
-          setWizardStarted={setWizardStarted}
-          bagrutGrades={bagrutGrades}
-          handleBagrutUpdate={handleBagrutUpdate}
-          psychometric={psychometric}
-          handlePsychometricUpdate={handlePsychometricUpdate}
-          results={results}
+    <TrackedDegreesProvider initialIds={userData?.trackedPrograms || []} userData={userData}>
+      <Routes>
+        <Route path="/" element={
+          <HomePage
+            wizardStarted={wizardStarted}
+            setWizardStarted={setWizardStarted}
+            bagrutGrades={bagrutGrades}
+            handleBagrutUpdate={handleBagrutUpdate}
+            psychometric={psychometric}
+            handlePsychometricUpdate={handlePsychometricUpdate}
+            results={results}
 
-          preferences={preferences}
-          onPreferencesUpdate={handlePreferencesUpdate}
-        />
-      } />
-      <Route path="/programs" element={
-        <div className="min-h-screen flex flex-col font-sans" dir="rtl">
-          <Header />
-          <ProgramsExplorer userStats={userStats} trackedDegrees={results} />
-          <Footer />
-        </div>
-      } />
-      <Route path="/program/:id" element={<ProgramPage />} />
-      <Route path="/dashboard" element={
-        <div className="min-h-screen flex flex-col font-sans" dir="rtl">
-          <Header />
-          <UnifiedDashboard />
-        </div>
-      } />
-      <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
-      <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
-      <Route path="/admin/shadow" element={!isProduction ? <CRMPage /> : <Navigate to="/" />} />
-      <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
-      <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
-      <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
-    </Routes>
+            preferences={preferences}
+            onPreferencesUpdate={handlePreferencesUpdate}
+          />
+        } />
+        <Route path="/programs" element={
+          <div className="min-h-screen flex flex-col font-sans" dir="rtl">
+            <Header />
+            <ProgramsExplorer userStats={userStats} trackedDegrees={results} />
+            <Footer />
+          </div>
+        } />
+        <Route path="/program/:id" element={<ProgramPage />} />
+        <Route path="/dashboard" element={
+          <div className="min-h-screen flex flex-col font-sans" dir="rtl">
+            <Header />
+            <UnifiedDashboard />
+          </div>
+        } />
+        <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
+        <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
+        <Route path="/admin/shadow" element={!isProduction ? <CRMPage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
+      </Routes>
+      <CookieConsent />
+      <AccessibilityWidget />
+      <TrackedDegreesFloatingMenu />
+    </TrackedDegreesProvider>
   );
 }
 

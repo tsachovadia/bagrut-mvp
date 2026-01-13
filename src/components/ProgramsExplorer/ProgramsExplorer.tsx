@@ -190,9 +190,8 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                     {/* Left Panel (RTL): Tracked Degrees - 2 Cols */}
                     <div className="hidden lg:block lg:col-span-2 sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar order-1 lg:order-3">
                         <TrackedDegreesWidget
-                            trackedDegrees={trackedDegrees}
+                            availablePrograms={programs}
                             className="shadow-sm border-gray-200"
-                            onRemove={(name) => console.log('Remove', name)}
                         />
                     </div>
                 </div>
