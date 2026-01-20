@@ -47,7 +47,7 @@ export function Header() {
 
                     {/* Logo / Brand */}
                     <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer group" onClick={() => navigate('/')}>
-                        <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg shadow-sm transition-all duration-300 object-cover" />
+                        <img src="/logo_new.png" alt="Logo" className="w-10 h-10 rounded-full shadow-sm transition-all duration-300 object-cover" />
                         <span className="text-lg font-bold text-gray-900 tracking-tight">מתלבטים בלימודים</span>
                     </div>
 
@@ -73,7 +73,7 @@ export function Header() {
                                 {user.user_metadata?.avatar_url ? (
                                     <img src={user.user_metadata.avatar_url} alt="Profile" className="w-8 h-8 rounded-full border border-gray-200" />
                                 ) : (
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                    <div className="w-8 h-8 rounded-full bg-brand-purple-100 flex items-center justify-center text-brand-purple-600">
                                         <User className="h-4 w-4" />
                                     </div>
                                 )}
@@ -90,7 +90,7 @@ export function Header() {
                             <Button
                                 variant="outline"
                                 onClick={handleLogin}
-                                className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 font-medium"
+                                className="flex items-center gap-2 border-brand-purple-200 text-brand-purple-700 hover:bg-brand-purple-50 font-medium"
                             >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                                     <path
@@ -180,9 +180,9 @@ function NavItem({ text, icon, onClick }: { text: string; icon?: React.ReactNode
         <a
             href="#"
             onClick={(e) => { e.preventDefault(); onClick?.(); }}
-            className="group inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
+            className="group inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-brand-purple-600 hover:bg-brand-purple-50 rounded-md transition-all duration-200"
         >
-            {icon && <span className="ml-2 text-gray-400 group-hover:text-blue-500 transition-colors">{icon}</span>}
+            {icon && <span className="ml-2 text-gray-400 group-hover:text-brand-purple-500 transition-colors">{icon}</span>}
             {text}
         </a>
     );
@@ -193,7 +193,7 @@ function MobileNavItem({ text, onClick }: { text: string; onClick?: () => void }
         <a
             href="#"
             onClick={(e) => { e.preventDefault(); onClick?.(); }}
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 text-right"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-purple-600 hover:bg-gray-50 text-right"
         >
             {text}
         </a>

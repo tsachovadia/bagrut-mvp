@@ -164,7 +164,7 @@ export const GradeUpload = ({ onGradesExtracted, onSwitchToManual, onScanError }
 
             <div
                 className={`border-3 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer overflow-hidden relative
-                    ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-blue-300'}
+                    ${isDragging ? 'border-brand-purple-500 bg-brand-purple-50' : 'border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-brand-purple-300'}
                     ${isUploading ? 'opacity-50 pointer-events-none' : ''}
                 `}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -186,7 +186,7 @@ export const GradeUpload = ({ onGradesExtracted, onSwitchToManual, onScanError }
                     onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
                 />
 
-                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-brand-purple-100 text-brand-purple-600 rounded-full flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
                     <UploadCloud className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">גרור לכאן צילום של גליון הציונים</h3>
@@ -194,7 +194,7 @@ export const GradeUpload = ({ onGradesExtracted, onSwitchToManual, onScanError }
                     המערכת תפענח את הציונים אוטומטית (Gemini 2.0).<br />
                     תומך בתמונות (JPG, PNG) וקבצי PDF
                 </p>
-                <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50 pointer-events-none">
+                <Button variant="outline" className="border-brand-purple-200 text-brand-purple-700 hover:bg-brand-purple-50 pointer-events-none">
                     או בחר קובץ מהמחשב
                 </Button>
             </div>

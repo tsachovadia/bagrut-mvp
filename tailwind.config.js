@@ -7,6 +7,19 @@ export default {
     theme: {
         extend: {
             colors: {
+                brand: {
+                    purple: {
+                        50: '#F5F3FF',
+                        DEFAULT: '#7C3AED', // Violet-600
+                        600: '#7C3AED',
+                        700: '#6D28D9', // Violet-700
+                    },
+                    green: {
+                        100: '#ECFCCB',
+                        DEFAULT: '#65A30D', // Lime-600
+                        600: '#65A30D',
+                    }
+                },
                 apple: {
                     gray: '#F5F5F7',
                     blue: '#0071E3',

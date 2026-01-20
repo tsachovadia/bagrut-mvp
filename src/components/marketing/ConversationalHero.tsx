@@ -34,7 +34,7 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
 
             {/* Background Decor */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none opacity-30 blur-3xl -z-10">
-                <div className="absolute top-10 left-10 w-40 h-40 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+                <div className="absolute top-10 left-10 w-40 h-40 bg-brand-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
                 <div className="absolute top-10 right-10 w-40 h-40 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
                 <div className="absolute -bottom-8 left-20 w-40 h-40 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
             </div>
@@ -50,7 +50,7 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                     <span className="inline-block text-4xl mb-2 animate-bounce-slow">🚀</span>
                     <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-tight">
                         בוא נבדוק את<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">סיכויי הקבלה שלך</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-purple-600 to-brand-green-600">סיכויי הקבלה שלך</span>
                     </h1>
                     <p className="text-gray-500 font-medium text-lg px-4">
                         הדרך המהירה והמדויקת ביותר, בחינם.
@@ -69,18 +69,18 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                             trackEvent('interaction_start', { method: 'ai', source: 'hero_card' });
                             onStartUpload();
                         }}
-                        className="relative group overflow-hidden bg-white/60 backdrop-blur-xl border border-white/60 hover:border-purple-300 shadow-xl shadow-purple-500/10 rounded-3xl p-6 text-right transition-all duration-300"
+                        className="relative group overflow-hidden bg-white/60 backdrop-blur-xl border border-white/60 hover:border-brand-purple-300 shadow-xl shadow-brand-purple-500/10 rounded-3xl p-6 text-right transition-all duration-300"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-purple-50/50 to-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                         <div className="absolute top-4 left-4">
-                            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-purple-500/30 animate-pulse">
+                            <div className="bg-gradient-to-r from-brand-purple-600 to-brand-purple-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-brand-purple-500/30 animate-pulse">
                                 מומלץ ✨
                             </div>
                         </div>
 
                         <div className="relative flex items-center gap-5">
-                            <div className="bg-purple-100/80 p-3.5 rounded-2xl shadow-inner group-hover:bg-purple-100 transition-colors">
+                            <div className="bg-brand-purple-100/80 p-3.5 rounded-2xl shadow-inner group-hover:bg-brand-purple-100 transition-colors">
                                 <span className="text-3xl">📸</span>
                             </div>
                             <div>
@@ -99,10 +99,10 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                             trackEvent('interaction_start', { method: 'manual', source: 'hero_card' });
                             onManual();
                         }}
-                        className="group bg-white/40 backdrop-blur-md border border-white/50 hover:border-blue-300 shadow-lg shadow-blue-500/5 rounded-3xl p-6 text-right transition-all duration-300"
+                        className="group bg-white/40 backdrop-blur-md border border-white/50 hover:border-brand-green-300 shadow-lg shadow-brand-green-500/5 rounded-3xl p-6 text-right transition-all duration-300"
                     >
                         <div className="flex items-center gap-5">
-                            <div className="bg-blue-50/80 p-3.5 rounded-2xl group-hover:bg-blue-100 transition-colors">
+                            <div className="bg-brand-green-50/80 p-3.5 rounded-2xl group-hover:bg-brand-green-100 transition-colors">
                                 <span className="text-3xl">✏️</span>
                             </div>
                             <div>

@@ -219,7 +219,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                                 <p className="text-sm text-gray-500">לא נמצאו תוצאות לחיפוש זה</p>
                                 <Button
                                     variant="link"
-                                    className="text-blue-600 text-sm"
+                                    className="text-brand-purple-600 text-sm"
                                     onClick={() => handleFilterUpdate([], [])}
                                 >
                                     נקה סינונים

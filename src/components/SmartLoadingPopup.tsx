@@ -23,7 +23,7 @@ export const SmartLoadingPopup = ({ phase }: SmartLoadingPopupProps) => {
                 {/* Step 1: Scanning (OCR) */}
                 <div className={`flex items-center gap-4 transition-colors duration-500 ${phase !== 'scanning' ? 'opacity-50' : 'opacity-100'}`}>
                     <div className={`relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors duration-300
-                        ${phase === 'scanning' ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-green-500 bg-green-50 text-green-600'}
+                        ${phase === 'scanning' ? 'border-brand-purple-500 bg-brand-purple-50 text-brand-purple-600' : 'border-brand-green-500 bg-brand-green-50 text-brand-green-600'}
                     `}>
                         {phase === 'scanning' ? (
                             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
@@ -42,8 +42,8 @@ export const SmartLoadingPopup = ({ phase }: SmartLoadingPopupProps) => {
                 {/* Step 2: Processing (Normalization) */}
                 <div className={`flex items-center gap-4 transition-colors duration-500 ${phase === 'scanning' ? 'opacity-40' : 'opacity-100'}`}>
                     <div className={`relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors duration-300
-                        ${phase === 'processing' ? 'border-blue-500 bg-blue-50 text-blue-600' :
-                            phase === 'complete' ? 'border-green-500 bg-green-50 text-green-600' : 'border-gray-200 bg-gray-50 text-gray-400'}
+                        ${phase === 'processing' ? 'border-brand-purple-500 bg-brand-purple-50 text-brand-purple-600' :
+                            phase === 'complete' ? 'border-brand-green-500 bg-brand-green-50 text-brand-green-600' : 'border-gray-200 bg-gray-50 text-gray-400'}
                     `}>
                         {phase === 'processing' ? (
                             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>

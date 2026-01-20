@@ -23,7 +23,7 @@ export const Button = ({ children, onClick, variant, className = '', ...props }:
 
     // Variants
     const variants = {
-        primary: "bg-[#0071E3] text-white hover:bg-[#0077ED] shadow-lg shadow-blue-500/20 active:scale-95",
+        primary: "bg-brand-purple-600 text-white hover:bg-brand-purple-700 shadow-lg shadow-brand-purple-500/20 active:scale-95",
         outline: "border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 active:scale-95",
         ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:scale-95",
         destructive: "bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20",
@@ -40,7 +40,7 @@ export const Button = ({ children, onClick, variant, className = '', ...props }:
 
 export const Input = ({ className = '', ...props }: any) => (
     <input
-        className={`w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] transition-all duration-200 ${className}`}
+        className={`w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-purple-600/20 focus:border-brand-purple-600 transition-all duration-200 ${className}`}
         {...props}
     />
 );
@@ -62,7 +62,7 @@ export const Badge = ({ children, className = '' }: any) => (
 
 export const Progress = ({ value = 0, className = '' }: any) => (
     <div className={`w-full bg-gray-100 rounded-full h-2 ${className}`}>
-        <div className="bg-[#0071E3] h-2 rounded-full transition-all duration-500 ease-out" style={{ width: `${value}%` }}></div>
+        <div className="bg-brand-purple-600 h-2 rounded-full transition-all duration-500 ease-out" style={{ width: `${value}%` }}></div>
     </div>
 );
 
@@ -124,7 +124,7 @@ export const TabsContent = ({ value, children, className = '' }: any) => {
 };
 
 export const Textarea = ({ className = '', ...props }: any) => (
-    <textarea className={`w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] transition-all duration-200 ${className}`} {...props} />
+    <textarea className={`w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-purple-600/20 focus:border-brand-purple-600 transition-all duration-200 ${className}`} {...props} />
 );
 
 // Dialog Shim using Context

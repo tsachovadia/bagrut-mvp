@@ -31,7 +31,7 @@ export const CollapsibleCard = ({
         <div className={cn(
             "rounded-2xl transition-all duration-300 overflow-hidden border",
             isOpen
-                ? "bg-white/80 backdrop-blur-xl border-blue-100 shadow-xl shadow-blue-900/5 my-4"
+                ? "bg-white/80 backdrop-blur-xl border-brand-purple-100 shadow-xl shadow-brand-purple-900/5 my-4"
                 : "bg-white/40 backdrop-blur-sm border-white/50 my-2",
             isLocked && "opacity-60 grayscale pointer-events-none",
             className
@@ -48,8 +48,8 @@ export const CollapsibleCard = ({
                     {/* Status Icon */}
                     <div className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm",
-                        isCompleted ? "bg-green-100 text-green-600" :
-                            isOpen ? "bg-blue-100 text-blue-600" :
+                        isCompleted ? "bg-brand-green-100 text-brand-green-600" :
+                            isOpen ? "bg-brand-purple-100 text-brand-purple-600" :
                                 "bg-gray-100 text-gray-400"
                     )}>
                         {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : (icon || <div className="w-2 h-2 rounded-full bg-current" />)}
@@ -93,7 +93,7 @@ export const CollapsibleCard = ({
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                        <div className="border-t border-blue-50/50">
+                        <div className="border-t border-brand-purple-50/50">
                             {children}
                         </div>
                     </motion.div>

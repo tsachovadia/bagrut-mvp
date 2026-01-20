@@ -47,7 +47,7 @@ export const InteractiveLoader = () => {
     return (
         <div className="w-full max-w-md mx-auto text-center space-y-6">
             <div className="flex justify-center mb-6">
-                <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+                <Loader2 className="w-12 h-12 text-brand-purple-600 animate-spin" />
             </div>
 
             <div className="relative min-h-[200px] flex items-center justify-center">
@@ -70,8 +70,8 @@ export const InteractiveLoader = () => {
                                         onClick={() => handleAnswer(option)}
                                         className={`p-3 rounded-xl border text-sm font-medium transition-all duration-200
                                             ${answers[currentQuestion.id] === option
-                                                ? 'bg-blue-600 text-white border-blue-600 shadow-lg scale-105'
-                                                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                                ? 'bg-brand-purple-600 text-white border-brand-purple-600 shadow-lg scale-105'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-brand-purple-300 hover:bg-brand-purple-50'
                                             }`}
                                     >
                                         {option}
@@ -85,8 +85,8 @@ export const InteractiveLoader = () => {
                             animate={{ opacity: 1 }}
                             className="text-center space-y-4"
                         >
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                                <Check className="w-8 h-8 text-green-600" />
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-green-100 rounded-full mb-4">
+                                <Check className="w-8 h-8 text-brand-green-600" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-800">תודה! אנחנו מסיימים לעבד את הנתונים...</h3>
                             <p className="text-gray-500">מיד הכל יהיה מוכן</p>

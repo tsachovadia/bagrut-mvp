@@ -129,7 +129,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border border-gray-200"
                     >
-                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-12 h-12 bg-brand-purple-100 text-brand-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
@@ -146,7 +146,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="מספר נייד (לדוגמה: 050-1234567)"
-                                className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-center font-medium text-lg"
+                                className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-purple-500 focus:border-transparent outline-none transition-all text-center font-medium text-lg"
                                 dir="ltr"
                             />
 
@@ -155,10 +155,10 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                                     type="checkbox"
                                     checked={agreed}
                                     onChange={(e) => setAgreed(e.target.checked)}
-                                    className="mt-0.5 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                    className="mt-0.5 w-4 h-4 text-brand-purple-600 rounded border-gray-300 focus:ring-brand-purple-500"
                                 />
                                 <span>
-                                    אני מאשר/ת את <a href="/terms" target="_blank" className="text-blue-600 underline hover:text-blue-700">תנאי השימוש</a> ומדיניות הפרטיות, ומסכים/ה לקבל עדכונים והצעות רלוונטיות.
+                                    אני מאשר/ת את <a href="/terms" target="_blank" className="text-brand-purple-600 underline hover:text-brand-purple-700">תנאי השימוש</a> ומדיניות הפרטיות, ומסכים/ה לקבל עדכונים והצעות רלוונטיות.
                                 </span>
                             </label>
 
@@ -171,7 +171,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                             <button
                                 onClick={handlePhoneSubmit}
                                 disabled={submitting}
-                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                                className="w-full bg-brand-purple-600 hover:bg-brand-purple-700 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                             >
                                 {submitting ? 'שומר נתונים...' : 'הצג תוצאות'}
                             </button>
@@ -198,7 +198,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-white/90 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border border-white/50"
                     >
-                        <div className="w-16 h-16 bg-blue-100/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-600">
+                        <div className="w-16 h-16 bg-brand-purple-100/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-brand-purple-600">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
