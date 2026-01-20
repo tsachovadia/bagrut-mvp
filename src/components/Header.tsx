@@ -57,7 +57,7 @@ export function Header() {
                         <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
                         <NavItem onClick={() => navigate('/tracking')} icon={<Heart className="w-4 h-4 text-pink-500" />} text="התארים שלי" />
                         <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="הקוקפיט (סימולטור)" />
-                        <NavItem icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />
+                        <NavItem onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')} icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />
                         {!isProduction && (
                             <NavItem onClick={() => navigate('/admin/shadow')} icon={<Users className="w-4 h-4" />} text="CRM (Admin)" />
                         )}
@@ -147,7 +147,7 @@ export function Header() {
                         <MobileNavItem onClick={() => { navigate('/tracking'); setIsMenuOpen(false); }} text="התארים שלי" />
                         <MobileNavItem text="איך לשפר את הסכם" />
                         <MobileNavItem text="דעות אמיתיות של סטודנטים" />
-                        <MobileNavItem text="קהילה בוואטסאפ" />
+                        <MobileNavItem onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')} text="קהילה בוואטסאפ" />
 
                         <div className="pt-4 px-2 border-t mt-2">
                             {user ? (

@@ -17,6 +17,11 @@ export default defineConfig(({ mode }) => {
         }
       }
     ],
+    resolve: {
+      alias: {
+        "@": "/src",
+      },
+    },
   }
 })
 // Force reload Sun Jan 11 10:19:13 +07 2026

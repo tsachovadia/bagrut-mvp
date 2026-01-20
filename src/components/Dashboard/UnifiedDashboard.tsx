@@ -5,6 +5,7 @@ import { calculateAdmissionStats } from '../../utils/calculation-bridge';
 import type { SubjectGrade, PsychometricScores } from '../../utils/calculator';
 import { MyDataPanel } from './MyDataPanel';
 import { SimulationSidebar } from './SimulationSidebar';
+import { ResultsAuthGate } from '../ResultsAuthGate';
 
 import { TargetsPanel } from './TargetsPanel';
 import { SimulationInsightOverlay } from './SimulationInsightOverlay';
@@ -41,6 +42,7 @@ export const UnifiedDashboard = () => {
     useEffect(() => {
         async function init() {
             const data = await loadUserData();
+            console.log('[UnifiedDashboard] Loaded data:', data);
             if (data && data.bagrut?.length > 0 && data.psychometric?.general > 0) {
                 setOriginalData(data);
                 if (data.sector) setSector(data.sector);
@@ -248,57 +250,59 @@ export const UnifiedDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#F5F5F7] font-sans p-2 lg:p-3 dir-rtl lg:overflow-hidden overflow-y-auto" dir="rtl">
-            <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row gap-3 h-auto lg:h-[calc(100vh-24px)] overflow-hidden">
+        <ResultsAuthGate>
+            <div className="min-h-screen bg-[#F5F5F7] font-sans p-2 lg:p-3 dir-rtl lg:overflow-hidden overflow-y-auto" dir="rtl">
+                <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row gap-3 h-auto lg:h-[calc(100vh-24px)] overflow-hidden">
 
-                {/* 1. Sidebar (Rightmost in RTL) */}
-                <div className="hidden lg:block h-full shrink-0 relative z-20">
-                    <SimulationSidebar
-                        savedSimulations={originalData.savedSimulations || []}
-                        activeSimulationId={activeSimulationId}
-                        onSelect={handleLoadSimulation}
-                        onDelete={handleDeleteSimulation}
-                        originalBagrut={originalData.bagrut}
-                        originalPsychometric={originalData.psychometric}
-                    />
+                    {/* 1. Sidebar (Rightmost in RTL) */}
+                    <div className="hidden lg:block h-full shrink-0 relative z-20">
+                        <SimulationSidebar
+                            savedSimulations={originalData.savedSimulations || []}
+                            activeSimulationId={activeSimulationId}
+                            onSelect={handleLoadSimulation}
+                            onDelete={handleDeleteSimulation}
+                            originalBagrut={originalData.bagrut}
+                            originalPsychometric={originalData.psychometric}
+                        />
 
+                    </div>
+
+                    {/* 2. My Data (Center - Takes remaining space) */}
+                    <div className="flex-1 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0 relative z-10">
+                        <MyDataPanel
+                            originalBagrut={originalData.bagrut}
+                            originalPsychometric={originalData.psychometric}
+                            simulatedBagrut={simulatedBagrut}
+                            simulatedPsychometric={simulatedPsychometric}
+                            onSimulationUpdate={handleSimulationUpdate}
+                            onSaveSimulation={handleSaveSimulation}
+                            onUpdateSimulation={handleUpdateSimulation}
+                            onLoadSimulation={handleLoadSimulation}
+                            savedSimulations={originalData.savedSimulations || []}
+                            activeSimulationId={activeSimulationId}
+                            onReset={handleResetSimulation}
+                            sector={sector}
+                        />
+                    </div>
+
+                    {/* 3. Targets (Left Sidebar) */}
+                    <div className="h-full shrink-0 relative z-20 min-h-[500px] lg:min-h-0">
+                        <TargetsPanel
+                            simulatedStats={simulatedStats}
+                            originalStats={originalStats}
+                            targetDegree={targetDegree}
+                            setTargetDegree={setTargetDegree}
+                            allSimulationsStats={simulationsWithStats}
+                            preferences={originalData?.preferences}
+                            onPreferencesUpdate={handlePreferencesUpdate}
+                        />
+                    </div>
+
+                    {/* Insights Overlay */}
+                    <SimulationInsightOverlay insights={insights} isVisible={true} />
                 </div>
-
-                {/* 2. My Data (Center - Takes remaining space) */}
-                <div className="flex-1 h-full overflow-hidden flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100/50 min-h-[500px] lg:min-h-0 relative z-10">
-                    <MyDataPanel
-                        originalBagrut={originalData.bagrut}
-                        originalPsychometric={originalData.psychometric}
-                        simulatedBagrut={simulatedBagrut}
-                        simulatedPsychometric={simulatedPsychometric}
-                        onSimulationUpdate={handleSimulationUpdate}
-                        onSaveSimulation={handleSaveSimulation}
-                        onUpdateSimulation={handleUpdateSimulation}
-                        onLoadSimulation={handleLoadSimulation}
-                        savedSimulations={originalData.savedSimulations || []}
-                        activeSimulationId={activeSimulationId}
-                        onReset={handleResetSimulation}
-                        sector={sector}
-                    />
-                </div>
-
-                {/* 3. Targets (Left Sidebar) */}
-                <div className="h-full shrink-0 relative z-20 min-h-[500px] lg:min-h-0">
-                    <TargetsPanel
-                        simulatedStats={simulatedStats}
-                        originalStats={originalStats}
-                        targetDegree={targetDegree}
-                        setTargetDegree={setTargetDegree}
-                        allSimulationsStats={simulationsWithStats}
-                        preferences={originalData?.preferences}
-                        onPreferencesUpdate={handlePreferencesUpdate}
-                    />
-                </div>
-
-                {/* Insights Overlay */}
-                <SimulationInsightOverlay insights={insights} isVisible={true} />
             </div>
-        </div>
+        </ResultsAuthGate>
     );
 
 };

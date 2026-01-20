@@ -92,6 +92,7 @@ export const saveUserData = async (data: UserData) => {
 
 export const loadUserData = async (): Promise<UserData | null> => {
     // 1. Try Local Storage
+    let localData: UserData | null = null;
     try {
         const local = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (local) {
@@ -104,13 +105,32 @@ export const loadUserData = async (): Promise<UserData | null> => {
             if (!data.savedSimulations) {
                 data.savedSimulations = [];
             }
-            return data;
+            // Ensure savedSimulations is an array
+            if (!data.savedSimulations) {
+                data.savedSimulations = [];
+            }
+            localData = data;
         }
     } catch (e) { /* ignore */ }
 
-    // 2. Try Supabase (if logged in)
+    if (localData && !navigator.onLine) {
+        return localData;
+    }
+
+    // 2. Try Supabase (if logged in) or Sync Local->Cloud
     try {
         const { data: { session } } = await supabase.auth.getSession();
+
+        // SYNC: If we have local data and a user, force a save to ensure cloud is in sync
+        // Guard against infinite loops: only sync once per session load
+        const hasSynced = sessionStorage.getItem('has_synced_data');
+        if (localData && session?.user && !hasSynced) {
+            console.log('Syncing local data to cloud profile...');
+            sessionStorage.setItem('has_synced_data', 'true');
+            saveUserData(localData);
+            return localData;
+        }
+
         if (session?.user) {
             const { data } = await supabase
                 .from('user_profiles')
@@ -120,33 +140,37 @@ export const loadUserData = async (): Promise<UserData | null> => {
 
             if (data) {
                 // Map from user_profiles back to UserData structure
-                // Use type assertion as JSONB is returned as generic Json
                 const bagrutData = (data.bagrut_grades as any) || [];
                 const savedSims = (data.saved_simulations as any) || [];
 
-                // Construct psychometric object
-                // Construct psychometric object
                 const psychometric = {
-                    general: data.psycho_score_total || 0, // General score is the main one
+                    general: data.psycho_score_total || 0,
                     total: data.psycho_score_total || 0,
                     english: data.psycho_score_eng || 0,
                     quantitative: data.psycho_score_quant || 0,
-                    verbal: 0 // Not stored in schema currently, default to 0
+                    verbal: 0
                 };
 
-                // Construct preferences
                 const preferences: UserPreferences = {
                     fields: data.major_subjects || [],
                     institutions: data.institution_pref || [],
-                    isUndecided: false // Default/Not persisted explicitly
+                    isUndecided: false
                 };
 
-                console.log('UserData loaded from Supabase session');
+                // CRITICAL FAILOVER: If Cloud data is empty (no bagrut) but we have Local data,
+                // assume the Cloud is stale/empty and PREFER LOCAL to avoid "No Data" screen.
+                if (bagrutData.length === 0 && localData && localData.bagrut.length > 0) {
+                    console.warn('[loadUserData] Cloud profile found but has NO GRADES. Local data HAS GRADES. Preferring Local & Re-Syncing.');
+                    saveUserData(localData); // Force update cloud with local
+                    return localData;
+                }
+
+                console.log('[loadUserData] UserData loaded from Supabase session', { bagrutCount: bagrutData.length });
                 return {
                     bagrut: bagrutData,
                     psychometric: psychometric,
                     preferences: preferences,
-                    sector: undefined, // Sector not in user_profiles explicitly (maybe via school?)
+                    sector: undefined,
                     savedSimulations: savedSims,
                     trackedPrograms: (data.tracked_programs as string[]) || []
                 };

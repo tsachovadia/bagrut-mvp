@@ -196,10 +196,7 @@ export const ProgramDetailsCard: React.FC<ProgramDetailsCardProps> = ({ program,
 
                         <div className="flex flex-col sm:flex-row items-center gap-4 mt-8 pt-6 border-t border-gray-100">
                             <button
-                                onClick={() => {
-                                    // Todo: Connect to real WhatsApp group/bot
-                                    console.log('Connect to community clicked');
-                                }}
+                                onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')}
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#128C7E] transition-all shadow-sm hover:shadow-md group"
                             >
                                 <WhatsAppIcon className="w-5 h-5 fill-current" />

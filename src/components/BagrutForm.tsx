@@ -6,7 +6,8 @@ import { SECTOR_MANDATORY_SUBJECTS, SECTOR_NAMES, type Sector, getSubjectByName,
 import type { SubjectGrade } from '../utils/calculator';
 import { InfoBox } from './ui/InfoBox';
 import { calculateBonus } from '../utils/bonuses';
-import { BagrutSubjectRow } from './BagrutSubjectRow';
+import { BagrutSubjectCard } from './ui/BagrutSubjectCard';
+import { GradeEditDrawer } from './ui/GradeEditDrawer';
 import { GradeUpload } from './GradeUpload';
 import { DynamicInfoSidepanel } from './DynamicInfoSidepanel';
 import { AverageDisplay } from './AverageDisplay';
@@ -34,6 +35,9 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [scanError, setScanError] = useState<string | null>(null);
+
+    // State for Drawer
+    const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
 
     // Sync to parent
     useEffect(() => {
@@ -63,13 +67,21 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         });
     }, [sector]);
 
-    const updateGrade = (id: string, field: keyof SubjectGrade, value: any) => {
+    const handleSaveGrade = (grade: number, units: number) => {
+        if (!editingSubjectId) return;
+
         setGrades(prev => prev.map(g => {
-            if (g.id === id) {
-                return { ...g, [field]: value };
+            if (g.id === editingSubjectId) {
+                return { ...g, grade, units };
             }
             return g;
         }));
+    };
+
+    const handleRemoveSubject = () => {
+        if (!editingSubjectId) return;
+        setGrades(prev => prev.filter(g => g.id !== editingSubjectId));
+        setEditingSubjectId(null);
     };
 
     const addElective = () => {
@@ -77,8 +89,9 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         const subjectDef = getSubjectByName(selectedElective);
         if (!subjectDef) return;
 
+        const newId = `elective-${Date.now()}`;
         const newGrade: SubjectGrade = {
-            id: `elective-${Date.now()}`,
+            id: newId,
             subject: subjectDef.name,
             units: subjectDef.defaultUnits || 5,
             grade: 0
@@ -86,31 +99,21 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
 
         setGrades(prev => [...prev, newGrade]);
         setSelectedElective('');
+        // Optional: Immediately open drawer for the new elective
+        // setEditingSubjectId(newId); 
     };
-
-    const removeGrade = (id: string) => {
-        setGrades(prev => prev.filter(g => g.id !== id));
-    };
-
-    const handleGradeChange = (subjectName: string, field: keyof SubjectGrade, value: any) => {
-        setGrades(prev => prev.map(g => {
-            if (g.subject === subjectName) {
-                return { ...g, [field]: value };
-            }
-            return g;
-        }));
-    };
-
 
     const handleScanError = (errorMessage: string) => {
         setScanError(errorMessage);
         setActiveTab('manual');
     };
 
+    // Helper to find currently editing subject
+    const activeSubject = grades.find(g => g.id === editingSubjectId);
+
     const renderManualInput = () => {
-        // Main Content - Form inputs (Right side on PC)
-        const formContent = (
-            <div className={`space-y-4 ${variant === 'compact' ? 'space-y-2' : ''}`}>
+        return (
+            <div className={`space-y-6 ${variant === 'compact' ? 'space-y-4' : ''} pb-24`}>
                 {scanError && (
                     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 relative group">
                         <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
@@ -128,11 +131,9 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                     </div>
                 )}
 
-                {/* Mobile Average Display - Removed (Lifted to Wizard) */}
-
-                {/* Sector Selection (Dropdown Picker) */}
+                {/* Sector Selection */}
                 <div className="relative">
-                    <Label className="text-xs font-bold text-gray-500 mb-1.5 block">מגזר בית הספר</Label>
+                    <Label className="text-xs font-bold text-gray-500 mb-2 block uppercase tracking-wider">מגזר בית הספר</Label>
                     <div className="relative">
                         <select
                             value={sector}
@@ -148,22 +149,18 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                 </div>
 
                 {/* Mandatory Subjects */}
-                <div className="space-y-2">
-                    <h3 className={`font-bold flex items-center gap-2 ${variant === 'compact' ? 'text-xs text-gray-400 uppercase tracking-wider' : 'text-gray-800'}`}>
-                        {variant !== 'compact' && <BookOpen className="w-4 h-4 text-blue-500" />}
+                <div className="space-y-3">
+                    <h3 className="font-bold flex items-center gap-2 text-xs text-gray-400 uppercase tracking-wider">
                         מקצועות חובה
                     </h3>
-                    <div className="grid gap-2 md:grid-cols-2 md:gap-x-4 md:gap-y-3">
-                        {grades.filter(g => {
-                            const isMandatory = SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject);
-                            return isMandatory;
-                        }).map((gradeItem) => (
-                            <BagrutSubjectRow
+                    <div className="space-y-2">
+                        {grades.filter(g => SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).map((gradeItem) => (
+                            <BagrutSubjectCard
                                 key={gradeItem.id}
                                 subjectName={gradeItem.subject}
                                 grade={gradeItem.grade}
                                 units={gradeItem.units}
-                                onChange={(name, field, val) => handleGradeChange(name, field, val)}
+                                onClick={() => setEditingSubjectId(gradeItem.id)}
                                 isMandatory={true}
                             />
                         ))}
@@ -171,19 +168,18 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                 </div>
 
                 {/* Electives */}
-                <div className="space-y-2 pt-2">
-                    <h3 className={`font-bold flex items-center gap-2 ${variant === 'compact' ? 'text-xs text-gray-400 uppercase tracking-wider' : 'text-gray-800'}`}>
-                        {variant !== 'compact' && <Sparkles className="w-4 h-4 text-amber-500" />}
+                <div className="space-y-3 pt-2">
+                    <h3 className="font-bold flex items-center gap-2 text-xs text-gray-400 uppercase tracking-wider">
                         מגמות הרחבה
                     </h3>
 
                     {/* Add Elective Row */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mb-2">
                         <div className="relative flex-1">
                             <select
                                 value={selectedElective}
                                 onChange={(e) => setSelectedElective(e.target.value)}
-                                className={`w-full appearance-none border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${variant === 'compact' ? 'text-xs h-8 px-2 border-gray-200' : 'p-2 border-gray-200 pr-2 pl-8'}`}
+                                className="w-full appearance-none bg-white border border-gray-200 text-gray-900 text-sm rounded-xl px-4 py-3 pr-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
                             >
                                 <option value="">בחר מגמה להוספה...</option>
                                 {availableElectives.filter(s => !grades.some(g => g.subject === s.name)).map(subject => (
@@ -192,67 +188,53 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                                     </option>
                                 ))}
                             </select>
-                            {variant !== 'compact' && (
-                                <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                            )}
+                            <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         </div>
                         <Button
                             onClick={addElective}
                             disabled={!selectedElective}
-                            variant="outline"
-                            className={`${variant === 'compact' ? 'h-8 w-8 p-0' : ''} border-blue-200 hover:bg-blue-50 text-blue-600`}
+                            className="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border border-blue-100 shadow-sm w-12 p-0 rounded-xl"
                         >
-                            <Plus className="w-4 h-4" />
-                            {variant !== 'compact' && "הוסף"}
+                            <Plus className="w-5 h-5" />
                         </Button>
                     </div>
 
-                    <div className="grid gap-2 md:grid-cols-2 md:gap-x-4 md:gap-y-3">
+                    <div className="space-y-2">
                         {grades.filter(g => !SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).map((gradeItem) => (
-                            <BagrutSubjectRow
+                            <BagrutSubjectCard
                                 key={gradeItem.id}
                                 subjectName={gradeItem.subject}
                                 grade={gradeItem.grade}
                                 units={gradeItem.units}
-                                onChange={(name, field, val) => handleGradeChange(name, field, val)}
-                                onRemove={() => removeGrade(gradeItem.id)}
+                                onClick={() => setEditingSubjectId(gradeItem.id)}
+                                isMandatory={false}
                             />
                         ))}
                     </div>
+
+                    {/* Empty State for Electives if none */}
+                    {grades.filter(g => !SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).length === 0 && (
+                        <div className="text-center py-6 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
+                            <p className="text-sm text-gray-400">לא הוספו מגמות</p>
+                        </div>
+                    )}
                 </div>
+
+                {/* Drawer Component */}
+                <GradeEditDrawer
+                    isOpen={!!editingSubjectId}
+                    onClose={() => setEditingSubjectId(null)}
+                    subjectName={activeSubject?.subject || ''}
+                    initialGrade={activeSubject?.grade || 0}
+                    initialUnits={activeSubject?.units || 3}
+                    onSave={handleSaveGrade}
+                    // Only pass remove if not mandatory
+                    onRemove={activeSubject && !SECTOR_MANDATORY_SUBJECTS[sector].includes(activeSubject.subject) ? handleRemoveSubject : undefined}
+                    isMandatory={activeSubject && SECTOR_MANDATORY_SUBJECTS[sector].includes(activeSubject.subject)}
+                />
             </div>
         );
-
-        if (variant === 'compact') return formContent;
-
-        // Default Variant Layout with Side Panel
-        return (
-            <Card className="border-gray-200 shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row h-[65vh]"> {/* Constraint height for layout */}
-
-                        {/* Right Column (Form) - Scrollable */}
-                        {/* In RTL flex-row, first child is Right. */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                            {formContent}
-                        </div>
-
-                        {/* Left Column (Info Panel) - Sticky/Fixed height */}
-                        {/* Visually left in RTL means it should be the 2nd child in DOM if direction is RTL? */}
-                        {/* Actually standard flex-row in RTL: Start (Right) -> End (Left). */}
-                        {/* So if we want Panel on Left, it should be the second child. */}
-                        <div className="hidden md:flex w-80 bg-blue-50/30 border-r border-gray-100 p-4 flex-col gap-4">
-                            {/* AverageDisplay removed from here - moved to WizardContainer */}
-                            <div className="flex-1 overflow-hidden">
-                                <DynamicInfoSidepanel sector={sector} grades={grades} hasGrades={grades.some(g => g.grade > 0)} />
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        );
     };
-
 
     const handleExtractedGrades = (extractedGrades: SubjectGrade[]) => {
         setGrades(prev => {
@@ -324,25 +306,7 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         <Card className="border-none shadow-none bg-transparent">
             {/* Header is ONLY for tabs now. Title was redundant inside specific variants usually, or we can keep it. */}
             <CardHeader className="p-0 space-y-0 text-right">
-                <CardTitle className="flex items-center justify-between text-xl mb-3">
-                    <div className="flex items-center gap-2">
-                        <GraduationCap className="h-7 w-7 text-blue-600" />
-                        ציוני בגרות
-                    </div>
-                    {!isProduction && (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={fillSampleData}
-                            className="text-gray-500 hover:text-blue-600 border-dashed"
-                        >
-                            ✨ מלא נתונים לדוגמה
-                        </Button>
-                    )}
-                </CardTitle>
-
-                <div className="flex bg-gray-100/50 p-1 rounded-xl self-start md:self-auto w-full md:w-auto overflow-x-auto border border-white/50">
+                <div className="flex bg-gray-100/50 p-1 rounded-xl self-start md:self-auto w-full md:w-auto overflow-x-auto border border-white/50 mb-4">
                     <button
                         onClick={() => setActiveTab('manual')}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${activeTab === 'manual' ? 'bg-white text-[#1d1d1f] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-900 hover:bg-white/40'}`}
@@ -367,8 +331,7 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                 </div>
             </CardHeader>
 
-            <CardContent className="p-0 mt-4">
-                {/* mt-4 to add back some space ONLY inside the logic if needed, but keeping it tight for now */}
+            <CardContent className="p-0 px-1">
                 {activeTab === 'manual' && renderManualInput()}
                 {activeTab === 'upload' && renderUpload()}
                 {activeTab === 'link' && renderLink()}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { trackEvent } from '../../utils/gtm';
+import { useEffect } from 'react';
 
 interface ConversationalHeroProps {
     onStartUpload: () => void;
@@ -8,103 +9,127 @@ interface ConversationalHeroProps {
 
 export function ConversationalHero({ onStartUpload, onManual }: ConversationalHeroProps) {
 
-    // Simple handler to trigger the file input (reusing existing logic if possible, 
-    // or we can implement a drag-zone here later. For now, let's keep it simple: 
-    // "Yes" -> Opens the existing upload flow or manual flow but pre-selected)
+    useEffect(() => {
+        trackEvent('hero_impression', { source: 'mobile_redesign_v1' });
+    }, []);
 
-    // Actually, per the plan, "Yes" -> Drag & Drop Zone. "No" -> Wizard/Ministry Site.
-    // To keep implementation fast, "Yes" triggers the same 'onStart' effectively, 
-    // but maybe we pass a flag to open the upload tab directly.
+    // Stagger animation variants
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.15
+            }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
+    };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] w-full max-w-4xl mx-auto px-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] w-full max-w-4xl mx-auto px-4 py-8 relative overflow-hidden">
+
+            {/* Background Decor */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-lg pointer-events-none opacity-30 blur-3xl -z-10">
+                <div className="absolute top-10 left-10 w-40 h-40 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+                <div className="absolute top-10 right-10 w-40 h-40 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+                <div className="absolute -bottom-8 left-20 w-40 h-40 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+            </div>
 
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl rounded-3xl p-8 md:p-12 w-full max-w-3xl"
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="w-full max-w-md flex flex-col gap-6"
             >
-                <div className="mb-8">
-                    <span className="text-5xl md:text-6xl mb-4 block">📄</span>
-                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight">
-                        יש לך קובץ ציונים (PDF)?
-                    </h2>
-                    <p className="text-lg text-gray-600 font-medium">
-                        הדרך הכי מהירה לגלות את סיכויי הקבלה שלך.
+                {/* Header Section */}
+                <motion.div variants={item} className="text-center space-y-2">
+                    <span className="inline-block text-4xl mb-2 animate-bounce-slow">🚀</span>
+                    <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-tight">
+                        בוא נבדוק את<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">סיכויי הקבלה שלך</span>
+                    </h1>
+                    <p className="text-gray-500 font-medium text-lg px-4">
+                        הדרך המהירה והמדויקת ביותר, בחינם.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
-                    {/* Option 1: Have PDF - Primary Action */}
-                    <button
+                {/* Cards Container */}
+                <div className="grid grid-cols-1 gap-4 mt-4">
+
+                    {/* Card 1: AI / Upload - Primary Premium Option */}
+                    <motion.button
+                        variants={item}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
-                            trackEvent('hero_action', { action: 'upload_pdf' });
+                            trackEvent('interaction_start', { method: 'ai', source: 'hero_card' });
                             onStartUpload();
                         }}
-                        className="group relative flex items-center justify-between p-4 bg-[#1877F2] hover:bg-[#1559B2] text-white rounded-2xl shadow-lg shadow-blue-200 transition-all duration-300 hover:scale-[1.02] border border-blue-600"
+                        className="relative group overflow-hidden bg-white/60 backdrop-blur-xl border border-white/60 hover:border-purple-300 shadow-xl shadow-purple-500/10 rounded-3xl p-6 text-right transition-all duration-300"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="bg-white/20 p-2 rounded-xl">
-                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                </svg>
-                            </div>
-                            <div className="text-right">
-                                <span className="block text-lg font-bold">כן, יש לי!</span>
-                                <span className="text-xs text-blue-100 opacity-90">גרור אותו למחשבון</span>
-                            </div>
-                        </div>
-                        <div className="bg-white/10 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </div>
-                    </button>
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    {/* Option 2: Ministry Link - Secondary Action */}
+                        <div className="absolute top-4 left-4">
+                            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-purple-500/30 animate-pulse">
+                                מומלץ ✨
+                            </div>
+                        </div>
+
+                        <div className="relative flex items-center gap-5">
+                            <div className="bg-purple-100/80 p-3.5 rounded-2xl shadow-inner group-hover:bg-purple-100 transition-colors">
+                                <span className="text-3xl">📸</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">סריקה חכמה ב-AI</h3>
+                                <p className="text-sm text-gray-500 mt-1 font-medium">מעלים צילום של הבגרות והמערכת מחשבת הכל לבד</p>
+                            </div>
+                        </div>
+                    </motion.button>
+
+                    {/* Card 2: Manual Entry - Clean Option */}
+                    <motion.button
+                        variants={item}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                            trackEvent('interaction_start', { method: 'manual', source: 'hero_card' });
+                            onManual();
+                        }}
+                        className="group bg-white/40 backdrop-blur-md border border-white/50 hover:border-blue-300 shadow-lg shadow-blue-500/5 rounded-3xl p-6 text-right transition-all duration-300"
+                    >
+                        <div className="flex items-center gap-5">
+                            <div className="bg-blue-50/80 p-3.5 rounded-2xl group-hover:bg-blue-100 transition-colors">
+                                <span className="text-3xl">✏️</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">הקלדה ידנית</h3>
+                                <p className="text-sm text-gray-500 mt-1 font-medium">למי שאין קובץ זמין כרגע, הזנה מהירה ב-30 שניות</p>
+                            </div>
+                        </div>
+                    </motion.button>
+                </div>
+
+                {/* Trust/Ministry Link - Microcopy */}
+                <motion.div variants={item} className="mt-6 text-center">
                     <a
                         href="https://students.education.gov.il/matriculation-exams/grades"
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() => trackEvent('hero_action', { action: 'ministry_link' })}
-                        className="group relative flex items-center justify-between p-4 bg-white hover:bg-gray-50 text-gray-700 rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm transition-all duration-300 hover:scale-[1.02]"
+                        onClick={() => trackEvent('interaction_start', { method: 'ministry_link' })}
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors py-2 px-4 rounded-full hover:bg-gray-50"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="bg-gray-100 p-2 rounded-xl text-gray-500 group-hover:text-[#1877F2] transition-colors">
-                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <div className="text-right">
-                                <span className="block text-lg font-bold">אין לי את הקובץ</span>
-                                <span className="text-xs text-gray-500">קח אותי למשרד החינוך להנפיק</span>
-                            </div>
-                        </div>
-                        <div className="text-gray-300 group-hover:text-[#1877F2] transition-colors">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </div>
+                        <span>חסרים לך ציונים?</span>
+                        <span className="underline decoration-dashed decoration-gray-300 underline-offset-4">כניסה לפורטל משרד החינוך</span>
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                     </a>
+                </motion.div>
 
-                    {/* Option 3: Manual Entry - Tertiary Action */}
-                    <button
-                        onClick={() => {
-                            trackEvent('hero_action', { action: 'manual_entry' });
-                            onManual();
-                        }}
-                        className="text-sm text-gray-400 hover:text-gray-600 font-medium py-2 transition-colors underline decoration-gray-300 hover:decoration-gray-500 underline-offset-4"
-                    >
-                        אני מעדיף להקליד ידנית
-                    </button>
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-gray-100">
-                    <p className="text-sm text-gray-400">
-                        * אל דאגה, אנחנו מסבירים איך מורידים את הקובץ בשניות
-                    </p>
-                </div>
             </motion.div>
         </div>
     );

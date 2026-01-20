@@ -25,6 +25,7 @@ import { GroupsPage } from './pages/Admin/GroupsPage';
 import { PartnersPage } from './pages/Admin/PartnersPage';
 import { isProduction } from './utils/env';
 import { TrackedDegreesPage } from './pages/TrackedDegreesPage';
+import { CampaignMobileFirst } from './pages/CampaignMobileFirst';
 
 function App() {
   const navigate = useNavigate();
@@ -144,6 +145,7 @@ function App() {
         <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
+        <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
       </Routes>
       <CookieConsent />
       <AccessibilityWidget />

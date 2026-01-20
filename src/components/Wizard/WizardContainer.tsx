@@ -5,11 +5,15 @@ import { WizardProgress } from './WizardProgress';
 import { BagrutForm } from '../BagrutForm';
 import { PsychometricForm } from '../PsychometricForm';
 import { SmartPreferencesStep } from './SmartPreferencesStep';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { Card } from '../ui/shim';
 import { Button } from '../ui/shim';
+import { ArrowLeft, Calculator, Loader2, GraduationCap, Compass } from 'lucide-react';
+import { useTrackedDegrees } from '../../context/TrackedDegreesContext';
+import { SECTOR_NAMES } from '../../utils/subjects';
+import { CollapsibleCard } from '../ui/CollapsibleCard';
 import { AverageDisplay } from '../AverageDisplay';
 import { SekemDisplay } from '../SekemDisplay';
-import { calculateOptimalAverage, type SubjectGrade, type PsychometricScores } from '../../utils/calculator';
+import { calculateOptimalAverage, calculateDryAverage, type SubjectGrade, type PsychometricScores } from '../../utils/calculator';
 
 interface WizardContainerProps {
     bagrutData: SubjectGrade[];
@@ -65,6 +69,14 @@ export function WizardContainer({
         return calculateOptimalAverage(bagrutData, sector);
     }, [bagrutData, sector]);
 
+    const bonusDiff = useMemo(() => {
+        if (bagrutData.length === 0) return 0;
+        const dry = calculateDryAverage(bagrutData);
+        const diff = currentBagrutStats.average - dry;
+        return diff > 0 ? Number(diff.toFixed(1)) : 0;
+    }, [currentBagrutStats.average, bagrutData]);
+
+
     const handleNext = () => {
         if (currentStep < STEPS.length - 1) {
             setCurrentStep(prev => prev + 1);
@@ -116,142 +128,207 @@ export function WizardContainer({
         onPsychometricUpdate(mockPsycho);
     };
 
-    return (
-        <div className="max-w-6xl mx-auto w-full px-2 md:px-4 flex flex-col md:flex-row items-start gap-6 relative">
+    // -- Render Helpers --
 
-            {/* LEFT SIDEBAR - Desktop Only (Sticky) */}
-            <div className="hidden md:block w-80 sticky top-24 space-y-4 shrink-0 z-10">
-                {/* Average Score Card */}
-                <div className="transition-all duration-300 hover:-translate-y-1">
-                    <AverageDisplay
-                        grades={bagrutData}
-                        sector={sector}
-                        className="shadow-apple border-slate-100"
-                    />
-                </div>
+    const handleStepCompletion = (step: number) => {
+        // If current step matches, move to next
+        if (currentStep === step && step < STEPS.length - 1) {
+            setCurrentStep(step + 1);
+        }
+    };
 
-                {/* Sekem Score Card */}
-                {currentStep >= 1 && (
-                    <div className="animate-in slide-in-from-left-4 fade-in duration-700 delay-100">
-                        <SekemDisplay
-                            bagrutAverage={currentBagrutStats.average}
-                            psychometricScore={psychometricData.general || 0}
-                            className="shadow-apple border-slate-100"
+    const renderStepContent = (stepIndex: number) => {
+        switch (stepIndex) {
+            case 0: // Grades
+                return (
+                    <div className="p-2 sm:p-4">
+                        <BagrutForm
+                            onDataUpdate={onBagrutUpdate}
+                            initialData={bagrutData}
+                            fillSampleData={handleAutoFill}
+                            variant="default"
+                            sector={sector}
+                            onSectorChange={(s) => {
+                                setSector(s);
+                            }}
                         />
+                        <div className="mt-6 flex justify-end">
+                            <Button
+                                onClick={() => handleStepCompletion(0)}
+                                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"
+                            >
+                                סיימתי להזין, המשך לשלב הבא
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                            </Button>
+                        </div>
+                    </div>
+                );
+            case 1: // Psychometric
+                return (
+                    <div className="p-2 sm:p-4">
+                        <PsychometricForm
+                            initialData={psychometricData}
+                            onDataUpdate={onPsychometricUpdate}
+                        />
+                        <div className="mt-6 flex justify-end gap-3 px-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setCurrentStep(0)}
+                                className="flex-1 md:flex-none"
+                            >
+                                חזור
+                            </Button>
+                            <Button
+                                onClick={() => handleStepCompletion(1)}
+                                className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"
+                            >
+                                המשך
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                            </Button>
+                        </div>
+                    </div>
+                );
+            case 2: // Preferences
+                return (
+                    <div className="p-2 sm:p-4">
+                        <SmartPreferencesStep
+                            preferences={preferences}
+                            onUpdate={onPreferencesUpdate}
+                        />
+                        <div className="mt-6 flex justify-end gap-3 px-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setCurrentStep(1)}
+                                className="flex-1 md:flex-none"
+                            >
+                                חזור
+                            </Button>
+                            <Button
+                                onClick={() => handleStepCompletion(2)}
+                                className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"
+                            >
+                                <Calculator className="ml-2 h-4 w-4" />
+                                שקלול וחיפוש תארים
+                            </Button>
+                        </div>
+                    </div>
+                );
+            case 3: // Loader/Processing
+                return (
+                    <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in-95">
+                        <div className="relative w-20 h-20 mb-6">
+                            <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-ping" />
+                            <div className="relative bg-white rounded-full p-4 shadow-xl border border-blue-100 flex items-center justify-center">
+                                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">מעבד נתונים...</h3>
+                        <p className="text-gray-500 max-w-xs mx-auto">
+                            הרובוטים שלנו סורקים את תנאי הקבלה בכל האוניברסיטאות עבורך
+                        </p>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    // Calculate completion status for summary
+    const isGradesComplete = bagrutData.some(g => g.grade > 0);
+    const isPsychoComplete = psychometricData.general > 0 || (psychometricData.english > 0 && psychometricData.quantitative > 0);
+    const isPreferencesComplete = preferences.fields.length > 0 || preferences.isUndecided;
+
+    // Map step to title and icon
+    const stepsConfig = [
+        {
+            id: 0,
+            title: 'ציוני בגרות',
+            icon: <GraduationCap className="w-5 h-5" />,
+            summary: `${bagrutData.length} מקצועות הוזנו`,
+            isCompleted: isGradesComplete
+        },
+        {
+            id: 1,
+            title: 'פסיכומטרי',
+            icon: <Calculator className="w-5 h-5" />,
+            summary: psychometricData.general > 0 ? `ציון כללי: ${psychometricData.general}` : 'עדיין לא הוזן',
+            isCompleted: isPsychoComplete
+        },
+        {
+            id: 2,
+            title: 'מה מעניין אותך?',
+            icon: <Compass className="w-5 h-5" />,
+            summary: preferences.fields.length > 0 ? `${preferences.fields.length} תחומים נבחרו` : 'טרם נבחרו תחומים',
+            isCompleted: isPreferencesComplete
+        }
+    ];
+
+    return (
+        <div className="max-w-3xl mx-auto w-full px-4 pb-32 md:pb-10 pt-4 relative">
+            {/* Header */}
+            <div className="text-center mb-6">
+                <WizardProgress
+                    currentStep={currentStep}
+                    steps={STEPS}
+                    onStepClick={(s) => setCurrentStep(s)}
+                />
+            </div>
+
+            {/* Accordion Steps */}
+            <div className="space-y-4">
+                {stepsConfig.map((stepConf) => (
+                    <CollapsibleCard
+                        key={stepConf.id}
+                        title={stepConf.title}
+                        icon={stepConf.icon}
+                        isOpen={currentStep === stepConf.id}
+                        onToggle={() => setCurrentStep(stepConf.id)}
+                        summary={stepConf.summary}
+                        isCompleted={stepConf.isCompleted}
+                        isLocked={currentStep === 3} // Lock all if processing
+                    >
+                        {renderStepContent(stepConf.id)}
+                    </CollapsibleCard>
+                ))}
+
+                {/* Processing Step (Overlay or separate card?) */}
+                {currentStep === 3 && (
+                    <div className="fixed inset-0 z-50 bg-white/90 backdrop-blur-sm flex items-center justify-center p-4">
+                        <Card className="w-full max-w-sm shadow-2xl border-blue-100">
+                            {renderStepContent(3)}
+                        </Card>
                     </div>
                 )}
             </div>
 
-            {/* RIGHT MAIN CONTENT */}
-            <div className="flex-1 w-full min-w-0">
-                <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-apple border border-white/60 overflow-hidden transition-all duration-300">
-                    {/* Progress Header */}
-                    <div className="bg-white/40 border-b border-white/30 p-2 backdrop-blur-sm">
-                        <WizardProgress currentStep={currentStep} steps={STEPS} onStepClick={(step) => {
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            setCurrentStep(step);
-                        }} />
-                    </div>
-
-                    {/* MOBILE ONLY - Persistent Stats Banner */}
-                    <div className="md:hidden bg-slate-50/50 border-b border-slate-100 p-4 transition-all duration-500 ease-in-out">
-                        <div className="grid gap-4">
-                            <AverageDisplay grades={bagrutData} sector={sector} className="mb-0 h-full" />
-                            {currentStep >= 1 && (
-                                <SekemDisplay
-                                    bagrutAverage={currentBagrutStats.average}
-                                    psychometricScore={psychometricData.general || 0}
-                                    className="mb-0 h-full"
-                                />
-                            )}
+            {/* Sticky Stats Footer (Mobile) */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40 transition-transform duration-500 translate-y-0">
+                <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">ממוצע בגרות</span>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-lg font-black text-blue-600">{currentBagrutStats.average.toFixed(1)}</span>
+                            {bonusDiff > 0 && <span className="text-[10px] text-green-600 font-medium">+{bonusDiff} בונוס</span>}
                         </div>
                     </div>
 
-                    {/* Content Area */}
-                    <div className="p-2 md:p-6 min-h-[500px]">
-                        {currentStep === 0 && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                                <BagrutForm
-                                    key={`bagrut-${formKey}`}
-                                    onDataUpdate={onBagrutUpdate}
-                                    initialData={bagrutData}
-                                    fillSampleData={handleAutoFill}
-                                    sector={sector}
-                                    onSectorChange={setSector}
-                                    variant="compact"
-                                    initialTab={initialTab}
-                                />
-                            </div>
-                        )}
-
-                        {currentStep === 1 && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                                <PsychometricForm
-                                    key={`psycho-${formKey}`}
-                                    onDataUpdate={onPsychometricUpdate}
-                                    initialData={psychometricData}
-                                />
-                            </div>
-                        )}
-
-                        {currentStep === 2 && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                                <SmartPreferencesStep
-                                    preferences={preferences}
-                                    onUpdate={onPreferencesUpdate}
-                                />
-                            </div>
-                        )}
-
-                        {currentStep === 3 && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex flex-col items-center justify-center min-h-[400px] text-center">
-                                <div className="w-24 h-24 mb-6 relative">
-                                    <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20"></div>
-                                    <div className="relative bg-white rounded-full p-6 shadow-xl border border-blue-100">
-                                        <div className="w-full h-full border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                    </div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <span className="text-2xl animate-bounce">🤖</span>
-                                    </div>
-                                </div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                    הרובוטים שלנו בודקים בכל האוניברסיטאות...
-                                </h2>
-                                <p className="text-slate-500 max-w-sm mx-auto animate-pulse">
-                                    מחשבים סיכויי קבלה למאות מסלולי לימוד על סמך הנתונים שלך
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Footer / Navigation */}
-                    <div className="bg-gray-50/50 p-4 md:p-6 border-t border-gray-100 flex items-center justify-between">
-                        {currentStep > 0 ? (
-                            <Button
-                                variant="ghost"
-                                onClick={handleBack}
-                                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                            >
-                                <ArrowRight className="w-4 h-4 ml-1" />
-                                חזור
-                            </Button>
-                        ) : (
-                            <div></div>
-                        )}
-
-                        {currentStep < STEPS.length - 1 && (
-                            <Button
-                                onClick={handleNext}
-                                disabled={isNextDisabled()}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
-                            >
-                                המשך
-                                <ArrowLeft className="w-4 h-4 mr-1" />
-                            </Button>
-                        )}
-                    </div>
+                    {/* Quick Jump Buttom if not at end */}
+                    {currentStep < 3 && (
+                        <Button
+                            size="sm"
+                            className="bg-gray-900 text-white rounded-full px-4 h-9 shadow-lg"
+                            onClick={() => handleStepCompletion(currentStep)}
+                        >
+                            הבא
+                            <ArrowLeft className="w-3 h-3 mr-1" />
+                        </Button>
+                    )}
                 </div>
             </div>
+
+            {/* Desktop Side Panel (Hidden on Mobile) */}
+            {/* Note: In this redesign, we are focusing on mobile app feel, so usually we hide the side panel or make it a drawer. 
+                 For now, the sticky footer covers the detailed stats. */}
         </div>
     );
 }

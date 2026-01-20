@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useProgramFilters } from '../../hooks/useProgramFilters';
-import { Search, Filter, Building2 } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { Button, Badge } from '../ui/shim';
 import { CompactProgramRow } from '../CompactProgramRow';
 import { ProgramSummaryPanel } from '../ProgramSummaryPanel';
-import { useNavigate } from 'react-router-dom';
+import { FiltersDrawer } from '../ui/FiltersDrawer';
+import { ProgramDetailsDrawer } from '../ui/ProgramDetailsDrawer';
 import { admissionEngine } from '../../services/admission-engine';
 import { ProgramFilterPanel } from '../ProgramFilterPanel';
 import { TrackedDegreesWidget } from '../TrackedDegreesWidget';
@@ -20,9 +21,14 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
     const [selectedInstIds, setSelectedInstIds] = useState<string[]>([]);
     const [programs, setPrograms] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showFilters, setShowFilters] = useState(true);
+
+    // Desktop vs Mobile Filter State
+    const [showDesktopFilters, setShowDesktopFilters] = useState(true);
+    const [isFiltersDrawerOpen, setIsFiltersDrawerOpen] = useState(false);
+
+    // Details Drawer State
     const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
-    const navigate = useNavigate();
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     useEffect(() => {
         const fetchPrograms = async () => {
@@ -39,11 +45,11 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
         fetchPrograms();
     }, []);
 
-    // Filter Logic (Consolidated via Hook)
+    // Filter Logic
     const filteredPrograms = useProgramFilters(programs, {
         fields: selectedFields,
         institutionIds: selectedInstIds,
-        isUndecided: false, // Explorer always filters explicitly
+        isUndecided: false,
         searchQuery: ''
     }, {
         getField: (item: any) => item.program.name,
@@ -51,7 +57,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
         getInstitutionName: (item: any) => item.program.institution?.name
     });
 
-    // Auto-select first program on load/filter change if none selected
+    // Auto-select first program on load/filter change if none selected (Desktop convenience)
     useEffect(() => {
         if (!selectedProgramId && filteredPrograms.length > 0) {
             setSelectedProgramId(filteredPrograms[0].program.id);
@@ -77,6 +83,11 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
         setSelectedInstIds(instIds);
     };
 
+    const handleProgramClick = (id: string) => {
+        setSelectedProgramId(id);
+        setIsDetailsOpen(true);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -87,9 +98,10 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
 
     return (
         <div className="w-full relative min-h-screen pb-20 bg-gray-50">
-            {/* Header / Filters Section */}
+            {/* Sticky Header */}
             <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 py-3">
+                    {/* Top Row: Title & Filter Toggles */}
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                             <h1 className="text-xl font-bold text-gray-800">סייר התוכניות</h1>
@@ -97,50 +109,89 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                                 {filteredPrograms.length} תוצאות
                             </Badge>
                         </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 h-9 text-xs"
-                        >
-                            <Filter size={14} />
-                            {showFilters ? 'הסתר מסננים' : 'סינון מתקדם'}
-                        </Button>
+
+                        {/* Mobile Filter Trigger */}
+                        <div className="lg:hidden">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsFiltersDrawerOpen(true)}
+                                className="flex items-center gap-2 h-9 w-9 p-0 rounded-full border-gray-200 bg-white shadow-sm"
+                            >
+                                <Filter size={16} className="text-gray-600" />
+                            </Button>
+                        </div>
+
+                        {/* Desktop Filter Trigger */}
+                        <div className="hidden lg:block">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowDesktopFilters(!showDesktopFilters)}
+                                className="flex items-center gap-2 h-9 text-xs"
+                            >
+                                <Filter size={14} />
+                                {showDesktopFilters ? 'הסתר מסננים' : 'סינון מתקדם'}
+                            </Button>
+                        </div>
                     </div>
 
-                    {showFilters && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-200 pb-2">
-                            <ProgramFilterPanel
-                                selectedFields={selectedFields}
-                                selectedInstitutions={selectedInstIds}
-                                onUpdate={handleFilterUpdate}
-                                variant="explorer"
-                                className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/60"
-                                programs={programs}
-                            />
-                        </div>
-                    )}
+                    {/* Desktop Inline Filters Panel */}
+                    <div className="hidden lg:block">
+                        {showDesktopFilters && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-200 pb-2">
+                                <ProgramFilterPanel
+                                    selectedFields={selectedFields}
+                                    selectedInstitutions={selectedInstIds}
+                                    onUpdate={handleFilterUpdate}
+                                    variant="explorer"
+                                    className="bg-gray-50/50 p-4 rounded-xl border border-gray-200/60"
+                                    programs={programs}
+                                />
+                            </div>
+                        )}
+                    </div>
 
-                    {/* Active Filters Summary (when collapsed) */}
-                    {!showFilters && (selectedFields.length > 0 || selectedInstIds.length > 0) && (
-                        <div className="flex gap-2 pb-1 overflow-x-auto text-xs">
-                            {selectedFields.map(f => <Badge key={f} variant="secondary" className="px-2 py-0.5">{f}</Badge>)}
-                            {selectedInstIds.length > 0 && <Badge variant="outline" className="px-2 py-0.5">{selectedInstIds.length} מוסדות</Badge>}
-                        </div>
-                    )}
+                    {/* Horizontal Active Filters (Mobile & Desktop when collapsed) */}
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                        {/* Clear All Chip */}
+                        {(selectedFields.length > 0 || selectedInstIds.length > 0) && (
+                            <button
+                                onClick={() => handleFilterUpdate([], [])}
+                                className="flex-shrink-0 flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-600 border border-gray-200"
+                            >
+                                <X size={12} /> נקה הכל
+                            </button>
+                        )}
+
+                        {/* Field Chips */}
+                        {selectedFields.map(f => (
+                            <Badge key={f} variant="secondary" className="flex-shrink-0 px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 whitespace-nowrap">
+                                {f}
+                            </Badge>
+                        ))}
+
+                        {/* Institution Chips (Grouped count if many, or individual?) logic in panel was just count. Let's do names if few. */}
+                        {/* For simplicity, reusing "X Institutions" badge pattern but maybe individual names better if only 1-2. */}
+                        {selectedInstIds.length > 0 && (
+                            <Badge variant="outline" className="flex-shrink-0 px-3 py-1 bg-white border-gray-200 text-gray-600 whitespace-nowrap">
+                                {selectedInstIds.length} מוסדות שנבחרו
+                            </Badge>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* Split Layout */}
+            {/* Main Content Split */}
             <main className="max-w-7xl mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
-                    {/* Right Panel (RTL): Results List - 6 Cols */}
+                    {/* Right Panel (RTL): Results List */}
                     <div className="col-span-1 lg:col-span-6 space-y-8 order-2 lg:order-1">
                         {Object.entries(groupedPrograms).map(([instName, progs]) => (
                             <section key={instName} className="scroll-mt-32">
                                 {/* Section Header */}
-                                <div className="flex items-center gap-2 mb-3 sticky top-[138px] z-10 bg-gray-50/95 backdrop-blur-sm py-2">
+                                <div className="flex items-center gap-2 mb-3 sticky top-[138px] lg:top-[140px] z-10 bg-gray-50/95 backdrop-blur-sm py-2">
                                     <h2 className="text-sm font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
                                         {instName} <span className="text-gray-300 mx-1">|</span> {progs.length}
                                     </h2>
@@ -155,7 +206,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                                             admission={admission}
                                             userStats={userStats}
                                             isSelected={selectedProgramId === program.id}
-                                            onClick={() => setSelectedProgramId(program.id)}
+                                            onClick={() => handleProgramClick(program.id)}
                                         />
                                     ))}
                                 </div>
@@ -177,7 +228,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                         )}
                     </div>
 
-                    {/* Middle Panel: Summary - 4 Cols */}
+                    {/* Middle Panel: Summary (Desktop Sticky) */}
                     <div className="hidden lg:block lg:col-span-4 sticky top-[140px] h-[calc(100vh-150px)] order-3 lg:order-2">
                         <ProgramSummaryPanel
                             program={selectedProgramData?.program || null}
@@ -187,7 +238,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                         />
                     </div>
 
-                    {/* Left Panel (RTL): Tracked Degrees - 2 Cols */}
+                    {/* Left Panel (RTL): Tracked Degrees (Desktop Sticky) */}
                     <div className="hidden lg:block lg:col-span-2 sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar order-1 lg:order-3">
                         <TrackedDegreesWidget
                             availablePrograms={programs}
@@ -196,6 +247,24 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                     </div>
                 </div>
             </main>
+
+            {/* Mobile Drawers */}
+            <FiltersDrawer
+                isOpen={isFiltersDrawerOpen}
+                onClose={() => setIsFiltersDrawerOpen(false)}
+                selectedFields={selectedFields}
+                selectedInstitutions={selectedInstIds}
+                onUpdate={handleFilterUpdate}
+                programs={programs}
+            />
+
+            <ProgramDetailsDrawer
+                isOpen={isDetailsOpen}
+                onClose={() => setIsDetailsOpen(false)}
+                program={selectedProgramData?.program || null}
+                admission={selectedProgramData?.admission || null}
+                userStats={userStats}
+            />
         </div>
     );
 };
