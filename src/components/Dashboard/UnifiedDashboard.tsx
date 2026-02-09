@@ -43,7 +43,7 @@ export const UnifiedDashboard = () => {
         async function init() {
             const data = await loadUserData();
             console.log('[UnifiedDashboard] Loaded data:', data);
-            if (data && data.bagrut?.length > 0 && data.psychometric?.general > 0) {
+            if (data && data.bagrut?.length > 0) {
                 setOriginalData(data);
                 if (data.sector) setSector(data.sector);
 
