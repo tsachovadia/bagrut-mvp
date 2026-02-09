@@ -113,14 +113,19 @@ const calculateTelAvivBonuses = (grades: SubjectGrade[]): UniversityBonusStatus 
     return { university: 'אונ׳ תל אביב', totalBonus, details };
 };
 
-// --- Re-exporting calculateBonus for backward compatibility if used elsewhere ---
+// Single source of truth for generic (Ministry-standard) bonus calculations.
+// All other files should use this function instead of inline bonus logic.
 export const calculateBonus = (subject: string, units: number, grade: number): number => {
-    // Basic generic Ministry of Education bonus (simplified)
     if (grade < 60) return 0;
     if (subject === 'מתמטיקה') {
-        if (units === 5) return 30; // Ministry standard often 30 or 35 depending on year
-        if (units === 4) return 10;
+        if (units === 5) return 35;
+        if (units === 4) return 15;
     }
+    if (subject === 'אנגלית') {
+        if (units === 5) return 25;
+        if (units === 4) return 12.5;
+    }
+    if (subject === 'פיסיקה' && units === 5) return 25;
     if (units === 5) return 20;
     if (units === 4) return 10;
     return 0;

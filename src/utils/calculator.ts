@@ -81,17 +81,9 @@ export function calculateOptimalAverage(
     let subjectsWithBonuses: SubjectWithBonus[];
 
     if (universityName === 'general') {
-        // Use generic ministry bonuses (backward compat)
+        // Use generic ministry bonuses via single source of truth in bonuses.ts
         subjectsWithBonuses = subjects.map(s => {
-            // Basic generic Ministry of Education bonus
-            let bonus = 0;
-            if (s.grade >= 60) {
-                if (s.subject === 'מתמטיקה') bonus = s.units === 5 ? 30 : (s.units === 4 ? 10 : 0);
-                else if (s.subject === 'אנגלית') bonus = s.units === 5 ? 20 : (s.units === 4 ? 10 : 0);
-                else if (s.units === 5) bonus = 20;
-                else if (s.units === 4) bonus = 10;
-            }
-
+            const bonus = calculateBonus(s.subject, s.units, s.grade);
             return {
                 ...s,
                 bonus,

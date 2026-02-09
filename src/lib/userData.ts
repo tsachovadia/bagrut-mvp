@@ -28,66 +28,87 @@ const LOCAL_STORAGE_KEY = 'bagrut_plus_data';
 
 
 let saveTimeout: NodeJS.Timeout | null = null;
+let pendingSaveData: UserData | null = null;
+
+async function syncToSupabase(data: UserData) {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+            const { data: existingProfile } = await supabase
+                .from('user_profiles')
+                .select('id')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            const dbPayload = {
+                user_id: session.user.id,
+                bagrut_grades: data.bagrut as any,
+                saved_simulations: data.savedSimulations as any,
+                psycho_score_total: data.psychometric.total,
+                psycho_score_eng: data.psychometric.english,
+                psycho_score_quant: data.psychometric.quantitative,
+                institution_pref: data.preferences.institutions,
+                major_subjects: data.preferences.fields,
+                tracked_programs: data.trackedPrograms || [],
+                updated_at: new Date().toISOString()
+            };
+
+            if (existingProfile) {
+                await supabase
+                    .from('user_profiles')
+                    .update(dbPayload)
+                    .eq('id', existingProfile.id);
+            } else {
+                await supabase
+                    .from('user_profiles')
+                    .insert({
+                        ...dbPayload,
+                        email_primary: session.user.email,
+                        first_name: 'משתמש חדש'
+                    });
+            }
+        }
+    } catch (e) {
+        console.error('[userData] Failed to sync to Supabase:', e);
+    }
+}
+
+// Flush any pending debounced save immediately (call on page unload)
+export const flushPendingSave = () => {
+    if (saveTimeout && pendingSaveData) {
+        clearTimeout(saveTimeout);
+        saveTimeout = null;
+        syncToSupabase(pendingSaveData);
+        pendingSaveData = null;
+    }
+};
+
+// Register beforeunload to prevent data loss on page close
+if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', flushPendingSave);
+}
 
 export const saveUserData = async (data: UserData) => {
     // 1. Save to Local Storage (immediate)
     try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
-        console.error('Failed to save to localStorage', e);
+        console.error('[userData] Failed to save to localStorage:', e);
     }
 
     // 2. Save to Supabase (debounced)
+    pendingSaveData = data;
     if (saveTimeout) {
         clearTimeout(saveTimeout);
     }
 
     saveTimeout = setTimeout(async () => {
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                // Check if we have existing record(s) for this user
-                const { data: existingProfile } = await supabase
-                    .from('user_profiles')
-                    .select('id')
-                    .eq('user_id', session.user.id)
-                    .maybeSingle();
-
-                const dbPayload = {
-                    user_id: session.user.id,
-                    bagrut_grades: data.bagrut as any, // Cast to any for JSONB compatibility
-                    saved_simulations: data.savedSimulations as any, // Cast to any for JSONB compatibility
-                    // Map Psychometric
-                    psycho_score_total: data.psychometric.total,
-                    psycho_score_eng: data.psychometric.english,
-                    psycho_score_quant: data.psychometric.quantitative,
-                    // Map Preferences
-                    institution_pref: data.preferences.institutions,
-                    major_subjects: data.preferences.fields,
-                    tracked_programs: data.trackedPrograms || [],
-                    updated_at: new Date().toISOString()
-                };
-
-                if (existingProfile) {
-                    await supabase
-                        .from('user_profiles')
-                        .update(dbPayload)
-                        .eq('id', existingProfile.id);
-                } else {
-                    await supabase
-                        .from('user_profiles')
-                        .insert({
-                            ...dbPayload,
-                            // Set defaults for new profile if needed
-                            email_primary: session.user.email,
-                            first_name: 'משתמש חדש' // Placeholder
-                        });
-                }
-            }
-        } catch (e) {
-            console.error('Failed to sync to Supabase', e);
+        if (pendingSaveData) {
+            await syncToSupabase(pendingSaveData);
+            pendingSaveData = null;
         }
-    }, 1000); // 1 second debounce
+        saveTimeout = null;
+    }, 1000);
 };
 
 export const loadUserData = async (): Promise<UserData | null> => {
@@ -97,21 +118,17 @@ export const loadUserData = async (): Promise<UserData | null> => {
         const local = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (local) {
             const data = JSON.parse(local);
-            // Simple migration check: if preferences exists but lacks 'fields', reset it
             if (data.preferences && !Array.isArray(data.preferences.fields)) {
                 data.preferences = { fields: [], institutions: [], isUndecided: false };
             }
-            // Ensure savedSimulations is an array
-            if (!data.savedSimulations) {
-                data.savedSimulations = [];
-            }
-            // Ensure savedSimulations is an array
             if (!data.savedSimulations) {
                 data.savedSimulations = [];
             }
             localData = data;
         }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+        console.error('[userData] Failed to parse localStorage data:', e);
+    }
 
     if (localData && !navigator.onLine) {
         return localData;
@@ -176,7 +193,9 @@ export const loadUserData = async (): Promise<UserData | null> => {
                 };
             }
         }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+        console.error('[userData] Failed to load from Supabase:', e);
+    }
 
     // Fallback or default return
     return null;

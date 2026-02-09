@@ -1,4 +1,4 @@
-import { calculateOptimalAverage, type SubjectGrade, type UniversityConfig, type PsychometricScores } from './calculator';
+import { calculateOptimalAverage, applyBonuses, type SubjectGrade, type UniversityConfig, type PsychometricScores } from './calculator';
 import { SECTOR_MANDATORY_SUBJECTS } from './subjects';
 import { ALL_PROGRAMS } from '../data/programs';
 import { checkReachable, type UserAdmissionStats } from './admission-evaluation';
@@ -21,39 +21,6 @@ export const DEFAULT_UNIV_CONFIG: UniversityConfig = {
     },
     sechem_formulas: []
 };
-
-// Internal helper to replicate logic with specific hardcoded bonuses
-function applyAcademicBonuses(subjects: SubjectGrade[]) {
-    return subjects.map(s => {
-        let bonus = 0;
-        let adjusted = s.grade;
-        const name = s.subject;
-        const units = s.units;
-
-        if (name === 'מתמטיקה') {
-            if (units === 5) bonus = 35;
-            else if (units === 4) bonus = 15;
-        } else if (name === 'אנגלית') {
-            if (units === 5) bonus = 25;
-            else if (units === 4) bonus = 12.5;
-        } else if (name === 'פיסיקה' && units === 5) {
-            bonus = 25;
-        } else if (units === 5) {
-            bonus = 20;
-        } else if (units === 4) {
-            bonus = 10;
-        }
-
-        adjusted += bonus;
-
-        return {
-            ...s,
-            adjusted_grade: adjusted,
-            bonus,
-            effectiveUnits: units
-        };
-    });
-}
 
 import { type Sector } from './subjects';
 
@@ -85,7 +52,7 @@ export function calculateAdmissionStats(bagrutData: SubjectGrade[], psychoScore:
         };
     }
 
-    const subjectsWithBonuses = applyAcademicBonuses(bagrutData);
+    const subjectsWithBonuses = applyBonuses(bagrutData);
 
     // Dynamic config based on student's sector
     const sector = determineSectorFromSubjects(bagrutData);

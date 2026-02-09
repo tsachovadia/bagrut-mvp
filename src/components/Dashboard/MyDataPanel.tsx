@@ -42,7 +42,7 @@ export const MyDataPanel = ({
 
     // Check if currently simulating (diff from original)
     const isSimulating = JSON.stringify(originalBagrut) !== JSON.stringify(simulatedBagrut) ||
-        JSON.stringify(originalPsychometric) !== JSON.stringify(originalPsychometric);
+        JSON.stringify(originalPsychometric) !== JSON.stringify(simulatedPsychometric);
     // Note: Comparing objects directly might be flaky, but for small JSONs it's often OK. 
     // Better to rely on "active override" state, but for now we check data equality.
 
