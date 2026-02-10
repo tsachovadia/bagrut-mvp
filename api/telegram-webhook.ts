@@ -1,81 +1,171 @@
-import { createClient } from '@supabase/supabase-js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { TelegramUpdate, HandlerContext } from './lib/telegram/types';
+import { verifyWebhook, resolveUser, touchUser, markUserBlocked, logMessage } from './lib/telegram/middleware';
+import { sendMessage } from './lib/telegram/client';
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-async function sendTelegramMessage(chatId: number, text: string) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: chatId,
-            text,
-            parse_mode: 'HTML',
-        }),
-    });
-}
+// Handlers
+import { handleStart } from './lib/telegram/handlers/start';
+import { handleGrades, handleGradeScore } from './lib/telegram/handlers/grades';
+import { handlePsychometric, handlePsychometricScore } from './lib/telegram/handlers/psychometric';
+import { handleCalculate } from './lib/telegram/handlers/calculate';
+import { handlePrograms } from './lib/telegram/handlers/programs';
+import { handleRooms } from './lib/telegram/handlers/rooms';
+import { handleHelp, handleStatus, handleShare } from './lib/telegram/handlers/misc';
+import { handleCallback } from './lib/telegram/handlers/callback-router';
+import { handleGroupMessage, handleNewMember } from './lib/telegram/handlers/group-events';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
     if (request.method !== 'POST') {
         return response.status(405).json({ error: 'Method not allowed' });
     }
 
-    try {
-        const update = request.body;
-        const message = update?.message;
+    // Verify webhook authenticity
+    if (!verifyWebhook(request)) {
+        return response.status(401).json({ error: 'Unauthorized' });
+    }
 
-        if (!message?.text) {
+    try {
+        const update: TelegramUpdate = request.body;
+
+        // Handle group messages separately
+        if (update.message?.chat?.type === 'group' || update.message?.chat?.type === 'supergroup') {
+            if (update.message.new_chat_members) {
+                await handleNewMember(update.message);
+            } else {
+                await handleGroupMessage(update.message);
+            }
             return response.status(200).json({ ok: true });
         }
 
-        const chatId = message.chat.id;
-        const text = message.text;
-        const username = message.from?.username || '';
-        const firstName = message.from?.first_name || '';
-
-        // Handle /start command with optional program ID deep link
-        if (text.startsWith('/start')) {
-            const programId = text.split(' ')[1] || null;
-
-            // Store lead in Supabase
-            await supabase.from('soft_leads').insert({
-                source: 'telegram_bot',
-                telegram_chat_id: chatId.toString(),
-                telegram_username: username,
-                name: firstName,
-                metadata: { program_id: programId },
-            });
-
-            // Send welcome message
-            const welcomeMessage = programId
-                ? `היי ${firstName}! 👋\n\nקיבלנו את הבקשה שלך להתחבר לסטודנטים.\nאנחנו נחבר אותך בהקדם לסטודנטים שלומדים את התואר שבחרת.\n\nבינתיים, אם יש לך שאלות - פשוט כתוב לנו כאן!`
-                : `היי ${firstName}! 👋\n\nברוכים הבאים ל-LaunchPad!\nאנחנו יכולים לחבר אותך לסטודנטים שלומדים תארים שמעניינים אותך.\n\nספר לנו איזה תואר מעניין אותך ונחבר אותך!`;
-
-            await sendTelegramMessage(chatId, welcomeMessage);
-        } else {
-            // For any other message, store it and send acknowledgment
-            await supabase.from('soft_leads').insert({
-                source: 'telegram_bot',
-                telegram_chat_id: chatId.toString(),
-                telegram_username: username,
-                name: firstName,
-                metadata: { message: text },
-            });
-
-            await sendTelegramMessage(
-                chatId,
-                'תודה! קיבלנו את ההודעה שלך ונחזור אליך בהקדם 🙏'
-            );
+        // Only handle private chat messages and callbacks
+        if (!update.message && !update.callback_query) {
+            return response.status(200).json({ ok: true });
         }
 
+        // Resolve or create bot user
+        const botUser = await resolveUser(update);
+
+        // Update activity
+        await touchUser(botUser.id);
+
+        // Build handler context
+        const chatId = update.message?.chat?.id || update.callback_query?.message?.chat?.id;
+        if (!chatId) {
+            return response.status(200).json({ ok: true });
+        }
+
+        const ctx: HandlerContext = {
+            chatId,
+            user: botUser,
+            message: update.message,
+            callbackQuery: update.callback_query,
+        };
+
+        // Route callback queries
+        if (update.callback_query) {
+            await handleCallback(ctx);
+            return response.status(200).json({ ok: true });
+        }
+
+        // Route text messages
+        const text = update.message?.text?.trim();
+        if (!text) {
+            return response.status(200).json({ ok: true });
+        }
+
+        // Commands
+        if (text.startsWith('/')) {
+            const [command, ...args] = text.split(' ');
+            const payload = args.join(' ');
+
+            switch (command.split('@')[0]) { // Handle /command@BotName format
+                case '/start':
+                    await handleStart(ctx, payload || undefined);
+                    break;
+                case '/grades':
+                    await handleGrades(ctx);
+                    break;
+                case '/psycho':
+                    await handlePsychometric(ctx);
+                    break;
+                case '/calculate':
+                    await handleCalculate(ctx);
+                    break;
+                case '/programs':
+                    await handlePrograms(ctx);
+                    break;
+                case '/rooms':
+                    await handleRooms(ctx);
+                    break;
+                case '/status':
+                    await handleStatus(ctx);
+                    break;
+                case '/share':
+                    await handleShare(ctx);
+                    break;
+                case '/help':
+                    await handleHelp(ctx);
+                    break;
+                default:
+                    await sendMessage(chatId, 'פקודה לא מוכרת. שלח /help לרשימת פקודות.');
+            }
+
+            return response.status(200).json({ ok: true });
+        }
+
+        // Non-command text: route based on conversation state
+        await handleTextInput(ctx, text);
+
         return response.status(200).json({ ok: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Telegram webhook error:', error);
-        return response.status(200).json({ ok: true }); // Always return 200 to Telegram
+
+        // Handle blocked user
+        if (error?.message === 'USER_BLOCKED') {
+            const chatId = request.body?.message?.chat?.id || request.body?.callback_query?.message?.chat?.id;
+            if (chatId) {
+                await markUserBlocked(chatId.toString());
+            }
+        }
+
+        // Always return 200 to Telegram to prevent retry storms
+        return response.status(200).json({ ok: true });
+    }
+}
+
+/**
+ * Route plain text messages based on the user's current conversation state
+ */
+async function handleTextInput(ctx: HandlerContext, text: string): Promise<void> {
+    const { user } = ctx;
+
+    switch (user.conversation_state) {
+        case 'grade_entry_score':
+            await handleGradeScore(ctx, text);
+            break;
+
+        case 'psychometric_general':
+        case 'psychometric_quant':
+        case 'psychometric_verbal':
+        case 'psychometric_english':
+            await handlePsychometricScore(ctx, text);
+            break;
+
+        case 'idle':
+        default:
+            // User sent free text without being in a flow
+            await logMessage(user.id, 'incoming', 'text', text);
+            await sendMessage(ctx.chatId,
+                'לא הבנתי. שלח /help לראות את רשימת הפקודות הזמינות.',
+                {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: '📝 הזן ציונים', callback_data: 'cmd:grades' }, { text: '📊 חשב', callback_data: 'cmd:calculate' }],
+                            [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
+                        ],
+                    },
+                }
+            );
+            break;
     }
 }

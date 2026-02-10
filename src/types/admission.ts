@@ -21,6 +21,7 @@ export interface Program {
     duration_years: number;
     description?: string;
     career_opportunities?: string;
+    website_url?: string;
     institution?: Institution;
     faculty?: Faculty;
 }

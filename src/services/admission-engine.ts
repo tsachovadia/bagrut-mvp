@@ -157,6 +157,7 @@ export class AdmissionEngine {
                 duration_years: p.duration_years,
                 description: p.description,
                 career_opportunities: p.career_opportunities,
+                website_url: p.website_url,
                 institution: institution ? {
                     id: institution.id,
                     name: institution.name,

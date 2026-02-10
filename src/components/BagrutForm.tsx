@@ -36,7 +36,6 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
     const [isUploading, setIsUploading] = useState(false);
     const [scanError, setScanError] = useState<string | null>(null);
 
-
     // Sync to parent
     useEffect(() => {
         onDataUpdate(grades);
@@ -103,7 +102,7 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
 
     const renderManualInput = () => {
         return (
-            <div className={`space-y-4 md:space-y-6 ${variant === 'compact' ? 'space-y-4' : ''} pb-24`}>
+            <div className={`space-y-3 ${variant === 'compact' ? 'space-y-2' : ''} pb-16`}>
                 {scanError && (
                     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 relative group">
                         <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
@@ -139,25 +138,22 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                 </div>
 
                 {/* Mandatory Subjects */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                     <h3 className="font-bold flex items-center gap-2 text-xs text-gray-400 uppercase tracking-wider">
                         מקצועות חובה
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {grades.filter(g => SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).map((gradeItem) => (
-                            <div key={gradeItem.id} className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-200">
-                                <div className="flex flex-col gap-3">
-                                    {/* Header: Name */}
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-bold text-gray-900 text-sm md:text-base">
-                                            {gradeItem.subject}
-                                        </span>
-                                    </div>
+                            <div key={gradeItem.id} className="bg-white border border-gray-100 rounded-xl p-2 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div className="flex items-center gap-1.5">
+                                    {/* Name */}
+                                    <span className="font-bold text-gray-900 text-xs shrink-0 w-[58px] truncate">
+                                        {gradeItem.subject}
+                                    </span>
 
                                     {/* Inputs Row */}
-                                    <div className="flex gap-3">
-                                        <div className="flex-1 relative">
-                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">ציון</label>
+                                    <div className="flex gap-1.5 flex-1 min-w-0">
+                                        <div className="flex-1 relative min-w-0">
                                             <input
                                                 type="number"
                                                 value={gradeItem.grade > 0 ? gradeItem.grade : ''}
@@ -165,24 +161,23 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                                                     const val = parseInt(e.target.value) || 0;
                                                     if (val <= 100) handleGradeChange(gradeItem.id, 'grade', val);
                                                 }}
-                                                placeholder="0"
-                                                className="w-full h-11 bg-gray-50 border-b-2 border-transparent focus:border-blue-500 rounded-lg px-3 text-lg font-bold text-gray-900 outline-none transition-all placeholder:text-gray-300 text-center"
+                                                placeholder="ציון"
+                                                className="w-full h-9 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-lg px-2 text-base font-bold text-gray-900 outline-none transition-all placeholder:text-gray-300 text-center"
                                             />
                                         </div>
 
-                                        <div className="w-[100px] relative">
-                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">יחידות</label>
-                                            <div className="relative h-11">
+                                        <div className="w-[68px] shrink-0 relative">
+                                            <div className="relative h-9">
                                                 <select
                                                     value={gradeItem.units}
                                                     onChange={(e) => handleGradeChange(gradeItem.id, 'units', parseInt(e.target.value))}
-                                                    className="w-full h-full appearance-none bg-gray-50 rounded-lg pl-8 pr-3 text-base font-medium text-gray-700 outline-none"
+                                                    className="w-full h-full appearance-none bg-gray-50 border border-gray-200 rounded-lg pl-6 pr-1.5 text-xs font-medium text-gray-700 outline-none"
                                                 >
                                                     {[1, 2, 3, 4, 5, 10].map(u => (
                                                         <option key={u} value={u}>{u} יח'</option>
                                                     ))}
                                                 </select>
-                                                <ChevronDown className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                <ChevronDown className="absolute left-1 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
                                             </div>
                                         </div>
                                     </div>
@@ -193,13 +188,13 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                 </div>
 
                 {/* Electives */}
-                <div className="space-y-3 pt-2">
+                <div className="space-y-2 pt-1">
                     <h3 className="font-bold flex items-center gap-2 text-xs text-gray-400 uppercase tracking-wider">
                         מגמות הרחבה
                     </h3>
 
                     {/* Add Elective Row */}
-                    <div className="flex gap-2 mb-2">
+                    <div className="flex gap-2 mb-1">
                         <div className="relative flex-1">
                             <select
                                 value={selectedElective}
@@ -215,36 +210,25 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                             </select>
                             <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                         </div>
-                        <Button
+                        <button
                             onClick={addElective}
                             disabled={!selectedElective}
-                            className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 border border-indigo-100 shadow-sm w-12 p-0 rounded-xl flex items-center justify-center shrink-0"
+                            className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shrink-0 shadow-sm"
                         >
-                            <Plus className="w-5 h-5" />
-                        </Button>
+                            <Plus className="w-4 h-4" />
+                            הוסף
+                        </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {grades.filter(g => !SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).map((gradeItem) => (
-                            <div key={gradeItem.id} className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-200">
-                                <div className="flex flex-col gap-3">
-                                    {/* Header: Name and Remove */}
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-bold text-gray-900 text-sm md:text-base">
-                                            {gradeItem.subject}
-                                        </span>
-                                        <button
-                                            onClick={() => removeGrade(gradeItem.id)}
-                                            className="text-gray-300 hover:text-red-500 transition-colors p-1"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-
-                                    {/* Inputs Row */}
-                                    <div className="flex gap-3">
-                                        <div className="flex-1 relative">
-                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">ציון</label>
+                            <div key={gradeItem.id} className="bg-white border border-gray-100 rounded-xl p-2 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-gray-900 text-xs shrink-0 w-[50px] truncate">
+                                        {gradeItem.subject}
+                                    </span>
+                                    <div className="flex gap-1.5 flex-1 min-w-0">
+                                        <div className="flex-1 relative min-w-0">
                                             <input
                                                 type="number"
                                                 value={gradeItem.grade > 0 ? gradeItem.grade : ''}
@@ -252,27 +236,31 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                                                     const val = parseInt(e.target.value) || 0;
                                                     if (val <= 100) handleGradeChange(gradeItem.id, 'grade', val);
                                                 }}
-                                                placeholder="0"
-                                                className="w-full h-11 bg-gray-50 border-b-2 border-transparent focus:border-blue-500 rounded-lg px-3 text-lg font-bold text-gray-900 outline-none transition-all placeholder:text-gray-300 text-center"
+                                                placeholder="ציון"
+                                                className="w-full h-9 bg-gray-50 border border-gray-200 focus:border-blue-500 rounded-lg px-2 text-base font-bold text-gray-900 outline-none transition-all placeholder:text-gray-300 text-center"
                                             />
                                         </div>
-
-                                        <div className="w-[100px] relative">
-                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">יחידות</label>
-                                            <div className="relative h-11">
+                                        <div className="w-[68px] shrink-0 relative">
+                                            <div className="relative h-9">
                                                 <select
                                                     value={gradeItem.units}
                                                     onChange={(e) => handleGradeChange(gradeItem.id, 'units', parseInt(e.target.value))}
-                                                    className="w-full h-full appearance-none bg-gray-50 rounded-lg pl-8 pr-3 text-base font-medium text-gray-700 outline-none"
+                                                    className="w-full h-full appearance-none bg-gray-50 border border-gray-200 rounded-lg pl-6 pr-1.5 text-xs font-medium text-gray-700 outline-none"
                                                 >
                                                     {[1, 2, 3, 4, 5, 10].map(u => (
                                                         <option key={u} value={u}>{u} יח'</option>
                                                     ))}
                                                 </select>
-                                                <ChevronDown className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                <ChevronDown className="absolute left-1 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
                                             </div>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={() => removeGrade(gradeItem.id)}
+                                        className="text-gray-300 hover:text-red-500 transition-colors p-0.5 shrink-0"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
                             </div>
                         ))}

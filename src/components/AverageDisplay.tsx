@@ -10,7 +10,7 @@ import { type Sector } from '../utils/subjects';
 import { cn } from '../lib/utils';
 import { calculateUniversityBonuses } from '../utils/bonuses';
 import { BonusBreakdown } from './Dashboard/BonusBreakdown';
-import { BugReportWidget } from './BugReportWidget';
+
 
 interface AverageDisplayProps {
     grades: SubjectGrade[];
@@ -170,10 +170,6 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, 
                     </div>
                 )
             }
-            {/* Feedback Widget moved inside */}
-            <div className="border-t border-slate-100 p-4 bg-slate-50/30">
-                <BugReportWidget />
-            </div>
         </div >
     );
 };

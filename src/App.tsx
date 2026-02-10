@@ -176,7 +176,15 @@ function App() {
             </div>
           </SidebarLayout>
         } />
-        <Route path="/program/:id" element={<ProgramPage />} />
+        <Route path="/program/:id" element={
+          <SidebarLayout userStats={userStats}>
+            <div className="min-h-screen flex flex-col font-sans" dir="rtl">
+              <Header />
+              <ProgramPage userStats={userStats} />
+              <Footer />
+            </div>
+          </SidebarLayout>
+        } />
         <Route path="/dashboard" element={
           <SidebarLayout userStats={userStats}>
             <div className="min-h-screen flex flex-col font-sans" dir="rtl">

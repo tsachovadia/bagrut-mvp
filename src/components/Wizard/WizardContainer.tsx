@@ -134,6 +134,8 @@ export function WizardContainer({
         // If current step matches, move to next
         if (currentStep === step && step < STEPS.length - 1) {
             setCurrentStep(step + 1);
+            // Scroll to top so user sees the newly opened step
+            setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
         }
     };
 
@@ -141,7 +143,7 @@ export function WizardContainer({
         switch (stepIndex) {
             case 0: // Grades
                 return (
-                    <div className="p-2 sm:p-4">
+                    <div className="p-1.5 sm:p-3">
                         <BagrutForm
                             onDataUpdate={onBagrutUpdate}
                             initialData={bagrutData}
@@ -152,7 +154,7 @@ export function WizardContainer({
                                 setSector(s);
                             }}
                         />
-                        <div className="mt-6 flex justify-end">
+                        <div className="mt-3 flex justify-end">
                             <Button
                                 onClick={() => handleStepCompletion(0)}
                                 className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"
@@ -165,7 +167,7 @@ export function WizardContainer({
                 );
             case 1: // Psychometric
                 return (
-                    <div className="p-2 sm:p-4">
+                    <div className="p-1.5 sm:p-3">
                         <PsychometricForm
                             initialData={psychometricData}
                             onDataUpdate={onPsychometricUpdate}
@@ -190,7 +192,7 @@ export function WizardContainer({
                 );
             case 2: // Preferences
                 return (
-                    <div className="p-2 sm:p-4">
+                    <div className="p-1.5 sm:p-3">
                         <SmartPreferencesStep
                             preferences={preferences}
                             onUpdate={onPreferencesUpdate}
@@ -264,9 +266,9 @@ export function WizardContainer({
     ];
 
     return (
-        <div className="max-w-3xl mx-auto w-full px-4 pb-32 md:pb-10 pt-4 relative">
+        <div className="max-w-3xl mx-auto w-full px-3 pb-20 md:pb-8 pt-2 relative">
             {/* Header */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-3">
                 <WizardProgress
                     currentStep={currentStep}
                     steps={STEPS}
@@ -274,8 +276,29 @@ export function WizardContainer({
                 />
             </div>
 
+            {/* Sticky Stats Banner — top on mobile, visible while scrolling */}
+            {currentStep < 3 && (
+                <div className="sticky top-[44px] z-[60] -mx-3 px-3 mb-2">
+                    <div className="bg-white/95 backdrop-blur-xl border border-gray-200 rounded-xl shadow-sm px-3 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-gray-400 font-medium">ממוצע בגרות</span>
+                            <span className="text-lg font-black text-blue-600">{currentBagrutStats.average.toFixed(1)}</span>
+                            {bonusDiff > 0 && <span className="text-[10px] text-green-600 font-medium bg-green-50 px-1.5 py-0.5 rounded-full">+{bonusDiff}</span>}
+                        </div>
+                        <Button
+                            size="sm"
+                            className="bg-gray-900 text-white rounded-full px-4 h-8 text-xs shadow-md"
+                            onClick={() => handleStepCompletion(currentStep)}
+                        >
+                            הבא
+                            <ArrowLeft className="w-3 h-3 mr-1" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             {/* Accordion Steps */}
-            <div className="space-y-4">
+            <div className="space-y-2.5">
                 {stepsConfig.map((stepConf) => (
                     <CollapsibleCard
                         key={stepConf.id}
@@ -291,7 +314,7 @@ export function WizardContainer({
                     </CollapsibleCard>
                 ))}
 
-                {/* Processing Step (Overlay or separate card?) */}
+                {/* Processing Step */}
                 {currentStep === 3 && (
                     <div className="fixed inset-0 z-50 bg-white/90 backdrop-blur-sm flex items-center justify-center p-4">
                         <Card className="w-full max-w-sm shadow-2xl border-blue-100">
@@ -300,35 +323,6 @@ export function WizardContainer({
                     </div>
                 )}
             </div>
-
-            {/* Sticky Stats Footer (Mobile) */}
-            <div className="fixed bottom-16 md:bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[70] transition-transform duration-500 translate-y-0">
-                <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">ממוצע בגרות</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-lg font-black text-blue-600">{currentBagrutStats.average.toFixed(1)}</span>
-                            {bonusDiff > 0 && <span className="text-[10px] text-green-600 font-medium">+{bonusDiff} בונוס</span>}
-                        </div>
-                    </div>
-
-                    {/* Quick Jump Buttom if not at end */}
-                    {currentStep < 3 && (
-                        <Button
-                            size="sm"
-                            className="bg-gray-900 text-white rounded-full px-4 h-9 shadow-lg"
-                            onClick={() => handleStepCompletion(currentStep)}
-                        >
-                            הבא
-                            <ArrowLeft className="w-3 h-3 mr-1" />
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            {/* Desktop Side Panel (Hidden on Mobile) */}
-            {/* Note: In this redesign, we are focusing on mobile app feel, so usually we hide the side panel or make it a drawer. 
-                 For now, the sticky footer covers the detailed stats. */}
         </div>
     );
 }

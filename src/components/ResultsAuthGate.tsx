@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Phone } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 
 interface ResultsAuthGateProps {
     children: React.ReactNode;
 }
-
 
 export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
     const [session, setSession] = useState<Session | null>(null);
@@ -15,14 +15,13 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
     const [loading, setLoading] = useState(true);
     const [phone, setPhone] = useState('');
     const [agreed, setAgreed] = useState(false);
-    const [submitting, setSubmitting] = useState(false); // Kept as it's used later
+    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [phoneBannerDismissed, setPhoneBannerDismissed] = useState(false);
     const { trackEvent } = useAnalytics();
 
-    // Local state to bypass the check immediately after successful update without waiting for session subscription
     const [profileCompleted, setProfileCompleted] = useState(false);
 
-    // Track when results are unlocked (strictly once)
     useEffect(() => {
         if (session && hasPhone) {
             trackEvent('results_unlocked', {
@@ -30,7 +29,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                 method: 'google_auth_phone'
             });
         }
-    }, [session, hasPhone, trackEvent]); // Added trackEvent to dependency array
+    }, [session, hasPhone, trackEvent]);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -82,7 +81,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
         setSubmitting(true);
 
         try {
-            const { data, error } = await supabase.auth.updateUser({
+            const { error } = await supabase.auth.updateUser({
                 data: { mobile_phone: phone, terms_accepted: true }
             });
 
@@ -90,9 +89,9 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
 
             trackEvent('profile_completed', { phone: 'collected' });
             setProfileCompleted(true);
-            setHasPhone(true); // Update local state immediately
+            setHasPhone(true);
+            setPhoneBannerDismissed(true);
 
-            // Refresh session to Ensure downstream components get the latest metadata if needed
             await supabase.auth.refreshSession();
 
         } catch (err: any) {
@@ -103,124 +102,131 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
         }
     };
 
-    const canViewResults = session && (hasPhone || profileCompleted);
+    // Gate only requires session — phone is collected non-blocking
+    const canViewResults = !!session;
+    const needsPhone = session && !hasPhone && !profileCompleted && !phoneBannerDismissed;
 
     if (loading) {
         return <div className="p-8 text-center text-gray-500">בודק הרשאות...</div>;
     }
 
+    // Logged in — show results immediately + optional phone banner
     if (canViewResults) {
-        return <>{children}</>;
-    }
-
-    // If session exists but phone is not collected, show phone collection form
-    if (session && !canViewResults) {
         return (
-            <div className="relative min-h-[500px]">
-                {/* Blurred Content Preview */}
-                <div className="filter blur-lg pointer-events-none select-none opacity-30 relative h-96 overflow-hidden" aria-hidden="true">
-                    {children}
-                </div>
+            <>
+                {children}
 
-                {/* Phone Collection Overlay */}
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-white/60">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border border-gray-200"
-                    >
-                        <div className="w-12 h-12 bg-brand-purple-100 text-brand-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                        </div>
+                {/* Non-blocking phone collection banner */}
+                <AnimatePresence>
+                    {needsPhone && (
+                        <motion.div
+                            initial={{ y: 100, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 100, opacity: 0 }}
+                            transition={{ delay: 2, duration: 0.4 }}
+                            className="fixed bottom-20 md:bottom-4 left-4 right-4 z-[80] max-w-md mx-auto"
+                        >
+                            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 relative">
+                                <button
+                                    onClick={() => setPhoneBannerDismissed(true)}
+                                    className="absolute top-2 left-2 p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
 
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">פרט אחד אחרון...</h3>
-                        <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                            כדי לשמור את התוצאות ולהציג לך התאמות מדויקות, אנו זקוקים למספר הנייד שלך.
-                        </p>
+                                <div className="flex items-start gap-3 mb-3">
+                                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+                                        <Phone className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 text-sm">רוצה שנעדכן אותך?</h4>
+                                        <p className="text-xs text-gray-500 mt-0.5">השאר מספר ונשלח לך עדכונים רלוונטיים</p>
+                                    </div>
+                                </div>
 
-                        <div className="space-y-4">
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="מספר נייד (לדוגמה: 050-1234567)"
-                                className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-purple-500 focus:border-transparent outline-none transition-all text-center font-medium text-lg"
-                                dir="ltr"
-                            />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        placeholder="050-1234567"
+                                        className="flex-1 p-2.5 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all text-center font-medium text-sm"
+                                        dir="ltr"
+                                    />
+                                    <button
+                                        onClick={handlePhoneSubmit}
+                                        disabled={submitting}
+                                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold px-4 py-2.5 rounded-lg text-sm transition-all shrink-0"
+                                    >
+                                        {submitting ? '...' : 'שלח'}
+                                    </button>
+                                </div>
 
-                            <label className="flex items-start gap-3 text-xs text-gray-600 text-right cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                                <input
-                                    type="checkbox"
-                                    checked={agreed}
-                                    onChange={(e) => setAgreed(e.target.checked)}
-                                    className="mt-0.5 w-4 h-4 text-brand-purple-600 rounded border-gray-300 focus:ring-brand-purple-500"
-                                />
-                                <span>
-                                    אני מאשר/ת את <a href="/terms" target="_blank" className="text-brand-purple-600 underline hover:text-brand-purple-700">תנאי השימוש</a> ומדיניות הפרטיות, ומסכים/ה לקבל עדכונים והצעות רלוונטיות.
-                                </span>
-                            </label>
+                                <label className="flex items-start gap-2 text-[10px] text-gray-400 mt-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={agreed}
+                                        onChange={(e) => setAgreed(e.target.checked)}
+                                        className="mt-0.5 w-3 h-3 rounded border-gray-300"
+                                    />
+                                    <span>
+                                        מאשר/ת <a href="/terms" target="_blank" className="underline">תנאי שימוש</a> וקבלת עדכונים
+                                    </span>
+                                </label>
 
-                            {error && (
-                                <p className="text-red-500 text-sm font-medium bg-red-50 p-2 rounded-lg animate-in fade-in slide-in-from-top-1">
-                                    {error}
-                                </p>
-                            )}
-
-                            <button
-                                onClick={handlePhoneSubmit}
-                                disabled={submitting}
-                                className="w-full bg-brand-purple-600 hover:bg-brand-purple-700 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                                {submitting ? 'שומר נתונים...' : 'הצג תוצאות'}
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
+                                {error && (
+                                    <p className="text-red-500 text-xs mt-1.5">{error}</p>
+                                )}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </>
         );
     }
 
-    // User is not logged in, show gate
+    // Not logged in — show gate with blurred preview
     return (
-        <div className="relative isolate">
-            {/* Main Content - Blurred when locked */}
-            <div className={`transition-all duration-700 ${!canViewResults ? 'blur-2xl opacity-20 pointer-events-none select-none grayscale' : ''}`}>
+        <div className="relative isolate min-h-[600px]">
+            {/* Main Content - Blurred but visible as preview */}
+            <div className="blur-lg opacity-40 pointer-events-none select-none transition-all duration-700">
                 {children}
             </div>
 
-            {/* Gate Overlay */}
-            {!canViewResults && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-white/90 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border border-white/50"
+            {/* Login Gate */}
+            <div className="absolute inset-0 z-50 flex items-start justify-center pt-16 md:pt-24 p-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="bg-white p-7 rounded-2xl shadow-xl max-w-sm w-full text-center border border-gray-100"
+                >
+                    <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5 text-blue-600">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">התוצאות מוכנות!</h3>
+                    <p className="text-gray-500 text-sm mb-5 leading-relaxed">
+                        התחברו כדי לגלות את סיכויי הקבלה שלכם ולשמור את כל הנתונים.
+                        זה לוקח 3 שניות.
+                    </p>
+
+                    <button
+                        onClick={handleGoogleLogin}
+                        className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-800 font-bold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md"
                     >
-                        <div className="w-16 h-16 bg-brand-purple-100/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-brand-purple-600">
-                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                        <span>התחברות מהירה עם Google</span>
+                    </button>
 
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">רוצים לראות את התוצאות?</h3>
-                        <p className="text-gray-600 mb-6">התחברו כדי לראות את סיכויי הקבלה שלכם לכל האוניברסיטאות ולשמור את הנתונים להמשך.</p>
-
-                        <button
-                            onClick={handleGoogleLogin}
-                            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow-md"
-                        >
-                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
-                            <span>התחברות עם Google</span>
-                        </button>
-
-                        <p className="mt-4 text-xs text-gray-400">
-                            בהתחברות אני מאשר/ת את תנאי השימוש ומדיניות הפרטיות
-                        </p>
-                    </motion.div>
-                </div>
-            )}
+                    <p className="mt-4 text-[11px] text-gray-400 leading-relaxed">
+                        ככה אנחנו שומרים לך את הנתונים למפגש הבא.
+                        בהתחברות אני מאשר/ת את <a href="/terms" className="underline">תנאי השימוש</a>.
+                    </p>
+                </motion.div>
+            </div>
         </div>
     );
 }
