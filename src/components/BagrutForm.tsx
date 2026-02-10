@@ -6,8 +6,8 @@ import { SECTOR_MANDATORY_SUBJECTS, SECTOR_NAMES, type Sector, getSubjectByName,
 import type { SubjectGrade } from '../utils/calculator';
 import { InfoBox } from './ui/InfoBox';
 import { calculateBonus } from '../utils/bonuses';
-import { BagrutSubjectCard } from './ui/BagrutSubjectCard';
-import { GradeEditDrawer } from './ui/GradeEditDrawer';
+// import { BagrutSubjectCard } from './ui/BagrutSubjectCard';
+// import { GradeEditDrawer } from './ui/GradeEditDrawer';
 import { GradeUpload } from './GradeUpload';
 import { DynamicInfoSidepanel } from './DynamicInfoSidepanel';
 import { AverageDisplay } from './AverageDisplay';
@@ -36,8 +36,6 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
     const [isUploading, setIsUploading] = useState(false);
     const [scanError, setScanError] = useState<string | null>(null);
 
-    // State for Drawer
-    const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
 
     // Sync to parent
     useEffect(() => {
@@ -67,21 +65,8 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         });
     }, [sector]);
 
-    const handleSaveGrade = (grade: number, units: number) => {
-        if (!editingSubjectId) return;
-
-        setGrades(prev => prev.map(g => {
-            if (g.id === editingSubjectId) {
-                return { ...g, grade, units };
-            }
-            return g;
-        }));
-    };
-
-    const handleRemoveSubject = () => {
-        if (!editingSubjectId) return;
-        setGrades(prev => prev.filter(g => g.id !== editingSubjectId));
-        setEditingSubjectId(null);
+    const removeGrade = (id: string) => {
+        setGrades(prev => prev.filter(g => g.id !== id));
     };
 
     const addElective = () => {
@@ -99,8 +84,6 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
 
         setGrades(prev => [...prev, newGrade]);
         setSelectedElective('');
-        // Optional: Immediately open drawer for the new elective
-        // setEditingSubjectId(newId); 
     };
 
     const handleScanError = (errorMessage: string) => {
@@ -108,12 +91,19 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
         setActiveTab('manual');
     };
 
-    // Helper to find currently editing subject
-    const activeSubject = grades.find(g => g.id === editingSubjectId);
+
+    const handleGradeChange = (id: string, field: keyof SubjectGrade, value: any) => {
+        setGrades(prev => prev.map(g => {
+            if (g.id === id) {
+                return { ...g, [field]: value };
+            }
+            return g;
+        }));
+    };
 
     const renderManualInput = () => {
         return (
-            <div className={`space-y-6 ${variant === 'compact' ? 'space-y-4' : ''} pb-24`}>
+            <div className={`space-y-4 md:space-y-6 ${variant === 'compact' ? 'space-y-4' : ''} pb-24`}>
                 {scanError && (
                     <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 relative group">
                         <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
@@ -153,16 +143,51 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                     <h3 className="font-bold flex items-center gap-2 text-xs text-gray-400 uppercase tracking-wider">
                         מקצועות חובה
                     </h3>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {grades.filter(g => SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).map((gradeItem) => (
-                            <BagrutSubjectCard
-                                key={gradeItem.id}
-                                subjectName={gradeItem.subject}
-                                grade={gradeItem.grade}
-                                units={gradeItem.units}
-                                onClick={() => setEditingSubjectId(gradeItem.id)}
-                                isMandatory={true}
-                            />
+                            <div key={gradeItem.id} className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div className="flex flex-col gap-3">
+                                    {/* Header: Name */}
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-gray-900 text-sm md:text-base">
+                                            {gradeItem.subject}
+                                        </span>
+                                    </div>
+
+                                    {/* Inputs Row */}
+                                    <div className="flex gap-3">
+                                        <div className="flex-1 relative">
+                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">ציון</label>
+                                            <input
+                                                type="number"
+                                                value={gradeItem.grade > 0 ? gradeItem.grade : ''}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value) || 0;
+                                                    if (val <= 100) handleGradeChange(gradeItem.id, 'grade', val);
+                                                }}
+                                                placeholder="0"
+                                                className="w-full h-11 bg-gray-50 border-b-2 border-transparent focus:border-blue-500 rounded-lg px-3 text-lg font-bold text-gray-900 outline-none transition-all placeholder:text-gray-300 text-center"
+                                            />
+                                        </div>
+
+                                        <div className="w-[100px] relative">
+                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">יחידות</label>
+                                            <div className="relative h-11">
+                                                <select
+                                                    value={gradeItem.units}
+                                                    onChange={(e) => handleGradeChange(gradeItem.id, 'units', parseInt(e.target.value))}
+                                                    className="w-full h-full appearance-none bg-gray-50 rounded-lg pl-8 pr-3 text-base font-medium text-gray-700 outline-none"
+                                                >
+                                                    {[1, 2, 3, 4, 5, 10].map(u => (
+                                                        <option key={u} value={u}>{u} יח'</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -193,22 +218,63 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                         <Button
                             onClick={addElective}
                             disabled={!selectedElective}
-                            className="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border border-blue-100 shadow-sm w-12 p-0 rounded-xl"
+                            className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 border border-indigo-100 shadow-sm w-12 p-0 rounded-xl flex items-center justify-center shrink-0"
                         >
                             <Plus className="w-5 h-5" />
                         </Button>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {grades.filter(g => !SECTOR_MANDATORY_SUBJECTS[sector].includes(g.subject)).map((gradeItem) => (
-                            <BagrutSubjectCard
-                                key={gradeItem.id}
-                                subjectName={gradeItem.subject}
-                                grade={gradeItem.grade}
-                                units={gradeItem.units}
-                                onClick={() => setEditingSubjectId(gradeItem.id)}
-                                isMandatory={false}
-                            />
+                            <div key={gradeItem.id} className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div className="flex flex-col gap-3">
+                                    {/* Header: Name and Remove */}
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-gray-900 text-sm md:text-base">
+                                            {gradeItem.subject}
+                                        </span>
+                                        <button
+                                            onClick={() => removeGrade(gradeItem.id)}
+                                            className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+
+                                    {/* Inputs Row */}
+                                    <div className="flex gap-3">
+                                        <div className="flex-1 relative">
+                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">ציון</label>
+                                            <input
+                                                type="number"
+                                                value={gradeItem.grade > 0 ? gradeItem.grade : ''}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value) || 0;
+                                                    if (val <= 100) handleGradeChange(gradeItem.id, 'grade', val);
+                                                }}
+                                                placeholder="0"
+                                                className="w-full h-11 bg-gray-50 border-b-2 border-transparent focus:border-blue-500 rounded-lg px-3 text-lg font-bold text-gray-900 outline-none transition-all placeholder:text-gray-300 text-center"
+                                            />
+                                        </div>
+
+                                        <div className="w-[100px] relative">
+                                            <label className="text-[10px] text-gray-400 absolute -top-1.5 right-2 bg-white px-1">יחידות</label>
+                                            <div className="relative h-11">
+                                                <select
+                                                    value={gradeItem.units}
+                                                    onChange={(e) => handleGradeChange(gradeItem.id, 'units', parseInt(e.target.value))}
+                                                    className="w-full h-full appearance-none bg-gray-50 rounded-lg pl-8 pr-3 text-base font-medium text-gray-700 outline-none"
+                                                >
+                                                    {[1, 2, 3, 4, 5, 10].map(u => (
+                                                        <option key={u} value={u}>{u} יח'</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
 
@@ -219,19 +285,6 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
                         </div>
                     )}
                 </div>
-
-                {/* Drawer Component */}
-                <GradeEditDrawer
-                    isOpen={!!editingSubjectId}
-                    onClose={() => setEditingSubjectId(null)}
-                    subjectName={activeSubject?.subject || ''}
-                    initialGrade={activeSubject?.grade || 0}
-                    initialUnits={activeSubject?.units || 3}
-                    onSave={handleSaveGrade}
-                    // Only pass remove if not mandatory
-                    onRemove={activeSubject && !SECTOR_MANDATORY_SUBJECTS[sector].includes(activeSubject.subject) ? handleRemoveSubject : undefined}
-                    isMandatory={activeSubject && SECTOR_MANDATORY_SUBJECTS[sector].includes(activeSubject.subject)}
-                />
             </div>
         );
     };

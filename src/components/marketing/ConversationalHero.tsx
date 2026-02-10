@@ -58,37 +58,7 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                 </motion.div>
 
                 {/* Cards Container */}
-                <div className="grid grid-cols-1 gap-4 mt-4">
-
-                    {/* Card 1: AI / Upload - Primary Premium Option */}
-                    <motion.button
-                        variants={item}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                            trackEvent('interaction_start', { method: 'ai', source: 'hero_card' });
-                            onStartUpload();
-                        }}
-                        className="relative group overflow-hidden bg-white/60 backdrop-blur-xl border border-white/60 hover:border-brand-purple-300 shadow-xl shadow-brand-purple-500/10 rounded-3xl p-6 text-right transition-all duration-300"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-purple-50/50 to-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        <div className="absolute top-4 left-4">
-                            <div className="bg-gradient-to-r from-brand-purple-600 to-brand-purple-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-brand-purple-500/30 animate-pulse">
-                                מומלץ ✨
-                            </div>
-                        </div>
-
-                        <div className="relative flex items-center gap-5">
-                            <div className="bg-brand-purple-100/80 p-3.5 rounded-2xl shadow-inner group-hover:bg-brand-purple-100 transition-colors">
-                                <span className="text-3xl">📸</span>
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900">סריקה חכמה ב-AI</h3>
-                                <p className="text-sm text-gray-500 mt-1 font-medium">מעלים צילום של הבגרות והמערכת מחשבת הכל לבד</p>
-                            </div>
-                        </div>
-                    </motion.button>
+                <div className="flex flex-col-reverse md:flex-col gap-4 mt-4">
 
                     {/* Card 2: Manual Entry - Clean Option */}
                     <motion.button
@@ -108,6 +78,36 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900">הקלדה ידנית</h3>
                                 <p className="text-sm text-gray-500 mt-1 font-medium">למי שאין קובץ זמין כרגע, הזנה מהירה ב-30 שניות</p>
+                            </div>
+                        </div>
+                    </motion.button>
+
+                    {/* Card 1: AI / Upload - Primary Premium Option */}
+                    <motion.button
+                        variants={item}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                            trackEvent('interaction_start', { method: 'ai', source: 'hero_card' });
+                            onStartUpload();
+                        }}
+                        className="relative group overflow-hidden bg-white/60 backdrop-blur-xl border border-white/60 hover:border-brand-purple-300 shadow-xl shadow-brand-purple-500/10 rounded-3xl p-6 text-right transition-all duration-300 opacity-80 md:opacity-100"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-purple-50/50 to-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                        <div className="absolute top-4 left-4">
+                            <div className="bg-gradient-to-r from-brand-purple-600 to-brand-purple-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-brand-purple-500/30 animate-pulse hidden md:block">
+                                מומלץ ✨
+                            </div>
+                        </div>
+
+                        <div className="relative flex items-center gap-5">
+                            <div className="bg-brand-purple-100/80 p-3.5 rounded-2xl shadow-inner group-hover:bg-brand-purple-100 transition-colors">
+                                <span className="text-3xl">📸</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">סריקה חכמה ב-AI</h3>
+                                <p className="text-sm text-gray-500 mt-1 font-medium">מעלים צילום של הבגרות והמערכת מחשבת הכל לבד</p>
                             </div>
                         </div>
                     </motion.button>

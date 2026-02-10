@@ -182,7 +182,7 @@ export function WizardContainer({
                                 onClick={() => handleStepCompletion(1)}
                                 className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"
                             >
-                                המשך
+                                {psychometricData.general === 0 ? 'המשך ללא פסיכומטרי' : 'המשך'}
                                 <ArrowLeft className="w-4 h-4 mr-2" />
                             </Button>
                         </div>
@@ -302,7 +302,7 @@ export function WizardContainer({
             </div>
 
             {/* Sticky Stats Footer (Mobile) */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40 transition-transform duration-500 translate-y-0">
+            <div className="fixed bottom-16 md:bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[70] transition-transform duration-500 translate-y-0">
                 <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
                     <div className="flex flex-col">
                         <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">ממוצע בגרות</span>

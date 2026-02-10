@@ -3,6 +3,8 @@ import { type UserData, saveUserData } from '../lib/userData';
 
 interface TrackedDegreesContextType {
     trackedIds: string[];
+    userData: UserData | null;
+    updateUserData: (data: Partial<UserData>) => void; // Added updater
     toggleTrack: (id: string) => void;
     removeTrack: (id: string) => void;
     isTracked: (id: string) => boolean;
@@ -22,10 +24,11 @@ export const useTrackedDegrees = () => {
 interface TrackedDegreesProviderProps {
     children: React.ReactNode;
     initialIds?: string[];
-    userData?: UserData | null; // Pass full userData to sync updates
+    userData?: UserData | null;
+    onUpdateUserData?: (data: Partial<UserData>) => void; // Prop from App
 }
 
-export const TrackedDegreesProvider = ({ children, initialIds = [], userData }: TrackedDegreesProviderProps) => {
+export const TrackedDegreesProvider = ({ children, initialIds = [], userData, onUpdateUserData }: TrackedDegreesProviderProps) => {
     const [trackedIds, setTrackedIds] = useState<string[]>(initialIds);
 
     // Sync with initialIds when they load (e.g. from App.tsx async load)
@@ -76,8 +79,16 @@ export const TrackedDegreesProvider = ({ children, initialIds = [], userData }: 
         setTrackedIds(ids);
     };
 
+    const updateUserData = (data: Partial<UserData>) => {
+        if (onUpdateUserData) {
+            onUpdateUserData(data);
+        } else {
+            console.warn('TrackedDegreesProvider: No onUpdateUserData provided');
+        }
+    };
+
     return (
-        <TrackedDegreesContext.Provider value={{ trackedIds, toggleTrack, removeTrack, isTracked, initialize }}>
+        <TrackedDegreesContext.Provider value={{ trackedIds, userData: userData || null, updateUserData, toggleTrack, removeTrack, isTracked, initialize }}>
             {children}
         </TrackedDegreesContext.Provider>
     );

@@ -58,7 +58,7 @@ async function transcribeAudio(audioPath) {
     try {
         const fileManager = new GoogleAIFileManager(GOOGLE_API_KEY);
         const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         // Upload file
         const uploadResult = await fileManager.uploadFile(audioPath, {
@@ -85,7 +85,7 @@ async function transcribeAudio(audioPath) {
         const analysis = {
             filename: path.basename(audioPath),
             text: text,
-            provider: 'gemini-1.5-flash',
+            provider: 'gemini-2.0-flash',
             timestamp: new Date().toISOString()
         };
 

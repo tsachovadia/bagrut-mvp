@@ -145,8 +145,7 @@ export function Header() {
                         <MobileNavItem onClick={() => { navigate('/'); setIsMenuOpen(false); }} text="לאן אני מתקבל" />
                         <MobileNavItem onClick={() => { navigate('/programs'); setIsMenuOpen(false); }} text="חיפוש תארים" />
                         <MobileNavItem onClick={() => { navigate('/tracking'); setIsMenuOpen(false); }} text="התארים שלי" />
-                        <MobileNavItem text="איך לשפר את הסכם" />
-                        <MobileNavItem text="דעות אמיתיות של סטודנטים" />
+                        <MobileNavItem onClick={() => window.open('https://pop.education.gov.il/average-bagrut-calculator/', '_blank')} text="מחשבון משרד החינוך" />
                         <MobileNavItem onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')} text="קהילה בוואטסאפ" />
 
                         <div className="pt-4 px-2 border-t mt-2">

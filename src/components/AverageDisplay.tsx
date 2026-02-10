@@ -73,7 +73,7 @@ export const AverageDisplay: React.FC<AverageDisplayProps> = ({ grades, sector, 
     }
 
     return (
-        <div className={cn("bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4", className)}>
+        <div className={cn("bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8 relative z-10", className)}>
             {/* Header / Tabs */}
             <div className="flex border-b border-slate-100 bg-slate-50/50 p-1 gap-1 overflow-x-auto">
                 {tabs.map(tab => {

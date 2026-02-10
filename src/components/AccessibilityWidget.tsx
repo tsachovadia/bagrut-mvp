@@ -46,7 +46,7 @@ export function AccessibilityWidget() {
     };
 
     return (
-        <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2" dir="rtl">
+        <div className="fixed top-24 left-4 z-[90] flex flex-col items-start gap-2 md:top-auto md:bottom-4 md:left-4" dir="rtl">
             {/* Menu */}
             {isOpen && (
                 <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-xl p-4 w-64 mb-2 animate-in slide-in-from-bottom-2 zoom-in-95 duration-200">
@@ -135,10 +135,10 @@ export function AccessibilityWidget() {
             {/* Floating Trigger Button */}
             <button
                 onClick={toggleOpen}
-                className="w-12 h-12 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 overflow-hidden"
+                className="w-12 h-12 bg-blue-600 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center text-white"
                 aria-label="אפשרויות נגישות"
             >
-                <img src="/accessibility_icon.png" alt="נגישות" className="w-full h-full object-cover" />
+                <Accessibility className="w-7 h-7" />
             </button>
         </div>
     );

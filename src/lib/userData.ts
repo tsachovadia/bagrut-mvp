@@ -112,6 +112,7 @@ export const saveUserData = async (data: UserData) => {
 };
 
 export const loadUserData = async (): Promise<UserData | null> => {
+    console.log('[userData] loadUserData called');
     // 1. Try Local Storage
     let localData: UserData | null = null;
     try {
@@ -139,6 +140,7 @@ export const loadUserData = async (): Promise<UserData | null> => {
         const { data: { session } } = await supabase.auth.getSession();
 
         // SYNC: If we have local data and a user, force a save to ensure cloud is in sync
+        console.log('[userData] Checking Supabase session...');
         // Guard against infinite loops: only sync once per session load
         const hasSynced = sessionStorage.getItem('has_synced_data');
         if (localData && session?.user && !hasSynced) {
@@ -198,7 +200,7 @@ export const loadUserData = async (): Promise<UserData | null> => {
     }
 
     // Fallback or default return
-    return null;
+    return localData;
 };
 
 

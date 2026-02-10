@@ -59,8 +59,8 @@ export const HomePage = ({
     };
 
     const handleHeroAction = (action: 'manual' | 'upload') => {
-        if (action === 'manual') {
-            setWizardMode('manual');
+        if (action === 'manual' || action === 'upload') {
+            setWizardMode(action);
             setWizardStarted(true);
         } else {
             setPendingAction(action);

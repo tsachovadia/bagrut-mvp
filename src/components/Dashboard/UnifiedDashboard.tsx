@@ -6,16 +6,17 @@ import type { SubjectGrade, PsychometricScores } from '../../utils/calculator';
 import { MyDataPanel } from './MyDataPanel';
 import { SimulationSidebar } from './SimulationSidebar';
 import { ResultsAuthGate } from '../ResultsAuthGate';
-
 import { TargetsPanel } from './TargetsPanel';
 import { SimulationInsightOverlay } from './SimulationInsightOverlay';
 import { generateSimulationInsights, type SimulationInsight } from '../../utils/calculation-bridge';
 import { Button } from '../ui/shim';
 import { Calculator } from 'lucide-react';
-
+import { useTrackedDegrees } from '../../context/TrackedDegreesContext';
 
 export const UnifiedDashboard = () => {
     const navigate = useNavigate();
+    const { userData: contextData, updateUserData } = useTrackedDegrees();
+
     // ---- State ----
     const [loading, setLoading] = useState(true);
     const [originalData, setOriginalData] = useState<UserData | null>(null);
@@ -25,6 +26,9 @@ export const UnifiedDashboard = () => {
     const [simulatedPsychometric, setSimulatedPsychometric] = useState<PsychometricScores>({
         general: 0, quantitative: 0, verbal: 0, english: 0
     });
+
+    // Simulation Management State
+    const [activeSimulationId, setActiveSimulationId] = useState<string | null>(null);
 
     // Target/Results State
     const [targetDegree, setTargetDegree] = useState<string | null>(null);
@@ -36,33 +40,43 @@ export const UnifiedDashboard = () => {
 
     const [sector, setSector] = useState<string>('mamlachti');
 
-
     // ---- Effects ----
-    // 1. Load Data
+    // 1. Sync Data from Context
     useEffect(() => {
-        async function init() {
-            const data = await loadUserData();
-            console.log('[UnifiedDashboard] Loaded data:', data);
-            if (data && data.bagrut?.length > 0) {
-                setOriginalData(data);
-                if (data.sector) setSector(data.sector);
+        if (contextData) {
+            setOriginalData(contextData);
+            if (contextData.sector) setSector(contextData.sector);
 
-                // Init Simulation with deep copy
-                setSimulatedBagrut(JSON.parse(JSON.stringify(data.bagrut)));
-                setSimulatedPsychometric({ ...data.psychometric });
-
-                // Calc Original Stats
-                const stats = calculateAdmissionStats(data.bagrut, data.psychometric);
-                setOriginalStats(stats);
+            // If we are not currently simulating, default simulation state to original
+            // Check if simulatedBagrut is empty to avoid overwriting ongoing simulation?
+            // Actually, if context updates (e.g. from Home), we should probably respect it if not in active simulation.
+            // But let's just init if empty.
+            if (simulatedBagrut.length === 0) {
+                setSimulatedBagrut(contextData.bagrut ? JSON.parse(JSON.stringify(contextData.bagrut)) : []);
+                setSimulatedPsychometric({ ...contextData.psychometric });
             }
+
+            // Calc Original Stats
+            const stats = calculateAdmissionStats(contextData.bagrut || [], contextData.psychometric);
+            setOriginalStats(stats);
+
+            setLoading(false);
+        } else {
+            // If context is null, maybe wait or show loading?
+            // Since App.tsx shows "Loading..." if data not loaded, check if we should fallback (unlikely)
+            // But if specific race condition makes it null initially:
+            // We can keep loading=true.
+            // Or if user truly has no data (new user), App passes 'null' userData?
+            // No, App handles 'userData' as valid object if loaded.
+            // Actually App initializes userData with 'loadUserData()' result.
+            // If loadUserData returns null (new user), userData is null.
             setLoading(false);
         }
-        init();
-    }, []);
+    }, [contextData]); // Depend on contextData
 
     // 2. Calc Simulation Stats on change
     useEffect(() => {
-        if (simulatedBagrut.length > 0) {
+        if (simulatedBagrut.length > 0 || simulatedPsychometric.general > 0) {
             const stats = calculateAdmissionStats(simulatedBagrut, simulatedPsychometric);
             setSimulatedStats(stats);
             // Generate Insights
@@ -74,9 +88,6 @@ export const UnifiedDashboard = () => {
     }, [simulatedBagrut, simulatedPsychometric, originalStats]);
 
     // 3. Calc stats for all saved simulations (Memoized)
-
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const simulationsWithStats = useMemo(() => {
         if (!originalData?.savedSimulations) return [];
         return originalData.savedSimulations.map(sim => ({
@@ -85,14 +96,6 @@ export const UnifiedDashboard = () => {
         })).sort((a, b) => b.createdAt - a.createdAt);
     }, [originalData?.savedSimulations]);
 
-    // ---- Handlers ----
-    // Simulation Management State
-    const [activeSimulationId, setActiveSimulationId] = useState<string | null>(null);
-
-    // ... (Stats Effects remain)
-
-    // 2. Calc Simulation Stats on change (No change needed)
-
 
     // ---- Handlers ----
 
@@ -100,8 +103,6 @@ export const UnifiedDashboard = () => {
     const handleSimulationUpdate = (newBagrut: SubjectGrade[], newPsychometric: PsychometricScores) => {
         setSimulatedBagrut(newBagrut);
         setSimulatedPsychometric(newPsychometric);
-        // If we change data while in a saved simulation (without saving), we might conceptually be "editing" it 
-        // or starting a new unsaved one. For simplicity, we keep the ID active until they save as new or switch.
     };
 
     // Create NEW simulation
@@ -112,8 +113,6 @@ export const UnifiedDashboard = () => {
         let finalName = name.trim();
         if (!finalName) {
             const count = (originalData.savedSimulations?.length || 0) + 1;
-            // Hebrew letter based naming? Or just numbers? User asked for "Simulation A/B"
-            // Let's stick effectively to "Simulation 1", "Simulation 2" for simplicity or a simple mapper
             const hebrewLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
             const letter = hebrewLetters[count - 1] || count.toString();
             finalName = `סימולציה ${letter}`;
@@ -127,14 +126,11 @@ export const UnifiedDashboard = () => {
             psychometric: simulatedPsychometric
         };
 
-
         const updatedSimulations = [...(originalData.savedSimulations || []), newSimulation];
-        const updatedData = { ...updatedSimulations.length ? { ...originalData, savedSimulations: updatedSimulations } : originalData };
-        // Logic simplification:
         const newData = { ...originalData, savedSimulations: updatedSimulations };
 
         setOriginalData(newData);
-        saveUserData(newData);
+        updateUserData(newData); // Global update
         setActiveSimulationId(newSimulation.id);
     };
 
@@ -156,7 +152,7 @@ export const UnifiedDashboard = () => {
 
         const newData = { ...originalData, savedSimulations: updatedSimulations };
         setOriginalData(newData);
-        saveUserData(newData);
+        updateUserData(newData); // Global update
     };
 
     const handleDeleteSimulation = (id: string) => {
@@ -166,7 +162,7 @@ export const UnifiedDashboard = () => {
         const newData = { ...originalData, savedSimulations: updatedSimulations };
 
         setOriginalData(newData);
-        saveUserData(newData);
+        updateUserData(newData); // Global update
 
         if (activeSimulationId === id) {
             handleResetSimulation();
@@ -192,17 +188,7 @@ export const UnifiedDashboard = () => {
         if (originalData) {
             setSimulatedBagrut(JSON.parse(JSON.stringify(originalData.bagrut)));
             setSimulatedPsychometric({ ...originalData.psychometric });
-            setActiveSimulationId(null);
-        }
-    };
-
-    const handleSectorUpdate = (newSector: any) => {
-        setSector(newSector);
-        if (originalData) {
-            saveUserData({
-                ...originalData,
-                sector: newSector
-            });
+            setActiveSimulationId(null); // Explicit cleanup
         }
     };
 
@@ -210,7 +196,7 @@ export const UnifiedDashboard = () => {
         if (!originalData) return;
         const newData = { ...originalData, preferences: newPrefs };
         setOriginalData(newData);
-        saveUserData(newData);
+        updateUserData(newData);
     };
 
     // ---- Render ----
@@ -304,5 +290,4 @@ export const UnifiedDashboard = () => {
             </div>
         </ResultsAuthGate>
     );
-
 };

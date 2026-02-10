@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Agentation } from 'agentation';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+// import { Agentation } from 'agentation'; // Removed static import
+
+// Lazy load Agentation to avoid bundling it in production
+const Agentation = lazy(() => import('agentation').then(module => ({ default: module.Agentation })));
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { TrackedDegreesProvider } from './context/TrackedDegreesContext';
 import './App.css';
@@ -195,7 +198,11 @@ function App() {
       <AccessibilityWidget />
       <div className="md:hidden h-16" /> {/* Spacer for bottom nav */}
       <MobileBottomNav />
-      {import.meta.env.DEV && <Agentation />}
+      {import.meta.env.DEV && (
+        <Suspense fallback={null}>
+          <Agentation />
+        </Suspense>
+      )}
     </TrackedDegreesProvider>
   );
 }
