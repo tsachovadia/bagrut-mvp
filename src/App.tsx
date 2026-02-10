@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Agentation } from 'agentation';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { TrackedDegreesProvider } from './context/TrackedDegreesContext';
 import './App.css';
@@ -7,11 +8,12 @@ import { ProgramPage } from './pages/ProgramPage';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
 import { initializeGTM } from './utils/gtm';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
-import { loadUserData, saveUserData } from './lib/userData';
+import { loadUserData, saveUserData, type UserData } from './lib/userData';
 import { TermsOfUse } from './components/TermsOfUse';
 import { CookieConsent } from './components/CookieConsent';
 import { AccessibilityWidget } from './components/AccessibilityWidget';
-import { TrackedDegreesFloatingMenu } from './components/TrackedDegreesFloatingMenu';
+import { MobileBottomNav } from './components/MobileBottomNav';
+import { TrackedDegreesWidget } from './components/TrackedDegreesWidget';
 import { useNavigate } from 'react-router-dom';
 
 import { ProgramsExplorer } from './components/ProgramsExplorer/ProgramsExplorer';
@@ -26,6 +28,24 @@ import { PartnersPage } from './pages/Admin/PartnersPage';
 import { isProduction } from './utils/env';
 import { TrackedDegreesPage } from './pages/TrackedDegreesPage';
 import { CampaignMobileFirst } from './pages/CampaignMobileFirst';
+
+function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
+  return (
+    <div className="flex" dir="rtl">
+      <div className="flex-1 min-w-0">
+        {children}
+      </div>
+      <aside className="hidden lg:block w-60 shrink-0 border-r border-gray-200/60 bg-white/50">
+        <div className="sticky top-0 h-screen overflow-y-auto custom-scrollbar p-3 pt-4">
+          <TrackedDegreesWidget
+            className="shadow-sm border-gray-200"
+            userStats={userStats}
+          />
+        </div>
+      </aside>
+    </div>
+  );
+}
 
 function App() {
   const navigate = useNavigate();
@@ -66,20 +86,27 @@ function App() {
     init();
   }, []);
 
-  const handlePsychometricUpdate = (psychoData: PsychometricScores) => {
+  const handlePsychometricUpdate = useCallback((psychoData: PsychometricScores) => {
     setPsychometric(psychoData);
     saveUserData({ bagrut: bagrutGrades, psychometric: psychoData, preferences });
-  };
+  }, [bagrutGrades, preferences]);
 
-  const handleBagrutUpdate = (grades: SubjectGrade[]) => {
+  const handleBagrutUpdate = useCallback((grades: SubjectGrade[]) => {
     setBagrutGrades(grades);
     saveUserData({ bagrut: grades, psychometric: psychometric, preferences });
-  };
+  }, [psychometric, preferences]);
 
-  const handlePreferencesUpdate = (newPrefs: { fields: string[]; institutions: string[]; isUndecided: boolean; }) => {
+  const handlePreferencesUpdate = useCallback((newPrefs: { fields: string[]; institutions: string[]; isUndecided: boolean; }) => {
     setPreferences(newPrefs);
     saveUserData({ bagrut: bagrutGrades, psychometric, preferences: newPrefs });
-  };
+  }, [bagrutGrades, psychometric]);
+
+  // Unified update handler for context
+  const handleUserDataUpdate = useCallback((data: Partial<UserData>) => {
+    if (data.bagrut) handleBagrutUpdate(data.bagrut);
+    if (data.psychometric) handlePsychometricUpdate(data.psychometric);
+    if (data.preferences) handlePreferencesUpdate(data.preferences);
+  }, [handleBagrutUpdate, handlePsychometricUpdate, handlePreferencesUpdate]);
 
   // Auto-calculate whenever data changes
   useEffect(() => {
@@ -88,7 +115,15 @@ function App() {
       const stats = calculateAdmissionStats(bagrutGrades, psychometric);
       setResults(stats.degrees);
     }
-  }, [bagrutGrades, psychometric]);
+
+    // Update master userData object for context consumers
+    setUserData((prev: any) => ({
+      ...prev,
+      bagrut: bagrutGrades,
+      psychometric,
+      preferences
+    }));
+  }, [bagrutGrades, psychometric, preferences]);
 
   const loadScenario = (scenario: any) => {
     setPsychometric(scenario.psychometric);
@@ -109,7 +144,11 @@ function App() {
   };
 
   return (
-    <TrackedDegreesProvider initialIds={userData?.trackedPrograms || []} userData={userData}>
+    <TrackedDegreesProvider
+      initialIds={userData?.trackedPrograms || []}
+      userData={userData}
+      onUpdateUserData={handleUserDataUpdate}
+    >
       <Routes>
         <Route path="/" element={
           <HomePage
@@ -126,18 +165,22 @@ function App() {
           />
         } />
         <Route path="/programs" element={
-          <div className="min-h-screen flex flex-col font-sans" dir="rtl">
-            <Header />
-            <ProgramsExplorer userStats={userStats} trackedDegrees={results} />
-            <Footer />
-          </div>
+          <SidebarLayout userStats={userStats}>
+            <div className="min-h-screen flex flex-col font-sans" dir="rtl">
+              <Header />
+              <ProgramsExplorer userStats={userStats} trackedDegrees={results} />
+              <Footer />
+            </div>
+          </SidebarLayout>
         } />
         <Route path="/program/:id" element={<ProgramPage />} />
         <Route path="/dashboard" element={
-          <div className="min-h-screen flex flex-col font-sans" dir="rtl">
-            <Header />
-            <UnifiedDashboard />
-          </div>
+          <SidebarLayout userStats={userStats}>
+            <div className="min-h-screen flex flex-col font-sans" dir="rtl">
+              <Header />
+              <UnifiedDashboard />
+            </div>
+          </SidebarLayout>
         } />
         <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
         <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
@@ -145,11 +188,14 @@ function App() {
         <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
+        <Route path="/tracking" element={<TrackedDegreesPage />} />
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
       </Routes>
       <CookieConsent />
       <AccessibilityWidget />
-      <TrackedDegreesFloatingMenu />
+      <div className="md:hidden h-16" /> {/* Spacer for bottom nav */}
+      <MobileBottomNav />
+      {import.meta.env.DEV && <Agentation />}
     </TrackedDegreesProvider>
   );
 }

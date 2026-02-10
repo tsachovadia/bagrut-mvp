@@ -8,7 +8,6 @@ import { FiltersDrawer } from '../ui/FiltersDrawer';
 import { ProgramDetailsDrawer } from '../ui/ProgramDetailsDrawer';
 import { admissionEngine } from '../../services/admission-engine';
 import { ProgramFilterPanel } from '../ProgramFilterPanel';
-import { TrackedDegreesWidget } from '../TrackedDegreesWidget';
 import type { UserAdmissionStats } from '../../utils/admission-evaluation';
 
 interface ProgramsExplorerProps {
@@ -102,7 +101,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
             <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 py-3">
                     {/* Top Row: Title & Filter Toggles */}
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-3">
                             <h1 className="text-xl font-bold text-gray-800">סייר התוכניות</h1>
                             <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors">
@@ -116,9 +115,15 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setIsFiltersDrawerOpen(true)}
-                                className="flex items-center gap-2 h-9 w-9 p-0 rounded-full border-gray-200 bg-white shadow-sm"
+                                className="flex items-center gap-2 h-9 px-3 rounded-full border-gray-200 bg-white shadow-sm relative"
                             >
                                 <Filter size={16} className="text-gray-600" />
+                                <span className="text-xs text-gray-600 lg:hidden">סינון</span>
+                                {(selectedFields.length + selectedInstIds.length) > 0 && (
+                                    <span className="absolute -top-1 -left-1 bg-indigo-600 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                                        {selectedFields.length + selectedInstIds.length}
+                                    </span>
+                                )}
                             </Button>
                         </div>
 
@@ -135,6 +140,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                             </Button>
                         </div>
                     </div>
+                    <p className="text-xs text-gray-400 mb-2">חפשו וסננו תוכניות לימוד מכל המוסדות בארץ</p>
 
                     {/* Desktop Inline Filters Panel */}
                     <div className="hidden lg:block">
@@ -184,7 +190,7 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
 
             {/* Main Content Split */}
             <main className="max-w-7xl mx-auto px-4 py-6">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 items-start">
 
                     {/* Right Panel (RTL): Results List */}
                     <div className="col-span-1 lg:col-span-6 space-y-8 order-2 lg:order-1">
@@ -235,14 +241,6 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                             admission={selectedProgramData?.admission || null}
                             userStats={userStats}
                             className="h-full shadow-sm border-gray-200"
-                        />
-                    </div>
-
-                    {/* Left Panel (RTL): Tracked Degrees (Desktop Sticky) */}
-                    <div className="hidden lg:block lg:col-span-2 sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar order-1 lg:order-3">
-                        <TrackedDegreesWidget
-                            availablePrograms={programs}
-                            className="shadow-sm border-gray-200"
                         />
                     </div>
                 </div>

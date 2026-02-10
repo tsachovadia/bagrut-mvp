@@ -43,6 +43,8 @@ export interface AdmissionRule {
     max_score?: number;
     logic_operator?: string;
     raw_json?: any;
+    logic_config?: any; // Added to match DB
+    logic_rules?: any;  // Added for UI mapping
 }
 
 export interface ExamEvent {
@@ -104,8 +106,8 @@ export class AdmissionEngine {
                 faculties (
                     id,
                     name,
-                    institution_id,
-                    institutions (
+                    university_id,
+                    universities (
                         id,
                         name,
                         type,
@@ -125,8 +127,27 @@ export class AdmissionEngine {
 
     // Helper to map DB shape to UI shape expected by ProgramsExplorer
     mapProgramToUI(p: Program) {
-        const faculty = p.faculties;
-        const institution = faculty?.institutions;
+        const faculty = p.faculties as any;
+        const institution = faculty?.universities;
+        const rawRule = p.admission_rules?.[0];
+
+        // Map DB rule to UI rule, handling column name differences
+        const admissionRule = rawRule ? {
+            ...rawRule,
+            // Determine status based on year (if older than current year, maybe closed?)
+            // or use specific status field if exists in DB (it doesn't, so we assume open/published)
+            status: rawRule.status || 'published',
+            // Map logic_config (DB) to logic_rules (UI)
+            logic_rules: rawRule.logic_config || rawRule.raw_json || {},
+            // Ensure ID is set
+            id: rawRule.id
+        } : {
+            id: 'mock',
+            program_id: p.id,
+            year: 2026,
+            status: 'calculated', // Fallback
+            logic_rules: {}
+        };
 
         return {
             program: {
@@ -148,13 +169,7 @@ export class AdmissionEngine {
                     name: faculty.name
                 } : undefined
             },
-            admission: p.admission_rules?.[0] || {
-                id: 'mock',
-                program_id: p.id,
-                year: 2026,
-                status: 'calculated', // Fallback
-                logic_rules: {}
-            }
+            admission: admissionRule
         };
     }
 
