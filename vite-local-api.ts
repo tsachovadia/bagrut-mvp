@@ -1,6 +1,11 @@
 
 import { loadEnv } from 'vite';
 import { GradeExtractionService } from './api/services/grade-extraction';
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+// Load env vars immediately for server-side code
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // Increase payload limit for images
 
@@ -56,6 +61,7 @@ export function extractGradesMiddleware() {
                             details: e,
                             stack: e.stack
                         }));
+                        return;
                     }
                 }
 
@@ -77,6 +83,7 @@ export function extractGradesMiddleware() {
                             details: e,
                             stack: e.stack
                         }));
+                        return;
                     }
                 }
 
@@ -91,6 +98,52 @@ export function extractGradesMiddleware() {
                         return sendJson({ success: true, ...result });
 
                     } catch (e: any) {
+                        return sendError(500, e.message);
+                    }
+                }
+
+                // 4. TELEGRAM WEBHOOK (Local Simulation)
+                if (req.url === '/api/telegram-webhook' && req.method === 'POST') {
+                    try {
+                        console.log("[API] /api/telegram-webhook received POST");
+                        const body = await parseBody();
+
+                        // Mock Vercel Request
+                        const vercelReq: any = {
+                            method: 'POST',
+                            body: body,
+                            headers: req.headers,
+                            query: {},
+                            cookies: {}
+                        };
+
+                        // Mock Vercel Response
+                        const vercelRes: any = {
+                            status: (code: number) => {
+                                res.statusCode = code;
+                                return vercelRes;
+                            },
+                            json: (data: any) => {
+                                sendJson(data);
+                                return vercelRes;
+                            },
+                            send: (data: any) => {
+                                res.end(data);
+                                return vercelRes;
+                            },
+                            setHeader: (name: string, value: string) => {
+                                res.setHeader(name, value);
+                                return vercelRes;
+                            }
+                        };
+
+                        // Dynamic import to handle env loading order
+                        const { default: telegramHandler } = await import('./api/telegram-webhook');
+                        await telegramHandler(vercelReq, vercelRes);
+                        return;
+
+                    } catch (e: any) {
+                        console.error("[Local API] Telegram Webhook Failed:", e);
                         return sendError(500, e.message);
                     }
                 }
