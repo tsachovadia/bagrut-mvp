@@ -1,3 +1,4 @@
+/// <reference path="./types.d.ts" />
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { TelegramUpdate, HandlerContext } from './lib/telegram/types';
 import { verifyWebhook, resolveUser, touchUser, markUserBlocked, logMessage } from './lib/telegram/middleware';
