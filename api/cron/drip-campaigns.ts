@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import type { BotUser, DripStage } from '../lib/telegram/types';
+import type { BotUser, DripStage } from '../lib/telegram/types.js';
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL!,

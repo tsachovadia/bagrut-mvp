@@ -1,8 +1,8 @@
-import type { HandlerContext, PsychometricBot } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client';
-import { updateBotUser, logMessage } from '../middleware';
-import { setState } from '../services/user-service';
-import { updateLeadScore } from '../services/lead-scoring';
+import type { HandlerContext, PsychometricBot } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { updateBotUser, logMessage } from '../middleware.js';
+import { setState } from '../services/user-service.js';
+import { updateLeadScore } from '../services/lead-scoring.js';
 
 /**
  * Start psychometric score entry flow

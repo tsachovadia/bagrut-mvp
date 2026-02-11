@@ -1,8 +1,8 @@
-import type { HandlerContext, SubjectGradeBot } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client';
-import { updateBotUser, logMessage } from '../middleware';
-import { setState } from '../services/user-service';
-import { updateLeadScore } from '../services/lead-scoring';
+import type { HandlerContext, SubjectGradeBot } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { updateBotUser, logMessage } from '../middleware.js';
+import { setState } from '../services/user-service.js';
+import { updateLeadScore } from '../services/lead-scoring.js';
 
 // Subject categories for keyboard display
 const SUBJECT_CATEGORIES: { label: string; subjects: { name: string; units: number[] }[] }[] = [

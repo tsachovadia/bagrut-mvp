@@ -1,5 +1,5 @@
-import type { BotUser, ConversationState } from '../types';
-import { supabase, updateBotUser } from '../middleware';
+import type { BotUser, ConversationState } from '../types.js';
+import { supabase, updateBotUser } from '../middleware.js';
 
 /**
  * Set conversation state and optional state data

@@ -3,7 +3,7 @@
  * Used by the Telegram bot for calculation and program browsing.
  */
 
-import type { AdmissionRequirement } from './calculator';
+import type { AdmissionRequirement } from './calculator.js';
 
 interface Institution {
     id: string;

@@ -1,6 +1,6 @@
-import type { TelegramMessage } from '../types';
-import { sendMessage, deleteMessage } from '../client';
-import { supabase } from '../middleware';
+import type { TelegramMessage } from '../types.js';
+import { sendMessage, deleteMessage } from '../client.js';
+import { supabase } from '../middleware.js';
 
 // Simple spam patterns
 const SPAM_PATTERNS = [

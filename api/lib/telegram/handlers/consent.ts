@@ -1,6 +1,6 @@
-import type { HandlerContext } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client';
-import { updateBotUser, logMessage } from '../middleware';
+import type { HandlerContext } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { updateBotUser, logMessage } from '../middleware.js';
 
 /**
  * Handle /consent command - show and manage consent preferences

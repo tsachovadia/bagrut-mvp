@@ -1,7 +1,7 @@
-import type { HandlerContext } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client';
-import { logMessage } from '../middleware';
-import { getActiveGroups } from '../services/user-service';
+import type { HandlerContext } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client.js';
+import { logMessage } from '../middleware.js';
+import { getActiveGroups } from '../services/user-service.js';
 
 /**
  * Handle /rooms command - show available community rooms

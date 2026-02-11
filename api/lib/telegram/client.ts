@@ -1,4 +1,4 @@
-import type { InlineKeyboardMarkup, SendMessageOptions } from './types';
+import type { InlineKeyboardMarkup, SendMessageOptions } from './types.js';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;

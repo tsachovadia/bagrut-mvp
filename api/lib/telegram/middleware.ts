@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { VercelRequest } from '@vercel/node';
-import type { BotUser, TelegramUpdate, ConversationState, PsychometricBot } from './types';
+import type { BotUser, TelegramUpdate, ConversationState, PsychometricBot } from './types.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!;

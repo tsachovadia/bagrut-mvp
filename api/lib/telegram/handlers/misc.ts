@@ -1,8 +1,8 @@
-import type { HandlerContext } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client';
-import { logMessage } from '../middleware';
-import { calculateForBot, type Sector } from '../../shared/calculator';
-import { ALL_PROGRAMS } from '../../shared/programs';
+import type { HandlerContext } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { logMessage } from '../middleware.js';
+import { calculateForBot, type Sector } from '../../shared/calculator.js';
+import { ALL_PROGRAMS } from '../../shared/programs.js';
 
 /**
  * Handle /help command

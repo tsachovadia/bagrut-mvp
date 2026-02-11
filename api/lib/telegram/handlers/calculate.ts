@@ -1,9 +1,9 @@
-import type { HandlerContext } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client';
-import { logMessage } from '../middleware';
-import { updateLeadScore } from '../services/lead-scoring';
-import { calculateForBot, calculateSekem, type Sector } from '../../shared/calculator';
-import { ALL_PROGRAMS } from '../../shared/programs';
+import type { HandlerContext } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { logMessage } from '../middleware.js';
+import { updateLeadScore } from '../services/lead-scoring.js';
+import { calculateForBot, calculateSekem, type Sector } from '../../shared/calculator.js';
+import { ALL_PROGRAMS } from '../../shared/programs.js';
 
 /**
  * Handle /calculate command - run full admission simulation

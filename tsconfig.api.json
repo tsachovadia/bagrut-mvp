@@ -7,8 +7,8 @@
             "DOM.Iterable"
         ],
         "composite": true,
-        "module": "ESNext",
-        "moduleResolution": "node",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "allowImportingTsExtensions": true,
         "verbatimModuleSyntax": true,
         "moduleDetection": "force",

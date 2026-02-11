@@ -1,5 +1,5 @@
-import type { BotUser, LeadAction, LeadStage } from '../types';
-import { updateBotUser } from '../middleware';
+import type { BotUser, LeadAction, LeadStage } from '../types.js';
+import { updateBotUser } from '../middleware.js';
 
 const SCORE_WEIGHTS: Record<LeadAction, number> = {
     started_bot: 5,

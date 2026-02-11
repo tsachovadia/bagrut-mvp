@@ -1,20 +1,20 @@
 /// <reference path="./types.d.ts" />
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { TelegramUpdate, HandlerContext } from './lib/telegram/types';
-import { verifyWebhook, resolveUser, touchUser, markUserBlocked, logMessage } from './lib/telegram/middleware';
-import { sendMessage } from './lib/telegram/client';
+import type { TelegramUpdate, HandlerContext } from './lib/telegram/types.js';
+import { verifyWebhook, resolveUser, touchUser, markUserBlocked, logMessage } from './lib/telegram/middleware.js';
+import { sendMessage } from './lib/telegram/client.js';
 
 // Handlers
-import { handleStart } from './lib/telegram/handlers/start';
-import { handleGrades, handleGradeScore } from './lib/telegram/handlers/grades';
-import { handlePsychometric, handlePsychometricScore } from './lib/telegram/handlers/psychometric';
-import { handleCalculate } from './lib/telegram/handlers/calculate';
-import { handlePrograms } from './lib/telegram/handlers/programs';
-import { handleRooms } from './lib/telegram/handlers/rooms';
-import { handleHelp, handleStatus, handleShare } from './lib/telegram/handlers/misc';
-import { handleCallback } from './lib/telegram/handlers/callback-router';
-import { handleGroupMessage, handleNewMember } from './lib/telegram/handlers/group-events';
-import { handleConsent } from './lib/telegram/handlers/consent';
+import { handleStart } from './lib/telegram/handlers/start.js';
+import { handleGrades, handleGradeScore } from './lib/telegram/handlers/grades.js';
+import { handlePsychometric, handlePsychometricScore } from './lib/telegram/handlers/psychometric.js';
+import { handleCalculate } from './lib/telegram/handlers/calculate.js';
+import { handlePrograms } from './lib/telegram/handlers/programs.js';
+import { handleRooms } from './lib/telegram/handlers/rooms.js';
+import { handleHelp, handleStatus, handleShare } from './lib/telegram/handlers/misc.js';
+import { handleCallback } from './lib/telegram/handlers/callback-router.js';
+import { handleGroupMessage, handleNewMember } from './lib/telegram/handlers/group-events.js';
+import { handleConsent } from './lib/telegram/handlers/consent.js';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
     if (request.method !== 'POST') {

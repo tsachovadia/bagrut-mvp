@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { autoLinkSoftLead } from './lib/profile-linking';
+import { autoLinkSoftLead } from './lib/profile-linking.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {

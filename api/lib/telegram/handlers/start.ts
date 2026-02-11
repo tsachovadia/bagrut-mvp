@@ -1,11 +1,11 @@
-import type { HandlerContext } from '../types';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client';
-import { updateBotUser, logMessage } from '../middleware';
-import { updateLeadScore } from '../services/lead-scoring';
-import { setState } from '../services/user-service';
-import { getUserByReferralCode, incrementReferralCount } from '../services/user-service';
-import { ALL_PROGRAMS } from '../../shared/programs';
-import { linkBotToWeb } from '../../profile-linking';
+import type { HandlerContext } from '../types.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { updateBotUser, logMessage } from '../middleware.js';
+import { updateLeadScore } from '../services/lead-scoring.js';
+import { setState } from '../services/user-service.js';
+import { getUserByReferralCode, incrementReferralCount } from '../services/user-service.js';
+import { ALL_PROGRAMS } from '../../shared/programs.js';
+import { linkBotToWeb } from '../../profile-linking.js';
 
 /**
  * Handle /start command with variants:

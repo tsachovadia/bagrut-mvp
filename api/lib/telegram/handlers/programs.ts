@@ -1,8 +1,8 @@
-import type { HandlerContext } from '../types';
-import { sendMessage, answerCallbackQuery, inlineKeyboard, keyboardRow, btn } from '../client';
-import { updateBotUser, logMessage } from '../middleware';
-import { updateLeadScore } from '../services/lead-scoring';
-import { ALL_PROGRAMS, PROGRAM_FIELDS, getProgramsByField, getProgramById } from '../../shared/programs';
+import type { HandlerContext } from '../types.js';
+import { sendMessage, answerCallbackQuery, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { updateBotUser, logMessage } from '../middleware.js';
+import { updateLeadScore } from '../services/lead-scoring.js';
+import { ALL_PROGRAMS, PROGRAM_FIELDS, getProgramsByField, getProgramById } from '../../shared/programs.js';
 
 /**
  * Handle /programs command - show field selection

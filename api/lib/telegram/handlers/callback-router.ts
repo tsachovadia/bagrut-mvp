@@ -1,19 +1,19 @@
-import type { HandlerContext } from '../types';
-import { answerCallbackQuery } from '../client';
-import { logMessage } from '../middleware';
-import { handleSectorSelection } from './start';
-import { handleSubjectSelected, handleUnitsSelected, handleGradesDone, handleSubjectPage } from './grades';
-import { handlePsychometric } from './psychometric';
-import { handleFieldSelected, handleProgramDetail, handleTrackProgram } from './programs';
+import type { HandlerContext } from '../types.js';
+import { answerCallbackQuery } from '../client.js';
+import { logMessage } from '../middleware.js';
+import { handleSectorSelection } from './start.js';
+import { handleSubjectSelected, handleUnitsSelected, handleGradesDone, handleSubjectPage } from './grades.js';
+import { handlePsychometric } from './psychometric.js';
+import { handleFieldSelected, handleProgramDetail, handleTrackProgram } from './programs.js';
 
 // Command shortcuts mapped from callback data
-import { handleGrades } from './grades';
-import { handleCalculate } from './calculate';
-import { handlePrograms } from './programs';
-import { handleRooms } from './rooms';
-import { handleHelp, handleStatus, handleShare } from './misc';
-import { handleStart } from './start';
-import { handleConsentCallback } from './consent';
+import { handleGrades } from './grades.js';
+import { handleCalculate } from './calculate.js';
+import { handlePrograms } from './programs.js';
+import { handleRooms } from './rooms.js';
+import { handleHelp, handleStatus, handleShare } from './misc.js';
+import { handleStart } from './start.js';
+import { handleConsentCallback } from './consent.js';
 
 /**
  * Route callback queries to the appropriate handler based on data prefix.
