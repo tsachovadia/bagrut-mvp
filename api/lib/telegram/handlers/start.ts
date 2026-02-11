@@ -5,6 +5,7 @@ import { updateLeadScore } from '../services/lead-scoring';
 import { setState } from '../services/user-service';
 import { getUserByReferralCode, incrementReferralCount } from '../services/user-service';
 import { ALL_PROGRAMS } from '../../shared/programs';
+import { linkBotToWeb } from '../../profile-linking';
 
 /**
  * Handle /start command with variants:
@@ -30,6 +31,8 @@ export async function handleStart(ctx: HandlerContext, payload?: string): Promis
     if (payload?.startsWith('link_')) {
         const webUserId = payload.replace('link_', '');
         await updateBotUser(user.id, { web_user_id: webUserId, source: 'web' } as any);
+        // Also create profile_links entries for unified profile tracking
+        await linkBotToWeb(user.id, webUserId);
         await sendMessage(chatId,
             `🔗 החשבון חובר בהצלחה!\n\nהציונים שלך מהאתר יסונכרנו אוטומטית.\nתקבל/י עדכונים ישירות לכאן.`
         );

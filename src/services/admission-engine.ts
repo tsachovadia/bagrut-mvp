@@ -106,8 +106,8 @@ export class AdmissionEngine {
                 faculties (
                     id,
                     name,
-                    university_id,
-                    universities (
+                    institution_id,
+                    institutions (
                         id,
                         name,
                         type,
@@ -116,7 +116,7 @@ export class AdmissionEngine {
                     )
                 )
             `)
-            .limit(1000); // Increased limit for multiple universities
+            .limit(1000);
 
         if (error) {
             console.error('Error fetching full programs:', error);
@@ -128,18 +128,65 @@ export class AdmissionEngine {
     // Helper to map DB shape to UI shape expected by ProgramsExplorer
     mapProgramToUI(p: Program) {
         const faculty = p.faculties as any;
-        const institution = faculty?.universities;
+
+        // Handle new schema: faculty.institutions
+        const institutionRaw = faculty?.institutions || faculty?.universities;
+
+        let institution = undefined;
+
+        if (institutionRaw) {
+            // POLYFILL: Map Hebrew names to Keys & Calculator Types for logic
+            // Default fallback
+            let key = 'general';
+            let calculator_type = 'linear_approx';
+
+            const name = institutionRaw.name || '';
+
+            // Logic mapping based on known seed data
+            if (name.includes('הטכניון') || name.toLowerCase().includes('technion')) {
+                key = 'technion';
+                calculator_type = 'technion_exact';
+            } else if (name.includes('תל אביב') || name.toLowerCase().includes('tel aviv')) {
+                key = 'tau';
+                calculator_type = 'tau_sekem';
+            } else if (name.includes('בן-גוריון') || name.includes('בן גוריון') || name.toLowerCase().includes('ben gurion')) {
+                key = 'bgu';
+                calculator_type = 'linear_approx';
+            } else if (name.includes('העברית') || name.toLowerCase().includes('hebrew')) {
+                key = 'huji';
+                calculator_type = 'linear_approx';
+            } else if (name.includes('חיפה') || name.toLowerCase().includes('haifa')) {
+                key = 'haifa';
+                calculator_type = 'haifa_weighted';
+            } else if (name.includes('בר אילן') || name.toLowerCase().includes('bar ilan')) {
+                key = 'biu';
+                calculator_type = 'linear_approx';
+            } else if (name.includes('הפתוחה') || name.toLowerCase().includes('open')) {
+                key = 'openu';
+                calculator_type = 'afik_maavar';
+            } else if (name.includes('אריאל') || name.toLowerCase().includes('ariel')) {
+                key = 'ariel';
+                calculator_type = 'linear_approx';
+            }
+
+            institution = {
+                id: institutionRaw.id,
+                name: institutionRaw.name,
+                type: institutionRaw.type || 'university',
+                logo_url: institutionRaw.logo_url,
+                website_url: institutionRaw.website_url,
+                key,
+                calculator_type
+            };
+        }
+
         const rawRule = p.admission_rules?.[0];
 
         // Map DB rule to UI rule, handling column name differences
         const admissionRule = rawRule ? {
             ...rawRule,
-            // Determine status based on year (if older than current year, maybe closed?)
-            // or use specific status field if exists in DB (it doesn't, so we assume open/published)
             status: rawRule.status || 'published',
-            // Map logic_config (DB) to logic_rules (UI)
             logic_rules: rawRule.logic_config || rawRule.raw_json || {},
-            // Ensure ID is set
             id: rawRule.id
         } : {
             id: 'mock',
@@ -158,13 +205,7 @@ export class AdmissionEngine {
                 description: p.description,
                 career_opportunities: p.career_opportunities,
                 website_url: p.website_url,
-                institution: institution ? {
-                    id: institution.id,
-                    name: institution.name,
-                    type: institution.type,
-                    logo_url: institution.logo_url,
-                    website_url: institution.website_url
-                } : undefined,
+                institution: institution,
                 faculty: faculty ? {
                     id: faculty.id,
                     name: faculty.name

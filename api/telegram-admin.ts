@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!
 );
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Auth: check for admin token or service role
     const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_API_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY}`) {
+    if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_API_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY}`) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 

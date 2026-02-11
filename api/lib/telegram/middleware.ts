@@ -3,7 +3,7 @@ import type { VercelRequest } from '@vercel/node';
 import type { BotUser, TelegramUpdate, ConversationState, PsychometricBot } from './types';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -74,6 +74,8 @@ export async function resolveUser(update: TelegramUpdate): Promise<BotUser> {
         message_count: 0,
         commands_used: [],
         is_blocked: false,
+        consent_marketing: false,
+        consent_given_at: null,
         metadata: {},
     };
 

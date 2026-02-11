@@ -13,6 +13,7 @@ import { handlePrograms } from './programs';
 import { handleRooms } from './rooms';
 import { handleHelp, handleStatus, handleShare } from './misc';
 import { handleStart } from './start';
+import { handleConsentCallback } from './consent';
 
 /**
  * Route callback queries to the appropriate handler based on data prefix.
@@ -83,6 +84,10 @@ export async function handleCallback(ctx: HandlerContext): Promise<void> {
 
         case 'cmd':
             await handleCommandShortcut(ctx, value);
+            break;
+
+        case 'consent':
+            await handleConsentCallback(ctx, value);
             break;
 
         case 'noop':

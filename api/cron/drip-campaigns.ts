@@ -4,7 +4,7 @@ import type { BotUser, DripStage } from '../lib/telegram/types';
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!
 );
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;

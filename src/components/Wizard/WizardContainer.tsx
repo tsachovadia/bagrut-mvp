@@ -14,6 +14,8 @@ import { CollapsibleCard } from '../ui/CollapsibleCard';
 import { AverageDisplay } from '../AverageDisplay';
 import { SekemDisplay } from '../SekemDisplay';
 import { calculateOptimalAverage, calculateDryAverage, type SubjectGrade, type PsychometricScores } from '../../utils/calculator';
+import { CommunityStep } from './CommunityStep';
+import { hasAnyConsent } from '../../lib/consent';
 
 interface WizardContainerProps {
     bagrutData: SubjectGrade[];
@@ -45,6 +47,7 @@ export function WizardContainer({
 }: WizardContainerProps) {
     const { trackEvent } = useAnalytics();
     const [currentStep, setCurrentStep] = useState(0);
+    const [showCommunityStep, setShowCommunityStep] = useState(!hasAnyConsent());
 
     const [formKey, setFormKey] = useState(0);
     const [sector, setSector] = useState<any>('mamlachti'); // Lifted state
@@ -264,6 +267,15 @@ export function WizardContainer({
             isCompleted: isPreferencesComplete
         }
     ];
+
+    // Show community consent step before the wizard
+    if (showCommunityStep) {
+        return (
+            <div className="max-w-3xl mx-auto w-full px-3 pb-20 md:pb-8 pt-2 relative">
+                <CommunityStep onNext={() => setShowCommunityStep(false)} />
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-3xl mx-auto w-full px-3 pb-20 md:pb-8 pt-2 relative">

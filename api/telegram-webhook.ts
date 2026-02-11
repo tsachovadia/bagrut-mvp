@@ -13,6 +13,7 @@ import { handleRooms } from './lib/telegram/handlers/rooms';
 import { handleHelp, handleStatus, handleShare } from './lib/telegram/handlers/misc';
 import { handleCallback } from './lib/telegram/handlers/callback-router';
 import { handleGroupMessage, handleNewMember } from './lib/telegram/handlers/group-events';
+import { handleConsent } from './lib/telegram/handlers/consent';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
     if (request.method !== 'POST') {
@@ -105,6 +106,9 @@ export default async function handler(request: VercelRequest, response: VercelRe
                     break;
                 case '/help':
                     await handleHelp(ctx);
+                    break;
+                case '/consent':
+                    await handleConsent(ctx);
                     break;
                 default:
                     await sendMessage(chatId, 'פקודה לא מוכרת. שלח /help לרשימת פקודות.');

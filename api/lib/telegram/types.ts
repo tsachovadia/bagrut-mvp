@@ -60,6 +60,8 @@ export interface BotUser {
     commands_used: string[];
     last_active_at: string;
     is_blocked: boolean;
+    consent_marketing: boolean;
+    consent_given_at: string | null;
     metadata: Record<string, any>;
     created_at: string;
     updated_at: string;

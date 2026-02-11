@@ -28,6 +28,8 @@ import { CRMPage } from './pages/Admin/CRMPage';
 import { SignalsPage } from './pages/Admin/SignalsPage';
 import { GroupsPage } from './pages/Admin/GroupsPage';
 import { PartnersPage } from './pages/Admin/PartnersPage';
+import { MetricsDashboard } from './pages/Admin/MetricsDashboard';
+import { ClientPortal } from './pages/ClientPortal';
 import { isProduction } from './utils/env';
 import { TrackedDegreesPage } from './pages/TrackedDegreesPage';
 import { CampaignMobileFirst } from './pages/CampaignMobileFirst';
@@ -199,6 +201,9 @@ function App() {
         <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/metrics" element={!isProduction ? <MetricsDashboard /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/client-demo" element={!isProduction ? <ClientPortal /> : <Navigate to="/" />} />
+        <Route path="/client-portal" element={<ClientPortal />} />
         <Route path="/tracking" element={<TrackedDegreesPage />} />
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
       </Routes>

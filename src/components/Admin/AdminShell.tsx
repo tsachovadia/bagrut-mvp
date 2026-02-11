@@ -8,7 +8,9 @@ import {
     LogOut,
     Search,
     Menu,
-    X
+    X,
+    BarChart3,
+    Presentation
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -24,9 +26,11 @@ export const AdminShell: React.FC<AdminShellProps> = ({ children, title }) => {
 
     const navItems = [
         { label: 'CRM / משתמשים', icon: Users, path: '/admin/shadow', id: 'crm' },
+        { label: 'מטריקות', icon: BarChart3, path: '/admin/shadow/metrics', id: 'metrics' },
         { label: 'פיד סיגנלים', icon: MessageSquare, path: '/admin/shadow/signals', id: 'signals' },
         { label: 'קבוצות WhatsApp', icon: MessagesSquare, path: '/admin/shadow/groups', id: 'groups' },
         { label: 'שותפים (B2B)', icon: Handshake, path: '/admin/shadow/partners', id: 'partners' },
+        { label: 'פורטל לקוח', icon: Presentation, path: '/admin/shadow/client-demo', id: 'client-demo' },
     ];
 
     return (
