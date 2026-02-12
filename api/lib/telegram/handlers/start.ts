@@ -1,12 +1,10 @@
 import type { HandlerContext, WebProfileSummary } from '../types.js';
-import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn, webUrl } from '../client.js';
 import { updateBotUser, logMessage, supabase } from '../middleware.js';
 import { updateLeadScore } from '../services/lead-scoring.js';
 import { setState } from '../services/user-service.js';
 import { getUserByReferralCode, incrementReferralCount } from '../services/user-service.js';
 import { linkBotToWeb } from '../../profile-linking.js';
-
-const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 /**
  * Handle /start command with variants:
@@ -32,6 +30,17 @@ export async function handleStart(ctx: HandlerContext, payload?: string): Promis
     if (payload?.startsWith('link_')) {
         const token = payload.replace('link_', '');
         await handleLinkToken(ctx, token);
+        return;
+    }
+
+    // Handle return from website - show main menu
+    if (payload === 'return') {
+        if (user.web_user_id) {
+            const profile = await getWebProfileSummary(user.web_user_id);
+            await sendLinkedUserMenu(ctx, firstName, profile);
+        } else {
+            await sendUnlinkedReturningMenu(ctx, firstName);
+        }
         return;
     }
 
@@ -99,7 +108,7 @@ export async function handleSectorSelection(ctx: HandlerContext, sector: string)
         `חשב את סיכויי הקבלה שלך לכל מוסד - לוקח 2 דקות!`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(urlBtn('🚀 חשב סיכויים עכשיו!', WEB_APP_URL)),
+                keyboardRow(urlBtn('🚀 חשב סיכויים עכשיו!', webUrl())),
                 keyboardRow(btn('👥 הצטרף לקהילה', 'cmd:rooms')),
             ]),
         }
@@ -134,7 +143,7 @@ async function sendLinkedUserMenu(ctx: HandlerContext, firstName: string, profil
         `היי ${firstName}! 👋${statusLine}\n\n🔗 החשבון שלך מחובר. מה תרצה לעשות?`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(urlBtn('📊 דשבורד מלא באתר', `${WEB_APP_URL}/dashboard`)),
+                keyboardRow(urlBtn('📊 דשבורד מלא באתר', webUrl('/dashboard'))),
                 keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📤 שתף עם חברים', 'cmd:share')),
                 keyboardRow(btn('📋 הפרופיל שלי', 'cmd:status')),
             ]),
@@ -154,7 +163,7 @@ async function sendUnlinkedReturningMenu(ctx: HandlerContext, firstName: string)
         `ברוך שובך ${firstName}! 👋\n\nמה תרצה לעשות?`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)),
+                keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl())),
                 keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📤 שתף', 'cmd:share')),
                 keyboardRow(btn('📋 סטטוס', 'cmd:status'), btn('❓ עזרה', 'cmd:help')),
             ]),
@@ -195,7 +204,7 @@ async function handleProgramDeepLink(ctx: HandlerContext, programId: string): Pr
             `רוצה לבדוק אם תתקבל? חשב את הסיכויים באתר!`,
             {
                 reply_markup: inlineKeyboard([
-                    keyboardRow(urlBtn('🌐 חשב סיכויים באתר', `${WEB_APP_URL}/program/${programId}`)),
+                    keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl(`/program/${programId}`))),
                     keyboardRow(btn('👥 הצטרף לקהילה', 'cmd:rooms'), btn('❓ עזרה', 'cmd:help')),
                 ]),
             }
@@ -205,7 +214,7 @@ async function handleProgramDeepLink(ctx: HandlerContext, programId: string): Pr
             `היי ${user.first_name || ''}! 👋\n\nרוצה לבדוק את סיכויי הקבלה שלך?`,
             {
                 reply_markup: inlineKeyboard([
-                    keyboardRow(urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)),
+                    keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl())),
                     keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms')),
                 ]),
             }
@@ -263,7 +272,7 @@ async function handleLinkToken(ctx: HandlerContext, token: string): Promise<void
         `מעכשיו תקבל/י עדכונים אישיים ישירות לכאן.`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(urlBtn('📊 דשבורד מלא באתר', `${WEB_APP_URL}/dashboard`)),
+                keyboardRow(urlBtn('📊 דשבורד מלא באתר', webUrl('/dashboard'))),
                 keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📋 הפרופיל שלי', 'cmd:status')),
             ]),
         }

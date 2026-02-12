@@ -1,9 +1,7 @@
 import type { HandlerContext } from '../types.js';
-import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn, webUrl } from '../client.js';
 import { logMessage } from '../middleware.js';
 import { getWebProfileSummary } from './start.js';
-
-const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 /**
  * Handle /help command
@@ -21,7 +19,7 @@ export async function handleHelp(ctx: HandlerContext): Promise<void> {
         `💡 <b>טיפ:</b> חשב את סיכויי הקבלה שלך באתר, ואז חבר את החשבון כדי לקבל עדכונים כאן!`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)),
+                keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl())),
                 keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📋 סטטוס', 'cmd:status')),
             ]),
         }
@@ -71,11 +69,11 @@ export async function handleStatus(ctx: HandlerContext): Promise<void> {
 
     const buttons = user.web_user_id
         ? [
-            keyboardRow(urlBtn('📊 עדכן נתונים באתר', `${WEB_APP_URL}/dashboard`)),
+            keyboardRow(urlBtn('📊 עדכן נתונים באתר', webUrl('/dashboard'))),
             keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📤 שתף', 'cmd:share')),
         ]
         : [
-            keyboardRow(urlBtn('🌐 הירשם וחשב באתר', WEB_APP_URL)),
+            keyboardRow(urlBtn('🌐 הירשם וחשב באתר', webUrl())),
             keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📤 שתף', 'cmd:share')),
         ];
 

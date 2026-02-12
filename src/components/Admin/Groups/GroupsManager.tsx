@@ -9,6 +9,8 @@ import {
     X,
     Plus,
     Loader2,
+    MessageSquare,
+    Hash,
 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -30,6 +32,9 @@ interface BotGroup {
     member_count: number;
     is_active: boolean;
     auto_moderate: boolean;
+    is_forum: boolean;
+    forum_topic_id: number | null;
+    parent_group_id: string | null;
 }
 
 interface BaitTemplate {
@@ -54,11 +59,11 @@ const typeLabels: Record<string, string> = {
 export const GroupsManager = () => {
     const [groups, setGroups] = useState<BotGroup[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeBaitGroupId, setActiveBaitGroupId] = useState<string | null>(null);
+    const [activeBaitId, setActiveBaitId] = useState<string | null>(null);
     const [sendingBait, setSendingBait] = useState<string | null>(null);
-    const [lastAction, setLastAction] = useState<{ groupId: string; baitName: string } | null>(null);
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [createForm, setCreateForm] = useState({ name: '', type: 'general', telegram_group_id: '', invite_link: '', description: '' });
+    const [lastAction, setLastAction] = useState<{ name: string; action: string } | null>(null);
+    const [showCreateTopic, setShowCreateTopic] = useState(false);
+    const [topicForm, setTopicForm] = useState({ name: '', type: 'field', description: '', field_tags: '' });
     const [creating, setCreating] = useState(false);
 
     useEffect(() => {
@@ -76,7 +81,12 @@ export const GroupsManager = () => {
         setLoading(false);
     }
 
-    const handleInjectBait = async (groupId: string, bait: BaitTemplate) => {
+    // Separate forum parent, topics, and legacy groups
+    const forumParent = groups.find(g => g.is_forum && !g.forum_topic_id);
+    const topics = groups.filter(g => g.forum_topic_id !== null);
+    const legacyGroups = groups.filter(g => !g.is_forum && g.forum_topic_id === null);
+
+    const handleSendContent = async (groupId: string, bait: BaitTemplate, isTopic: boolean) => {
         setSendingBait(bait.id);
         try {
             const res = await fetch('/api/telegram-rooms', {
@@ -86,23 +96,39 @@ export const GroupsManager = () => {
                     'Authorization': `Bearer ${ADMIN_TOKEN}`,
                 },
                 body: JSON.stringify({
-                    action: 'send_to_room',
-                    room_id: groupId,
+                    action: isTopic ? 'send_to_topic' : 'send_to_room',
+                    [isTopic ? 'topic_id' : 'room_id']: groupId,
                     message: bait.content,
                 }),
             });
             const data = (await res.json()) as { ok?: boolean };
             if (data.ok) {
-                setLastAction({ groupId, baitName: bait.title });
+                setLastAction({ name: bait.title, action: 'נשלח בהצלחה' });
                 setTimeout(() => setLastAction(null), 3000);
             }
         } finally {
             setSendingBait(null);
-            setActiveBaitGroupId(null);
+            setActiveBaitId(null);
         }
     };
 
-    const handleToggleActive = async (group: BotGroup) => {
+    const handleToggleTopic = async (topic: BotGroup) => {
+        const action = topic.is_active ? 'close_topic' : 'reopen_topic';
+        const res = await fetch('/api/telegram-rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${ADMIN_TOKEN}`,
+            },
+            body: JSON.stringify({ action, topic_id: topic.id }),
+        });
+        const data = (await res.json()) as { ok?: boolean };
+        if (data.ok) {
+            setGroups(prev => prev.map(g => g.id === topic.id ? { ...g, is_active: !g.is_active } : g));
+        }
+    };
+
+    const handleToggleGroup = async (group: BotGroup) => {
         const res = await fetch('/api/telegram-rooms', {
             method: 'POST',
             headers: {
@@ -123,10 +149,12 @@ export const GroupsManager = () => {
 
     const handleCopyLink = (link: string) => {
         navigator.clipboard.writeText(link);
+        setLastAction({ name: 'קישור', action: 'הועתק' });
+        setTimeout(() => setLastAction(null), 2000);
     };
 
-    const handleCreateRoom = async () => {
-        if (!createForm.name || !createForm.telegram_group_id || !createForm.invite_link) return;
+    const handleCreateTopic = async () => {
+        if (!forumParent || !topicForm.name) return;
         setCreating(true);
         try {
             const res = await fetch('/api/telegram-rooms', {
@@ -136,15 +164,21 @@ export const GroupsManager = () => {
                     'Authorization': `Bearer ${ADMIN_TOKEN}`,
                 },
                 body: JSON.stringify({
-                    action: 'create_room',
-                    ...createForm,
+                    action: 'create_topic',
+                    parent_group_id: forumParent.id,
+                    name: topicForm.name,
+                    type: topicForm.type,
+                    description: topicForm.description || null,
+                    field_tags: topicForm.field_tags ? topicForm.field_tags.split(',').map(t => t.trim()).filter(Boolean) : [],
                 }),
             });
             const data = (await res.json()) as { ok?: boolean };
             if (data.ok) {
-                setShowCreateForm(false);
-                setCreateForm({ name: '', type: 'general', telegram_group_id: '', invite_link: '', description: '' });
+                setShowCreateTopic(false);
+                setTopicForm({ name: '', type: 'field', description: '', field_tags: '' });
                 fetchGroups();
+                setLastAction({ name: topicForm.name, action: 'נושא נוצר' });
+                setTimeout(() => setLastAction(null), 3000);
             }
         } finally {
             setCreating(false);
@@ -160,188 +194,299 @@ export const GroupsManager = () => {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-sm font-bold text-gray-800">קהילות Telegram</h2>
-                    <p className="text-xs text-gray-500">ניהול חדרי לימוד, הפצת תוכן ומעקב</p>
-                </div>
-                <button
-                    onClick={() => setShowCreateForm(!showCreateForm)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors"
-                >
-                    <Plus className="w-3.5 h-3.5" />
-                    צור חדר חדש
-                </button>
-            </div>
-
-            {/* Create Form */}
-            {showCreateForm && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                    <h3 className="text-xs font-bold text-blue-800">חדר חדש</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                        <input
-                            placeholder="שם החדר"
-                            value={createForm.name}
-                            onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))}
-                            className="text-xs px-2 py-1.5 border rounded"
-                        />
-                        <select
-                            value={createForm.type}
-                            onChange={e => setCreateForm(f => ({ ...f, type: e.target.value }))}
-                            className="text-xs px-2 py-1.5 border rounded"
-                        >
-                            <option value="general">כללי</option>
-                            <option value="field">תחום</option>
-                            <option value="stage">שלב</option>
-                        </select>
-                        <input
-                            placeholder="Telegram Group ID"
-                            value={createForm.telegram_group_id}
-                            onChange={e => setCreateForm(f => ({ ...f, telegram_group_id: e.target.value }))}
-                            className="text-xs px-2 py-1.5 border rounded"
-                        />
-                        <input
-                            placeholder="Invite Link"
-                            value={createForm.invite_link}
-                            onChange={e => setCreateForm(f => ({ ...f, invite_link: e.target.value }))}
-                            className="text-xs px-2 py-1.5 border rounded"
-                        />
-                    </div>
-                    <input
-                        placeholder="תיאור (אופציונלי)"
-                        value={createForm.description}
-                        onChange={e => setCreateForm(f => ({ ...f, description: e.target.value }))}
-                        className="text-xs px-2 py-1.5 border rounded w-full"
-                    />
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleCreateRoom}
-                            disabled={creating}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-3 py-1.5 rounded text-xs font-medium"
-                        >
-                            {creating ? 'יוצר...' : 'צור'}
-                        </button>
-                        <button
-                            onClick={() => setShowCreateForm(false)}
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs"
-                        >
-                            ביטול
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Notification Toast */}
+        <div className="space-y-6">
+            {/* Toast */}
             {lastAction && (
-                <div className="fixed bottom-4 left-4 bg-gray-900 text-white px-4 py-2 rounded shadow-lg text-xs flex items-center gap-2 animate-in slide-in-from-bottom-2 fade-in z-50">
+                <div className="fixed bottom-4 left-4 bg-gray-900 text-white px-4 py-2 rounded shadow-lg text-xs flex items-center gap-2 z-50">
                     <CheckCircle2 className="w-4 h-4 text-green-400" />
-                    <span>תוכן "<b>{lastAction.baitName}</b>" נשלח לחדר בהצלחה</span>
+                    <span>{lastAction.name} - {lastAction.action}</span>
                 </div>
             )}
 
-            {groups.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-sm">
-                    אין חדרים עדיין. צור חדר חדש כדי להתחיל.
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                    {groups.map((group) => (
-                        <div key={group.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all p-3 relative group/card">
-
-                            {/* Status Dot */}
-                            <div className={`absolute top-3 left-3 w-2 h-2 rounded-full ${group.is_active ? 'bg-green-500' : 'bg-gray-300'}`} title={group.is_active ? 'פעיל' : 'לא פעיל'} />
-
-                            <div className="mb-2.5">
-                                <h3 className="font-bold text-gray-900 text-sm leading-tight mb-0.5 pl-3">{group.name}</h3>
-                                <div className="text-gray-400 text-[10px] flex items-center gap-1.5">
-                                    <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[9px] font-medium">
-                                        {typeLabels[group.type] || group.type}
-                                    </span>
-                                    {group.description && (
-                                        <span className="truncate">{group.description}</span>
-                                    )}
+            {/* Forum Section */}
+            {forumParent ? (
+                <div className="space-y-4">
+                    {/* Forum Header */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <MessageSquare className="w-4 h-4 text-blue-600" />
+                                    <h2 className="text-sm font-bold text-gray-800">{forumParent.name}</h2>
+                                    <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[9px] font-medium">Forum</span>
+                                    <div className={`w-2 h-2 rounded-full ${forumParent.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
                                 </div>
+                                <p className="text-xs text-gray-500">
+                                    סופרגרופ עם נושאים | {topics.length} נושאים פעילים |
+                                    <span className="text-gray-400 mr-1">ID: {forumParent.telegram_group_id}</span>
+                                </p>
                             </div>
-
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="flex items-center gap-1 text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded text-[10px] font-medium border border-gray-100">
-                                    <Users className="w-3 h-3 text-gray-400" />
-                                    {group.member_count}
-                                </div>
-                                {group.field_tags?.length > 0 && (
-                                    <div className="flex gap-1 overflow-hidden">
-                                        {group.field_tags.slice(0, 2).map(tag => (
-                                            <span key={tag} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200 whitespace-nowrap">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
+                            <div className="flex items-center gap-2">
+                                {forumParent.invite_link && (
+                                    <button
+                                        onClick={() => handleCopyLink(forumParent.invite_link)}
+                                        className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-gray-200 hover:border-blue-300 text-gray-600 hover:text-blue-600 rounded text-xs transition-all"
+                                    >
+                                        <Copy className="w-3 h-3" />
+                                        העתק לינק
+                                    </button>
                                 )}
-                            </div>
-
-                            {/* Standard Actions */}
-                            {activeBaitGroupId !== group.id ? (
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button
-                                        onClick={() => handleCopyLink(group.invite_link)}
-                                        className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-gray-50 hover:bg-white border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-600 rounded text-xs font-medium transition-all"
-                                    >
-                                        <Copy className="w-3 h-3 text-gray-400" />
-                                        העתק
-                                    </button>
-
-                                    <button
-                                        onClick={() => setActiveBaitGroupId(group.id)}
-                                        className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-red-50 hover:bg-red-100 border border-red-100 text-red-700 rounded text-xs font-medium transition-colors"
-                                    >
-                                        <Zap className="w-3 h-3" />
-                                        שלח תוכן
-                                    </button>
-                                </div>
-                            ) : (
-                                /* Content Selection Mode */
-                                <div className="space-y-2 bg-red-50 p-2 rounded border border-red-100 animate-in fade-in zoom-in-95 duration-200">
-                                    <div className="flex justify-between items-center text-[10px] text-red-800 font-medium mb-1">
-                                        <span>בחר תוכן לשליחה:</span>
-                                        <button onClick={() => setActiveBaitGroupId(null)} className="p-0.5 hover:bg-red-200 rounded">
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    </div>
-                                    <div className="space-y-1">
-                                        {baitTemplates.map(bait => (
-                                            <button
-                                                key={bait.id}
-                                                onClick={() => handleInjectBait(group.id, bait)}
-                                                disabled={!!sendingBait}
-                                                className="w-full text-right px-2 py-1.5 bg-white hover:bg-red-100 border border-red-100 rounded text-[10px] text-gray-700 hover:text-red-900 transition-colors flex items-center justify-between"
-                                            >
-                                                <span className="truncate">{bait.title}</span>
-                                                {sendingBait === bait.id ? (
-                                                    <div className="w-2.5 h-2.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                                                ) : (
-                                                    <Send className="w-2.5 h-2.5 text-red-300" />
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="mt-2.5 pt-2 border-t border-gray-50 flex justify-between items-center">
-                                <span className="text-[10px] text-gray-300 truncate max-w-[120px]">ID: {group.telegram_group_id}</span>
                                 <button
-                                    onClick={() => handleToggleActive(group)}
-                                    className={`${group.is_active ? 'text-green-500 hover:text-red-500' : 'text-gray-300 hover:text-green-500'} transition-colors`}
-                                    title={group.is_active ? 'כבה' : 'הפעל'}
+                                    onClick={() => setShowCreateTopic(!showCreateTopic)}
+                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors"
                                 >
-                                    <Power className="w-3 h-3" />
+                                    <Plus className="w-3 h-3" />
+                                    נושא חדש
                                 </button>
                             </div>
                         </div>
-                    ))}
+
+                        {/* Member count */}
+                        <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                            <Users className="w-3 h-3" />
+                            {forumParent.member_count} חברים בקהילה
+                        </div>
+                    </div>
+
+                    {/* Create Topic Form */}
+                    {showCreateTopic && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                            <h3 className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
+                                <Hash className="w-3.5 h-3.5" />
+                                נושא חדש בפורום
+                            </h3>
+                            <div className="grid grid-cols-2 gap-2">
+                                <input
+                                    placeholder="שם הנושא (למשל: מדעי המחשב 2026)"
+                                    value={topicForm.name}
+                                    onChange={e => setTopicForm(f => ({ ...f, name: e.target.value }))}
+                                    className="text-xs px-2 py-1.5 border rounded col-span-2"
+                                />
+                                <select
+                                    value={topicForm.type}
+                                    onChange={e => setTopicForm(f => ({ ...f, type: e.target.value }))}
+                                    className="text-xs px-2 py-1.5 border rounded"
+                                >
+                                    <option value="general">כללי</option>
+                                    <option value="field">תחום לימוד</option>
+                                    <option value="stage">שלב (שנה)</option>
+                                </select>
+                                <input
+                                    placeholder="תגיות (מופרדות בפסיק)"
+                                    value={topicForm.field_tags}
+                                    onChange={e => setTopicForm(f => ({ ...f, field_tags: e.target.value }))}
+                                    className="text-xs px-2 py-1.5 border rounded"
+                                />
+                            </div>
+                            <input
+                                placeholder="תיאור קצר (אופציונלי)"
+                                value={topicForm.description}
+                                onChange={e => setTopicForm(f => ({ ...f, description: e.target.value }))}
+                                className="text-xs px-2 py-1.5 border rounded w-full"
+                            />
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleCreateTopic}
+                                    disabled={creating || !topicForm.name}
+                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-3 py-1.5 rounded text-xs font-medium"
+                                >
+                                    {creating ? 'יוצר נושא...' : 'צור נושא בטלגרם'}
+                                </button>
+                                <button
+                                    onClick={() => setShowCreateTopic(false)}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs"
+                                >
+                                    ביטול
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-gray-400">
+                                הנושא ייווצר אוטומטית בטלגרם דרך ה-Bot API
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Topics Grid */}
+                    {topics.length === 0 ? (
+                        <div className="text-center py-6 text-gray-400 text-xs border border-dashed border-gray-200 rounded-lg">
+                            אין נושאים עדיין. צור נושא חדש כדי להתחיל.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                            {topics.map((topic) => (
+                                <TopicCard
+                                    key={topic.id}
+                                    topic={topic}
+                                    activeBaitId={activeBaitId}
+                                    sendingBait={sendingBait}
+                                    onSendContent={(bait) => handleSendContent(topic.id, bait, true)}
+                                    onToggle={() => handleToggleTopic(topic)}
+                                    onOpenBait={() => setActiveBaitId(topic.id)}
+                                    onCloseBait={() => setActiveBaitId(null)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                    <MessageSquare className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-amber-800 mb-1">אין פורום מחובר</p>
+                    <p className="text-xs text-amber-600">
+                        צור סופרגרופ בטלגרם עם Topics מופעל, הוסף את @MitlabtimBot כאדמין, והמערכת תזהה אותו אוטומטית.
+                    </p>
+                </div>
+            )}
+
+            {/* Legacy Groups Section */}
+            {legacyGroups.length > 0 && (
+                <div className="space-y-3">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">קבוצות נוספות (ללא Forum)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {legacyGroups.map((group) => (
+                            <div key={group.id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 relative opacity-75">
+                                <div className={`absolute top-3 left-3 w-2 h-2 rounded-full ${group.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                <h3 className="font-bold text-gray-900 text-sm leading-tight mb-0.5 pl-3">{group.name}</h3>
+                                <div className="text-gray-400 text-[10px] flex items-center gap-1.5 mb-2">
+                                    <span className="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded text-[9px]">
+                                        {typeLabels[group.type] || group.type}
+                                    </span>
+                                    <Users className="w-3 h-3" />
+                                    {group.member_count}
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    {group.invite_link && (
+                                        <button
+                                            onClick={() => handleCopyLink(group.invite_link)}
+                                            className="text-[10px] text-gray-400 hover:text-blue-500 flex items-center gap-1"
+                                        >
+                                            <Copy className="w-3 h-3" />
+                                            העתק
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => handleToggleGroup(group)}
+                                        className={`${group.is_active ? 'text-green-500 hover:text-red-500' : 'text-gray-300 hover:text-green-500'} transition-colors`}
+                                    >
+                                        <Power className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
     );
 };
+
+// ============================
+// Topic Card Component
+// ============================
+
+function TopicCard({
+    topic,
+    activeBaitId,
+    sendingBait,
+    onSendContent,
+    onToggle,
+    onOpenBait,
+    onCloseBait,
+}: {
+    topic: BotGroup;
+    activeBaitId: string | null;
+    sendingBait: string | null;
+    onSendContent: (bait: BaitTemplate) => void;
+    onToggle: () => void;
+    onOpenBait: () => void;
+    onCloseBait: () => void;
+}) {
+    const icon = topic.type === 'field' ? '💻' : topic.type === 'stage' ? '📅' : '🏠';
+
+    return (
+        <div className={`bg-white rounded-lg border shadow-sm hover:shadow-md transition-all p-3 relative ${topic.is_active ? 'border-gray-200' : 'border-gray-100 opacity-60'}`}>
+            {/* Status */}
+            <div className={`absolute top-3 left-3 w-2 h-2 rounded-full ${topic.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
+
+            <div className="mb-2">
+                <h4 className="font-bold text-gray-900 text-sm leading-tight mb-0.5 pl-3 flex items-center gap-1.5">
+                    <span>{icon}</span>
+                    {topic.name}
+                </h4>
+                <div className="text-gray-400 text-[10px] flex items-center gap-1.5">
+                    <span className="bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded text-[9px] font-medium flex items-center gap-0.5">
+                        <Hash className="w-2.5 h-2.5" />
+                        {typeLabels[topic.type] || topic.type}
+                    </span>
+                    {topic.description && (
+                        <span className="truncate">{topic.description}</span>
+                    )}
+                </div>
+            </div>
+
+            {/* Tags */}
+            {topic.field_tags?.length > 0 && (
+                <div className="flex gap-1 mb-2 overflow-hidden">
+                    {topic.field_tags.slice(0, 3).map(tag => (
+                        <span key={tag} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200 whitespace-nowrap">
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            {/* Actions */}
+            {activeBaitId !== topic.id ? (
+                <div className="grid grid-cols-2 gap-2">
+                    <button
+                        onClick={onOpenBait}
+                        className="flex items-center justify-center gap-1.5 w-full py-1.5 bg-red-50 hover:bg-red-100 border border-red-100 text-red-700 rounded text-xs font-medium transition-colors"
+                    >
+                        <Zap className="w-3 h-3" />
+                        שלח תוכן
+                    </button>
+                    <button
+                        onClick={onToggle}
+                        className={`flex items-center justify-center gap-1.5 w-full py-1.5 rounded text-xs font-medium transition-colors ${
+                            topic.is_active
+                                ? 'bg-gray-50 hover:bg-red-50 border border-gray-200 text-gray-600 hover:text-red-600'
+                                : 'bg-green-50 hover:bg-green-100 border border-green-200 text-green-700'
+                        }`}
+                    >
+                        <Power className="w-3 h-3" />
+                        {topic.is_active ? 'סגור' : 'פתח'}
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-2 bg-red-50 p-2 rounded border border-red-100">
+                    <div className="flex justify-between items-center text-[10px] text-red-800 font-medium mb-1">
+                        <span>בחר תוכן לשליחה:</span>
+                        <button onClick={onCloseBait} className="p-0.5 hover:bg-red-200 rounded">
+                            <X className="w-3 h-3" />
+                        </button>
+                    </div>
+                    <div className="space-y-1">
+                        {baitTemplates.map(bait => (
+                            <button
+                                key={bait.id}
+                                onClick={() => onSendContent(bait)}
+                                disabled={!!sendingBait}
+                                className="w-full text-right px-2 py-1.5 bg-white hover:bg-red-100 border border-red-100 rounded text-[10px] text-gray-700 hover:text-red-900 transition-colors flex items-center justify-between"
+                            >
+                                <span className="truncate">{bait.title}</span>
+                                {sendingBait === bait.id ? (
+                                    <div className="w-2.5 h-2.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <Send className="w-2.5 h-2.5 text-red-300" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div className="mt-2 pt-2 border-t border-gray-50 flex justify-between items-center">
+                <span className="text-[10px] text-gray-300">Topic #{topic.forum_topic_id}</span>
+            </div>
+        </div>
+    );
+}

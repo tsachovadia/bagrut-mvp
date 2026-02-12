@@ -9,6 +9,7 @@ const supabase = createClient(
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
+function webUrl(path = ''): string { return `${WEB_APP_URL}${path}?from=telegram`; }
 
 async function sendTelegramMessage(chatId: string, text: string, reply_markup?: any) {
     const body: any = { chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true };
@@ -46,7 +47,7 @@ const DRIP_DEFINITIONS: DripDef[] = [
             `חשב את סיכויי הקבלה שלך באתר - לוקח 2 דקות!`,
         reply_markup: {
             inline_keyboard: [
-                [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+                [{ text: '🌐 חשב סיכויים באתר', url: webUrl() }],
                 [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
             ],
         },
@@ -61,7 +62,7 @@ const DRIP_DEFINITIONS: DripDef[] = [
             `חבר את החשבון שלך כדי לקבל עדכונים אישיים ישירות לטלגרם.`,
         reply_markup: {
             inline_keyboard: [
-                [{ text: '🌐 חבר חשבון באתר', url: WEB_APP_URL }],
+                [{ text: '🌐 חבר חשבון באתר', url: webUrl() }],
                 [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
             ],
         },
@@ -77,7 +78,7 @@ const DRIP_DEFINITIONS: DripDef[] = [
         reply_markup: {
             inline_keyboard: [
                 [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
-                [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+                [{ text: '🌐 חשב סיכויים באתר', url: webUrl() }],
             ],
         },
     },
@@ -91,7 +92,7 @@ const DRIP_DEFINITIONS: DripDef[] = [
             `מה חדש? בדוק אם יש עדכונים בסיכויי הקבלה שלך.`,
         reply_markup: {
             inline_keyboard: [
-                [{ text: '📊 בדוק עדכונים באתר', url: `${WEB_APP_URL}/dashboard` }],
+                [{ text: '📊 בדוק עדכונים באתר', url: webUrl('/dashboard') }],
                 [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
             ],
         },
@@ -121,7 +122,7 @@ const DRIP_DEFINITIONS: DripDef[] = [
             `עבר זמן - בוא לראות אם יש שינויים בסיכויי הקבלה שלך.`,
         reply_markup: {
             inline_keyboard: [
-                [{ text: '🌐 בדוק שינויים באתר', url: `${WEB_APP_URL}/dashboard` }],
+                [{ text: '🌐 בדוק שינויים באתר', url: webUrl('/dashboard') }],
                 [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
             ],
         },

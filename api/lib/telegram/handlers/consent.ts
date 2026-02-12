@@ -1,8 +1,6 @@
 import type { HandlerContext } from '../types.js';
-import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn, webUrl } from '../client.js';
 import { updateBotUser, logMessage } from '../middleware.js';
-
-const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 /**
  * Handle /consent command - show and manage consent preferences
@@ -45,7 +43,7 @@ export async function handleConsentCallback(ctx: HandlerContext, action: string)
     const returnButtons = user.web_user_id
         ? [keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('🏠 תפריט ראשי', 'cmd:start'))]
         : [
-            keyboardRow(urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)),
+            keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl())),
             keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('🏠 תפריט ראשי', 'cmd:start')),
         ];
 

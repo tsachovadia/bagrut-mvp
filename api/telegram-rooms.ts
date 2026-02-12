@@ -7,19 +7,26 @@ const supabase = createClient(
 );
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
+const TELEGRAM_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-async function sendTelegramToGroup(chatId: string, text: string) {
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+async function telegramApi(method: string, body: Record<string, any>) {
+    const res = await fetch(`${TELEGRAM_BASE}/${method}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+        body: JSON.stringify(body),
     });
-    return (await res.json()) as { ok: boolean; error_code?: number };
+    return (await res.json()) as { ok: boolean; result?: any; error_code?: number; description?: string };
+}
+
+async function sendTelegramToGroup(chatId: string, text: string, messageThreadId?: number) {
+    const body: Record<string, any> = { chat_id: chatId, text, parse_mode: 'HTML' };
+    if (messageThreadId) body.message_thread_id = messageThreadId;
+    return telegramApi('sendMessage', body);
 }
 
 /**
  * Admin API for Telegram room/group management
- * Actions: list_rooms, create_room, update_room, send_to_room
+ * Actions: list_rooms, create_room, update_room, send_to_room, create_topic, send_to_topic, close_topic, reopen_topic
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
@@ -42,6 +49,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return handleUpdateRoom(req, res);
         case 'send_to_room':
             return handleSendToRoom(req, res);
+        case 'create_topic':
+            return handleCreateTopic(req, res);
+        case 'send_to_topic':
+            return handleSendToTopic(req, res);
+        case 'close_topic':
+            return handleToggleTopic(req, res, false);
+        case 'reopen_topic':
+            return handleToggleTopic(req, res, true);
         default:
             return res.status(400).json({ error: `Unknown action: ${action}` });
     }
@@ -128,10 +143,10 @@ async function handleSendToRoom(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Missing room_id or message' });
     }
 
-    // Get room's telegram_group_id
+    // Get room's telegram_group_id + forum_topic_id
     const { data: room, error: roomError } = await supabase
         .from('bot_groups')
-        .select('telegram_group_id, name')
+        .select('telegram_group_id, name, forum_topic_id')
         .eq('id', room_id)
         .single();
 
@@ -139,8 +154,12 @@ async function handleSendToRoom(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Room not found' });
     }
 
-    // Send message to Telegram group
-    const result = await sendTelegramToGroup(room.telegram_group_id, message);
+    // Send message to Telegram group (or topic within it)
+    const result = await sendTelegramToGroup(
+        room.telegram_group_id,
+        message,
+        room.forum_topic_id || undefined
+    );
 
     // Log the message
     await supabase.from('bot_messages_log').insert({
@@ -150,6 +169,147 @@ async function handleSendToRoom(req: VercelRequest, res: VercelResponse) {
         content: message.substring(0, 500),
         campaign_id: `room_${room_id}`,
     });
+
+    return res.status(200).json({ ok: true, telegram_result: result });
+}
+
+/**
+ * Create a forum topic in the parent supergroup via Telegram API and save to DB
+ */
+async function handleCreateTopic(req: VercelRequest, res: VercelResponse) {
+    const { parent_group_id, name, description, field_tags, type } = req.body;
+
+    if (!parent_group_id || !name) {
+        return res.status(400).json({ error: 'Missing parent_group_id or name' });
+    }
+
+    // Get parent group
+    const { data: parent, error: parentError } = await supabase
+        .from('bot_groups')
+        .select('telegram_group_id, invite_link, is_forum')
+        .eq('id', parent_group_id)
+        .single();
+
+    if (parentError || !parent) {
+        return res.status(404).json({ error: 'Parent group not found' });
+    }
+
+    if (!parent.is_forum) {
+        return res.status(400).json({ error: 'Parent group is not a forum-enabled supergroup' });
+    }
+
+    // Create topic via Telegram API
+    const topicResult = await telegramApi('createForumTopic', {
+        chat_id: parent.telegram_group_id,
+        name,
+    });
+
+    if (!topicResult.ok || !topicResult.result) {
+        return res.status(500).json({
+            error: 'Failed to create Telegram topic',
+            details: topicResult.description,
+        });
+    }
+
+    const forumTopicId = topicResult.result.message_thread_id;
+
+    // Save topic as a child row in bot_groups
+    const { data: topic, error: insertError } = await supabase
+        .from('bot_groups')
+        .insert({
+            telegram_group_id: parent.telegram_group_id,
+            name,
+            type: type || 'field',
+            invite_link: parent.invite_link, // Same invite link as parent
+            description: description || null,
+            field_tags: field_tags || [],
+            is_active: true,
+            auto_moderate: true,
+            member_count: 0,
+            is_forum: false,
+            forum_topic_id: forumTopicId,
+            parent_group_id,
+        })
+        .select()
+        .single();
+
+    if (insertError) {
+        return res.status(500).json({ error: insertError.message });
+    }
+
+    return res.status(200).json({ ok: true, topic, forum_topic_id: forumTopicId });
+}
+
+/**
+ * Send a message to a specific forum topic
+ */
+async function handleSendToTopic(req: VercelRequest, res: VercelResponse) {
+    const { topic_id, message } = req.body;
+
+    if (!topic_id || !message) {
+        return res.status(400).json({ error: 'Missing topic_id or message' });
+    }
+
+    const { data: topic, error: topicError } = await supabase
+        .from('bot_groups')
+        .select('telegram_group_id, forum_topic_id, name')
+        .eq('id', topic_id)
+        .not('forum_topic_id', 'is', null)
+        .single();
+
+    if (topicError || !topic) {
+        return res.status(404).json({ error: 'Topic not found' });
+    }
+
+    const result = await sendTelegramToGroup(
+        topic.telegram_group_id,
+        message,
+        topic.forum_topic_id
+    );
+
+    await supabase.from('bot_messages_log').insert({
+        bot_user_id: 'admin',
+        direction: 'outgoing',
+        message_type: 'topic_content',
+        content: message.substring(0, 500),
+        campaign_id: `topic_${topic_id}`,
+    });
+
+    return res.status(200).json({ ok: true, telegram_result: result });
+}
+
+/**
+ * Close or reopen a forum topic
+ */
+async function handleToggleTopic(req: VercelRequest, res: VercelResponse, reopen: boolean) {
+    const { topic_id } = req.body;
+
+    if (!topic_id) {
+        return res.status(400).json({ error: 'Missing topic_id' });
+    }
+
+    const { data: topic, error: topicError } = await supabase
+        .from('bot_groups')
+        .select('telegram_group_id, forum_topic_id')
+        .eq('id', topic_id)
+        .not('forum_topic_id', 'is', null)
+        .single();
+
+    if (topicError || !topic) {
+        return res.status(404).json({ error: 'Topic not found' });
+    }
+
+    const method = reopen ? 'reopenForumTopic' : 'closeForumTopic';
+    const result = await telegramApi(method, {
+        chat_id: topic.telegram_group_id,
+        message_thread_id: topic.forum_topic_id,
+    });
+
+    // Update is_active in DB
+    await supabase
+        .from('bot_groups')
+        .update({ is_active: reopen })
+        .eq('id', topic_id);
 
     return res.status(200).json({ ok: true, telegram_result: result });
 }

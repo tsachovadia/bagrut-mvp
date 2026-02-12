@@ -16,6 +16,7 @@ import { TermsOfUse } from './components/TermsOfUse';
 import { CookieConsent } from './components/CookieConsent';
 import { AccessibilityWidget } from './components/AccessibilityWidget';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { ReturnToBot } from './components/ReturnToBot';
 import { TrackedDegreesWidget } from './components/TrackedDegreesWidget';
 import { useNavigate } from 'react-router-dom';
 
@@ -208,6 +209,7 @@ function App() {
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
       </Routes>
       <CookieConsent />
+      <ReturnToBot />
       <AccessibilityWidget />
       <div className="md:hidden h-16" /> {/* Spacer for bottom nav */}
       <MobileBottomNav />

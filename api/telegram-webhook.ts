@@ -2,17 +2,15 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { TelegramUpdate, HandlerContext } from './lib/telegram/types.js';
 import { verifyWebhook, resolveUser, touchUser, markUserBlocked, logMessage } from './lib/telegram/middleware.js';
-import { sendMessage } from './lib/telegram/client.js';
+import { sendMessage, webUrl } from './lib/telegram/client.js';
 
 // Handlers
 import { handleStart } from './lib/telegram/handlers/start.js';
 import { handleRooms } from './lib/telegram/handlers/rooms.js';
 import { handleHelp, handleStatus, handleShare } from './lib/telegram/handlers/misc.js';
 import { handleCallback } from './lib/telegram/handlers/callback-router.js';
-import { handleGroupMessage, handleNewMember } from './lib/telegram/handlers/group-events.js';
+import { handleGroupMessage, handleNewMember, handleMyChatMember } from './lib/telegram/handlers/group-events.js';
 import { handleConsent } from './lib/telegram/handlers/consent.js';
-
-const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
     if (request.method !== 'POST') {
@@ -26,6 +24,12 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
     try {
         const update: TelegramUpdate = request.body;
+
+        // Handle bot membership changes (added/removed from groups)
+        if (update.my_chat_member) {
+            await handleMyChatMember(update.my_chat_member);
+            return response.status(200).json({ ok: true });
+        }
 
         // Handle group messages separately
         if (update.message?.chat?.type === 'group' || update.message?.chat?.type === 'supergroup') {
@@ -101,7 +105,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
                     await sendMessage(chatId, 'פקודה לא מוכרת. מה תרצה לעשות?', {
                         reply_markup: {
                             inline_keyboard: [
-                                [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+                                [{ text: '🌐 חשב סיכויים באתר', url: webUrl() }],
                                 [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }, { text: '📋 סטטוס', callback_data: 'cmd:status' }],
                                 [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
                             ],
@@ -119,7 +123,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
             {
                 reply_markup: {
                     inline_keyboard: [
-                        [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+                        [{ text: '🌐 חשב סיכויים באתר', url: webUrl() }],
                         [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }, { text: '📋 סטטוס', callback_data: 'cmd:status' }],
                         [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
                     ],
