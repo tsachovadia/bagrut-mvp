@@ -1,6 +1,8 @@
 import type { HandlerContext } from '../types.js';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client.js';
 import { updateBotUser, logMessage } from '../middleware.js';
+
+const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 /**
  * Handle /consent command - show and manage consent preferences
@@ -40,6 +42,13 @@ export async function handleConsent(ctx: HandlerContext): Promise<void> {
 export async function handleConsentCallback(ctx: HandlerContext, action: string): Promise<void> {
     const { chatId, user } = ctx;
 
+    const returnButtons = user.web_user_id
+        ? [keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('🏠 תפריט ראשי', 'cmd:start'))]
+        : [
+            keyboardRow(urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)),
+            keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('🏠 תפריט ראשי', 'cmd:start')),
+        ];
+
     if (action === 'enable_marketing') {
         await updateBotUser(user.id, {
             consent_marketing: true,
@@ -47,7 +56,8 @@ export async function handleConsentCallback(ctx: HandlerContext, action: string)
         } as any);
 
         await sendMessage(chatId,
-            `✅ מעולה! תקבל/י עדכונים והמלצות מותאמות אישית.\n\nתוכל/י לשנות בכל עת עם /consent`
+            `✅ מעולה! תקבל/י עדכונים והמלצות מותאמות אישית.\n\nתוכל/י לשנות בכל עת עם /consent`,
+            { reply_markup: inlineKeyboard(returnButtons) }
         );
     } else if (action === 'disable_marketing') {
         await updateBotUser(user.id, {
@@ -55,7 +65,8 @@ export async function handleConsentCallback(ctx: HandlerContext, action: string)
         } as any);
 
         await sendMessage(chatId,
-            `❌ עדכונים בוטלו. לא נשלח לך הודעות שיווקיות.\n\nתוכל/י לשנות בכל עת עם /consent`
+            `❌ עדכונים בוטלו. לא נשלח לך הודעות שיווקיות.\n\nתוכל/י לשנות בכל עת עם /consent`,
+            { reply_markup: inlineKeyboard(returnButtons) }
         );
     }
 

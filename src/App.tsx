@@ -199,7 +199,7 @@ function App() {
         <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
         <Route path="/admin/shadow" element={!isProduction ? <CRMPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/groups" element={!isProduction ? <GroupsPage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/groups" element={<GroupsPage />} />
         <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/metrics" element={!isProduction ? <MetricsDashboard /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/client-demo" element={!isProduction ? <ClientPortal /> : <Navigate to="/" />} />

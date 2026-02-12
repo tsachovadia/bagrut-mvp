@@ -95,11 +95,12 @@ export async function handleSectorSelection(ctx: HandlerContext, sector: string)
 
     await sendMessage(chatId,
         `מעולה! מגזר: <b>${sectorNames[sector] || sector}</b>\n\n` +
-        `מה תרצה לעשות?`,
+        `🎯 <b>הצעד הבא שלך:</b>\n` +
+        `חשב את סיכויי הקבלה שלך לכל מוסד - לוקח 2 דקות!`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(urlBtn('🌐 חשב סיכויי קבלה באתר', WEB_APP_URL)),
-                keyboardRow(btn('👥 הצטרף לקהילה', 'cmd:rooms'), btn('❓ עזרה', 'cmd:help')),
+                keyboardRow(urlBtn('🚀 חשב סיכויים עכשיו!', WEB_APP_URL)),
+                keyboardRow(btn('👥 הצטרף לקהילה', 'cmd:rooms')),
             ]),
         }
     );
@@ -262,6 +263,7 @@ async function handleLinkToken(ctx: HandlerContext, token: string): Promise<void
         `מעכשיו תקבל/י עדכונים אישיים ישירות לכאן.`,
         {
             reply_markup: inlineKeyboard([
+                keyboardRow(urlBtn('📊 דשבורד מלא באתר', `${WEB_APP_URL}/dashboard`)),
                 keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📋 הפרופיל שלי', 'cmd:status')),
             ]),
         }

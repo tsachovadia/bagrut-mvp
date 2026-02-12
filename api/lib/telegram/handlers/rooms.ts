@@ -1,5 +1,5 @@
 import type { HandlerContext } from '../types.js';
-import { sendMessage, inlineKeyboard, urlBtn } from '../client.js';
+import { sendMessage, inlineKeyboard, btn, urlBtn } from '../client.js';
 import { logMessage, supabase } from '../middleware.js';
 import { getActiveGroups } from '../services/user-service.js';
 import { getWebProfileSummary } from './start.js';
@@ -22,7 +22,14 @@ export async function handleRooms(ctx: HandlerContext): Promise<void> {
             `🏠 <b>מתלבטים - הקהילה</b>\nקבוצה כללית לשאלות ודיונים\n\n` +
             `💻 <b>חדר CS והנדסה</b>\nלכל מי שמעוניין בהנדסה ומדעי המחשב\n\n` +
             `📅 <b>נרשמים 2026</b>\nקבוצה למתכננים להתחיל לימודים ב-2026\n\n` +
-            `הקבוצות ייפתחו בקרוב! שלח /help לראות מה עוד אפשר לעשות.`,
+            `הקבוצות נפתחות בקרוב! בינתיים, בדוק את סיכויי הקבלה שלך באתר:`,
+            {
+                reply_markup: inlineKeyboard([
+                    [urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)],
+                    [btn('📤 שתף עם חברים', 'cmd:share'), btn('📋 סטטוס', 'cmd:status')],
+                    [btn('🏠 תפריט ראשי', 'cmd:start')],
+                ]),
+            }
         );
         await logMessage(user.id, 'outgoing', 'rooms_empty');
         return;

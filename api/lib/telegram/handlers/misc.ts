@@ -99,7 +99,13 @@ export async function handleShare(ctx: HandlerContext): Promise<void> {
         `הלינק האישי שלך:\n<code>${referralLink}</code>\n\n` +
         `📋 טקסט לשיתוף:\n<i>${shareText}</i>\n\n` +
         `כל חבר שמצטרף דרכך = נחשב!\n` +
-        `הזמנת עד עכשיו: <b>${user.referral_count || 0}</b> חברים`
+        `הזמנת עד עכשיו: <b>${user.referral_count || 0}</b> חברים`,
+        {
+            reply_markup: inlineKeyboard([
+                keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📋 סטטוס', 'cmd:status')),
+                keyboardRow(btn('🏠 תפריט ראשי', 'cmd:start')),
+            ]),
+        }
     );
 
     await logMessage(user.id, 'outgoing', 'share');

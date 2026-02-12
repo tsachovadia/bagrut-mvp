@@ -10,11 +10,13 @@ const supabase = createClient(
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
-async function sendTelegramMessage(chatId: string, text: string) {
+async function sendTelegramMessage(chatId: string, text: string, reply_markup?: any) {
+    const body: any = { chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true };
+    if (reply_markup) body.reply_markup = reply_markup;
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+        body: JSON.stringify(body),
     });
     const data = (await res.json()) as { error_code?: number };
     if (data.error_code === 403) {
@@ -23,13 +25,14 @@ async function sendTelegramMessage(chatId: string, text: string) {
     return data;
 }
 
-// Drip stage definitions - all redirect to web app
+// Drip stage definitions - all redirect to web app, all have buttons
 interface DripDef {
     fromStage: DripStage;
     toStage: DripStage;
     delayHours: number;
     condition: (user: BotUser) => boolean;
     message: (user: BotUser) => string;
+    reply_markup?: any;
 }
 
 const DRIP_DEFINITIONS: DripDef[] = [
@@ -40,8 +43,13 @@ const DRIP_DEFINITIONS: DripDef[] = [
         condition: (u) => !u.web_user_id,
         message: (u: BotUser) =>
             `היי ${u.first_name || ''}! 👋\n\n` +
-            `חשב את סיכויי הקבלה שלך באתר - לוקח 2 דקות!\n` +
-            `🌐 ${WEB_APP_URL}`,
+            `חשב את סיכויי הקבלה שלך באתר - לוקח 2 דקות!`,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
+            ],
+        },
     },
     {
         fromStage: 'nudge_web',
@@ -50,9 +58,13 @@ const DRIP_DEFINITIONS: DripDef[] = [
         condition: (u) => !u.web_user_id,
         message: (u: BotUser) =>
             `היי ${u.first_name || ''}! 📊\n\n` +
-            `חבר את החשבון שלך כדי לקבל עדכונים אישיים ישירות לטלגרם.\n` +
-            `נרשמת באתר? חבר את החשבון:\n` +
-            `🌐 ${WEB_APP_URL}`,
+            `חבר את החשבון שלך כדי לקבל עדכונים אישיים ישירות לטלגרם.`,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🌐 חבר חשבון באתר', url: WEB_APP_URL }],
+                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
+            ],
+        },
     },
     {
         fromStage: 'nudge_link',
@@ -61,8 +73,13 @@ const DRIP_DEFINITIONS: DripDef[] = [
         condition: (u) => (u.rooms_joined || []).length === 0,
         message: () =>
             `👥 הצטרף לחדרי הלימוד שלנו!\n\n` +
-            `תלמידים כמוך כבר שם - שואלים שאלות, משתפים טיפים, ועוזרים אחד לשני.\n` +
-            `שלח /rooms לראות את החדרים הפעילים.`,
+            `תלמידים כמוך כבר שם - שואלים שאלות, משתפים טיפים, ועוזרים אחד לשני.`,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
+                [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+            ],
+        },
     },
     {
         fromStage: 'nudge_rooms',
@@ -71,9 +88,13 @@ const DRIP_DEFINITIONS: DripDef[] = [
         condition: () => true,
         message: (u: BotUser) =>
             `היי ${u.first_name || ''}! 📢\n\n` +
-            `מה חדש? בדוק אם יש עדכונים בסיכויי הקבלה שלך.\n` +
-            `🌐 ${WEB_APP_URL}/dashboard\n\n` +
-            `שלח /rooms להצטרף לדיונים בקהילה.`,
+            `מה חדש? בדוק אם יש עדכונים בסיכויי הקבלה שלך.`,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '📊 בדוק עדכונים באתר', url: `${WEB_APP_URL}/dashboard` }],
+                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
+            ],
+        },
     },
     {
         fromStage: 'community',
@@ -82,8 +103,13 @@ const DRIP_DEFINITIONS: DripDef[] = [
         condition: () => true,
         message: () =>
             `📤 חברים שלך גם מתלבטים?\n\n` +
-            `שתף אותם וגם הם יוכלו לבדוק את סיכויי הקבלה שלהם!\n` +
-            `שלח /share לקבל את הלינק האישי שלך.`,
+            `שתף אותם וגם הם יוכלו לבדוק את סיכויי הקבלה שלהם!`,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '📤 שתף עם חברים', callback_data: 'cmd:share' }],
+                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
+            ],
+        },
     },
     {
         fromStage: 'share',
@@ -92,8 +118,13 @@ const DRIP_DEFINITIONS: DripDef[] = [
         condition: () => true,
         message: (u: BotUser) =>
             `היי ${u.first_name || ''}! 👋\n\n` +
-            `עבר זמן - בוא לראות אם יש שינויים בסיכויי הקבלה שלך.\n` +
-            `🌐 ${WEB_APP_URL}/dashboard`,
+            `עבר זמן - בוא לראות אם יש שינויים בסיכויי הקבלה שלך.`,
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '🌐 בדוק שינויים באתר', url: `${WEB_APP_URL}/dashboard` }],
+                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }],
+            ],
+        },
     },
 ];
 
@@ -128,7 +159,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             totalProcessed++;
 
             if (!drip.condition(user)) {
-                // Skip this drip - user already met the goal, advance stage
                 await supabase.from('bot_users').update({
                     drip_stage: drip.toStage,
                     drip_last_sent_at: new Date().toISOString(),
@@ -137,7 +167,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
 
             const message = drip.message(user);
-            await sendTelegramMessage(user.telegram_chat_id, message);
+            await sendTelegramMessage(user.telegram_chat_id, message, drip.reply_markup);
 
             await supabase.from('bot_users').update({
                 drip_stage: drip.toStage,

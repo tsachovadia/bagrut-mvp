@@ -12,6 +12,8 @@ import { handleCallback } from './lib/telegram/handlers/callback-router.js';
 import { handleGroupMessage, handleNewMember } from './lib/telegram/handlers/group-events.js';
 import { handleConsent } from './lib/telegram/handlers/consent.js';
 
+const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
+
 export default async function handler(request: VercelRequest, response: VercelResponse) {
     if (request.method !== 'POST') {
         return response.status(405).json({ error: 'Method not allowed' });
@@ -96,19 +98,28 @@ export default async function handler(request: VercelRequest, response: VercelRe
                     await handleConsent(ctx);
                     break;
                 default:
-                    await sendMessage(chatId, 'פקודה לא מוכרת. שלח /help לרשימת פקודות.');
+                    await sendMessage(chatId, 'פקודה לא מוכרת. מה תרצה לעשות?', {
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
+                                [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }, { text: '📋 סטטוס', callback_data: 'cmd:status' }],
+                                [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
+                            ],
+                        },
+                    });
             }
 
             return response.status(200).json({ ok: true });
         }
 
-        // Non-command text: show help prompt
+        // Non-command text: show help prompt with web CTA
         await logMessage(botUser.id, 'incoming', 'text', text);
         await sendMessage(ctx.chatId,
-            'לא הבנתי. שלח /help לראות את רשימת הפקודות הזמינות.',
+            'לא הבנתי, אבל אין בעיה! רוצה לבדוק את סיכויי הקבלה שלך?',
             {
                 reply_markup: {
                     inline_keyboard: [
+                        [{ text: '🌐 חשב סיכויים באתר', url: WEB_APP_URL }],
                         [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }, { text: '📋 סטטוס', callback_data: 'cmd:status' }],
                         [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
                     ],
