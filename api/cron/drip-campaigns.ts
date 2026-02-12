@@ -8,6 +8,7 @@ const supabase = createClient(
 );
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
+const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 async function sendTelegramMessage(chatId: string, text: string) {
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -17,13 +18,12 @@ async function sendTelegramMessage(chatId: string, text: string) {
     });
     const data = (await res.json()) as { error_code?: number };
     if (data.error_code === 403) {
-        // User blocked bot
         await supabase.from('bot_users').update({ is_blocked: true }).eq('telegram_chat_id', chatId);
     }
     return data;
 }
 
-// Drip stage definitions
+// Drip stage definitions - all redirect to web app
 interface DripDef {
     fromStage: DripStage;
     toStage: DripStage;
@@ -35,71 +35,50 @@ interface DripDef {
 const DRIP_DEFINITIONS: DripDef[] = [
     {
         fromStage: 'welcome',
-        toStage: 'nudge_grades',
+        toStage: 'nudge_web',
         delayHours: 24,
-        condition: (u) => !Array.isArray(u.grades) || u.grades.length === 0,
+        condition: (u) => !u.web_user_id,
         message: (u: BotUser) =>
             `היי ${u.first_name || ''}! 👋\n\n` +
-            `שמנו לב שעדיין לא הזנת ציוני בגרות.\n` +
-            `זה לוקח פחות מ-2 דקות ומאפשר לך לראות לאיפה תתקבל!\n\n` +
-            `שלח /grades כדי להתחיל.`,
+            `חשב את סיכויי הקבלה שלך באתר - לוקח 2 דקות!\n` +
+            `🌐 ${WEB_APP_URL}`,
     },
     {
-        fromStage: 'nudge_grades',
-        toStage: 'partial_grades',
+        fromStage: 'nudge_web',
+        toStage: 'nudge_link',
         delayHours: 48,
-        condition: (u: BotUser) => Array.isArray(u.grades) && u.grades.length > 0 && u.grades.length < 5,
+        condition: (u) => !u.web_user_id,
         message: (u: BotUser) =>
-            `📝 הזנת ${u.grades?.length || 0} מקצועות - יופי!\n\n` +
-            `אבל ככל שתזין יותר, התוצאות יהיו מדויקות יותר.\n` +
-            `שלח /grades כדי להוסיף עוד מקצועות.`,
+            `היי ${u.first_name || ''}! 📊\n\n` +
+            `חבר את החשבון שלך כדי לקבל עדכונים אישיים ישירות לטלגרם.\n` +
+            `נרשמת באתר? חבר את החשבון:\n` +
+            `🌐 ${WEB_APP_URL}`,
     },
     {
-        fromStage: 'partial_grades',
-        toStage: 'nudge_psycho',
+        fromStage: 'nudge_link',
+        toStage: 'nudge_rooms',
         delayHours: 24,
-        condition: (u: BotUser) => Array.isArray(u.grades) && u.grades.length >= 3 && (!u.psychometric || u.psychometric.general === 0),
-        message: (u: BotUser) =>
-            `🧠 יש לך כבר ${u.grades?.length || 0} מקצועות.\n\n` +
-            `כדי לחשב סכמי קבלה מדויקים, הזן גם ציון פסיכומטרי.\n` +
-            `שלח /psycho כדי להזין.`,
-    },
-    {
-        fromStage: 'nudge_psycho',
-        toStage: 'first_results',
-        delayHours: 2,
-        condition: (u: BotUser) => u.lead_stage === 'simulated',
-        message: () =>
-            `📊 ראית את התוצאות שלך!\n\n` +
-            `הנה כמה דברים שאפשר לעשות עכשיו:\n` +
-            `🔍 חפש תוכניות ספציפיות - /programs\n` +
-            `👥 הצטרף לקהילה של סטודנטים - /rooms\n` +
-            `📤 שתף את התוצאות עם חברים - /share`,
-    },
-    {
-        fromStage: 'first_results',
-        toStage: 'track_programs',
-        delayHours: 48,
-        condition: (u: BotUser) => (u.tracked_programs || []).length === 0,
-        message: () =>
-            `🎯 טיפ: שמור תוכניות שמעניינות אותך כדי לקבל עדכונים.\n\n` +
-            `שלח /programs, בחר תוכנית, ולחץ על "עקוב".\n` +
-            `ככה תדע מיד אם משהו השתנה!`,
-    },
-    {
-        fromStage: 'track_programs',
-        toStage: 'community',
-        delayHours: 24,
-        condition: (u: BotUser) => (u.rooms_joined || []).length === 0,
+        condition: (u) => (u.rooms_joined || []).length === 0,
         message: () =>
             `👥 הצטרף לחדרי הלימוד שלנו!\n\n` +
-            `שם תוכל לשאול שאלות, לקבל טיפים, ולהכיר סטודנטים.\n` +
+            `תלמידים כמוך כבר שם - שואלים שאלות, משתפים טיפים, ועוזרים אחד לשני.\n` +
             `שלח /rooms לראות את החדרים הפעילים.`,
+    },
+    {
+        fromStage: 'nudge_rooms',
+        toStage: 'community',
+        delayHours: 168, // 7 days
+        condition: () => true,
+        message: (u: BotUser) =>
+            `היי ${u.first_name || ''}! 📢\n\n` +
+            `מה חדש? בדוק אם יש עדכונים בסיכויי הקבלה שלך.\n` +
+            `🌐 ${WEB_APP_URL}/dashboard\n\n` +
+            `שלח /rooms להצטרף לדיונים בקהילה.`,
     },
     {
         fromStage: 'community',
         toStage: 'share',
-        delayHours: 168, // 7 days
+        delayHours: 336, // 14 days
         condition: () => true,
         message: () =>
             `📤 חברים שלך גם מתלבטים?\n\n` +
@@ -109,25 +88,21 @@ const DRIP_DEFINITIONS: DripDef[] = [
     {
         fromStage: 'share',
         toStage: 're_engage',
-        delayHours: 336, // 14 days
+        delayHours: 720, // 30 days
         condition: () => true,
         message: (u: BotUser) =>
             `היי ${u.first_name || ''}! 👋\n\n` +
-            `עבר זמן מאז שהשתמשת בבוט.\n` +
-            `אם הציונים שלך השתנו, בוא לעדכן ולראות אם נפתחו הזדמנויות חדשות!\n\n` +
-            `שלח /calculate לחישוב מחדש.`,
+            `עבר זמן - בוא לראות אם יש שינויים בסיכויי הקבלה שלך.\n` +
+            `🌐 ${WEB_APP_URL}/dashboard`,
     },
 ];
 
 /**
  * Cron job: Process drip campaigns
- * Schedule: Every 2 hours (0 *‌/2 * * *)
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // Verify cron secret (Vercel sends this for cron jobs)
     const authHeader = req.headers.authorization;
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        // Allow in dev without secret
         if (process.env.NODE_ENV === 'production' && process.env.CRON_SECRET) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
@@ -137,17 +112,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let totalProcessed = 0;
 
     for (const drip of DRIP_DEFINITIONS) {
-        // Calculate the threshold timestamp
         const threshold = new Date(Date.now() - drip.delayHours * 3600 * 1000).toISOString();
 
-        // Find eligible users
         const { data: users } = await supabase
             .from('bot_users')
             .select('*')
             .eq('drip_stage', drip.fromStage)
             .eq('is_blocked', false)
             .or(`drip_last_sent_at.is.null,drip_last_sent_at.lt.${threshold}`)
-            .limit(100); // Process max 100 per drip per run
+            .limit(100);
 
         if (!users || users.length === 0) continue;
 
@@ -155,8 +128,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             totalProcessed++;
 
             if (!drip.condition(user)) {
-                // User doesn't meet condition but might need to advance stage
-                // (e.g., they already entered grades, skip nudge_grades)
+                // Skip this drip - user already met the goal, advance stage
                 await supabase.from('bot_users').update({
                     drip_stage: drip.toStage,
                     drip_last_sent_at: new Date().toISOString(),
@@ -164,17 +136,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 continue;
             }
 
-            // Send the drip message
             const message = drip.message(user);
             await sendTelegramMessage(user.telegram_chat_id, message);
 
-            // Update drip stage
             await supabase.from('bot_users').update({
                 drip_stage: drip.toStage,
                 drip_last_sent_at: new Date().toISOString(),
             }).eq('id', user.id);
 
-            // Log
             await supabase.from('bot_messages_log').insert({
                 bot_user_id: user.id,
                 direction: 'outgoing',
@@ -185,7 +154,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             totalSent++;
 
-            // Rate limiting: max 25 messages per second (leaving buffer)
             if (totalSent % 25 === 0) {
                 await new Promise(resolve => setTimeout(resolve, 1100));
             }

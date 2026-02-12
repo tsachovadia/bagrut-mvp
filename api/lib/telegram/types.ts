@@ -5,25 +5,15 @@
 export type ConversationState =
     | 'idle'
     | 'onboarding_sector'
-    | 'grade_entry_subject'
-    | 'grade_entry_units'
-    | 'grade_entry_score'
-    | 'psychometric_general'
-    | 'psychometric_quant'
-    | 'psychometric_verbal'
-    | 'psychometric_english'
-    | 'program_browsing'
     | 'awaiting_text_input';
 
 export type LeadStage = 'new' | 'engaged' | 'grade_entered' | 'simulated' | 'high_intent';
 
 export type DripStage =
     | 'welcome'
-    | 'nudge_grades'
-    | 'partial_grades'
-    | 'nudge_psycho'
-    | 'first_results'
-    | 'track_programs'
+    | 'nudge_web'
+    | 'nudge_link'
+    | 'nudge_rooms'
     | 'community'
     | 'share'
     | 're_engage'
@@ -42,8 +32,6 @@ export interface BotUser {
     conversation_state: ConversationState;
     state_data: Record<string, any>;
     sector: string | null;
-    grades: SubjectGradeBot[];
-    psychometric: PsychometricBot;
     tracked_programs: string[];
     lead_score: number;
     lead_stage: LeadStage;
@@ -67,20 +55,16 @@ export interface BotUser {
     updated_at: string;
 }
 
-// Lightweight grade type for bot storage (mirrors SubjectGrade from calculator.ts)
-export interface SubjectGradeBot {
-    id: string;
-    subject: string;
-    units: number;
-    grade: number;
-}
+// ============================
+// Web Profile Summary (pulled from user_profiles)
+// ============================
 
-export interface PsychometricBot {
-    general: number;
-    quantitative: number;
-    verbal: number;
-    english: number;
-    total?: number;
+export interface WebProfileSummary {
+    gradesCount: number;
+    bagrutAvg: number | null;
+    psychoTotal: number | null;
+    trackedPrograms: string[];
+    journeyStage: string | null;
 }
 
 // ============================
@@ -160,10 +144,8 @@ export interface HandlerContext {
 export type LeadAction =
     | 'started_bot'
     | 'selected_sector'
-    | 'entered_first_grade'
-    | 'entered_3_grades'
-    | 'entered_psychometric'
-    | 'ran_calculation'
+    | 'linked_account'
+    | 'visited_web_app'
     | 'tracked_program'
     | 'deep_link_from_program'
     | 'joined_room'

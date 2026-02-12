@@ -2,14 +2,8 @@ import type { HandlerContext } from '../types.js';
 import { answerCallbackQuery } from '../client.js';
 import { logMessage } from '../middleware.js';
 import { handleSectorSelection } from './start.js';
-import { handleSubjectSelected, handleUnitsSelected, handleGradesDone, handleSubjectPage } from './grades.js';
-import { handlePsychometric } from './psychometric.js';
-import { handleFieldSelected, handleProgramDetail, handleTrackProgram } from './programs.js';
 
 // Command shortcuts mapped from callback data
-import { handleGrades } from './grades.js';
-import { handleCalculate } from './calculate.js';
-import { handlePrograms } from './programs.js';
 import { handleRooms } from './rooms.js';
 import { handleHelp, handleStatus, handleShare } from './misc.js';
 import { handleStart } from './start.js';
@@ -19,17 +13,10 @@ import { handleConsentCallback } from './consent.js';
  * Route callback queries to the appropriate handler based on data prefix.
  *
  * Callback data format: "prefix:value"
- * - sector:mamlachti     → Sector selection
- * - grade_subj:מתמטיקה   → Subject selected for grade entry
- * - grade_units:5         → Units selected
- * - grade_page:1          → Navigate subject keyboard page
- * - grade_done            → Finished entering grades
- * - field:cs              → Program field selected
- * - prog:prog_bgu_cs      → Program detail view
- * - track:prog_bgu_cs     → Toggle track program
- * - psycho_restart        → Restart psychometric entry
- * - cmd:grades            → Command shortcut
- * - noop                  → Do nothing (category headers)
+ * - sector:mamlachti     -> Sector selection
+ * - cmd:rooms            -> Command shortcut
+ * - consent:enable       -> Consent toggle
+ * - noop                 -> Do nothing (decorative buttons)
  */
 export async function handleCallback(ctx: HandlerContext): Promise<void> {
     const data = ctx.callbackQuery?.data;
@@ -49,39 +36,6 @@ export async function handleCallback(ctx: HandlerContext): Promise<void> {
             await handleSectorSelection(ctx, value);
             break;
 
-        case 'grade_subj':
-            await handleSubjectSelected(ctx, value);
-            break;
-
-        case 'grade_units':
-            await handleUnitsSelected(ctx, parseInt(value, 10));
-            break;
-
-        case 'grade_page':
-            await handleSubjectPage(ctx, parseInt(value, 10));
-            break;
-
-        case 'grade_done':
-            await handleGradesDone(ctx);
-            break;
-
-        case 'field':
-            await handleFieldSelected(ctx, value);
-            break;
-
-        case 'prog':
-            await handleProgramDetail(ctx, value);
-            break;
-
-        case 'track':
-            await handleTrackProgram(ctx, value);
-            break;
-
-        case 'psycho_restart':
-            // Reset psychometric and start over
-            await handlePsychometric(ctx);
-            break;
-
         case 'cmd':
             await handleCommandShortcut(ctx, value);
             break;
@@ -91,7 +45,7 @@ export async function handleCallback(ctx: HandlerContext): Promise<void> {
             break;
 
         case 'noop':
-            // Do nothing (used for category headers in keyboards)
+            // Do nothing (used for decorative buttons)
             break;
 
         default:
@@ -101,10 +55,6 @@ export async function handleCallback(ctx: HandlerContext): Promise<void> {
 
 async function handleCommandShortcut(ctx: HandlerContext, command: string): Promise<void> {
     switch (command) {
-        case 'grades': await handleGrades(ctx); break;
-        case 'psycho': await handlePsychometric(ctx); break;
-        case 'calculate': await handleCalculate(ctx); break;
-        case 'programs': await handlePrograms(ctx); break;
         case 'rooms': await handleRooms(ctx); break;
         case 'help': await handleHelp(ctx); break;
         case 'status': await handleStatus(ctx); break;

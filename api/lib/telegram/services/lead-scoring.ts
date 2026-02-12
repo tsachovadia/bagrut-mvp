@@ -4,10 +4,8 @@ import { updateBotUser } from '../middleware.js';
 const SCORE_WEIGHTS: Record<LeadAction, number> = {
     started_bot: 5,
     selected_sector: 5,
-    entered_first_grade: 15,
-    entered_3_grades: 10,
-    entered_psychometric: 15,
-    ran_calculation: 20,
+    linked_account: 20,
+    visited_web_app: 10,
     tracked_program: 10,
     deep_link_from_program: 10,
     joined_room: 15,

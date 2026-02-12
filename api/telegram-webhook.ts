@@ -6,10 +6,6 @@ import { sendMessage } from './lib/telegram/client.js';
 
 // Handlers
 import { handleStart } from './lib/telegram/handlers/start.js';
-import { handleGrades, handleGradeScore } from './lib/telegram/handlers/grades.js';
-import { handlePsychometric, handlePsychometricScore } from './lib/telegram/handlers/psychometric.js';
-import { handleCalculate } from './lib/telegram/handlers/calculate.js';
-import { handlePrograms } from './lib/telegram/handlers/programs.js';
 import { handleRooms } from './lib/telegram/handlers/rooms.js';
 import { handleHelp, handleStatus, handleShare } from './lib/telegram/handlers/misc.js';
 import { handleCallback } from './lib/telegram/handlers/callback-router.js';
@@ -84,18 +80,6 @@ export default async function handler(request: VercelRequest, response: VercelRe
                 case '/start':
                     await handleStart(ctx, payload || undefined);
                     break;
-                case '/grades':
-                    await handleGrades(ctx);
-                    break;
-                case '/psycho':
-                    await handlePsychometric(ctx);
-                    break;
-                case '/calculate':
-                    await handleCalculate(ctx);
-                    break;
-                case '/programs':
-                    await handlePrograms(ctx);
-                    break;
                 case '/rooms':
                     await handleRooms(ctx);
                     break;
@@ -118,8 +102,19 @@ export default async function handler(request: VercelRequest, response: VercelRe
             return response.status(200).json({ ok: true });
         }
 
-        // Non-command text: route based on conversation state
-        await handleTextInput(ctx, text);
+        // Non-command text: show help prompt
+        await logMessage(botUser.id, 'incoming', 'text', text);
+        await sendMessage(ctx.chatId,
+            'לא הבנתי. שלח /help לראות את רשימת הפקודות הזמינות.',
+            {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: '👥 חדרי לימוד', callback_data: 'cmd:rooms' }, { text: '📋 סטטוס', callback_data: 'cmd:status' }],
+                        [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
+                    ],
+                },
+            }
+        );
 
         return response.status(200).json({ ok: true });
     } catch (error: any) {
@@ -135,42 +130,5 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
         // Always return 200 to Telegram to prevent retry storms
         return response.status(200).json({ ok: true });
-    }
-}
-
-/**
- * Route plain text messages based on the user's current conversation state
- */
-async function handleTextInput(ctx: HandlerContext, text: string): Promise<void> {
-    const { user } = ctx;
-
-    switch (user.conversation_state) {
-        case 'grade_entry_score':
-            await handleGradeScore(ctx, text);
-            break;
-
-        case 'psychometric_general':
-        case 'psychometric_quant':
-        case 'psychometric_verbal':
-        case 'psychometric_english':
-            await handlePsychometricScore(ctx, text);
-            break;
-
-        case 'idle':
-        default:
-            // User sent free text without being in a flow
-            await logMessage(user.id, 'incoming', 'text', text);
-            await sendMessage(ctx.chatId,
-                'לא הבנתי. שלח /help לראות את רשימת הפקודות הזמינות.',
-                {
-                    reply_markup: {
-                        inline_keyboard: [
-                            [{ text: '📝 הזן ציונים', callback_data: 'cmd:grades' }, { text: '📊 חשב', callback_data: 'cmd:calculate' }],
-                            [{ text: '❓ עזרה', callback_data: 'cmd:help' }],
-                        ],
-                    },
-                }
-            );
-            break;
     }
 }

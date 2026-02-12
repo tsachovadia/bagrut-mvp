@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { VercelRequest } from '@vercel/node';
-import type { BotUser, TelegramUpdate, ConversationState, PsychometricBot } from './types.js';
+import type { BotUser, TelegramUpdate, ConversationState } from './types.js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!;
@@ -21,7 +21,6 @@ export function verifyWebhook(req: VercelRequest): boolean {
  * Generate a unique referral code from chat ID
  */
 function generateReferralCode(chatId: string): string {
-    // Simple hash-based code: base36 of a numeric derivation
     const num = BigInt(chatId) * BigInt(31) + BigInt(7919);
     return num.toString(36).slice(0, 8).toUpperCase();
 }
@@ -57,8 +56,6 @@ export async function resolveUser(update: TelegramUpdate): Promise<BotUser> {
         conversation_state: 'idle' as ConversationState,
         state_data: {},
         sector: null,
-        grades: [],
-        psychometric: { general: 0, quantitative: 0, verbal: 0, english: 0 } as PsychometricBot,
         tracked_programs: [],
         lead_score: 0,
         lead_stage: 'new',
@@ -133,7 +130,7 @@ export async function logMessage(
         bot_user_id: botUserId,
         direction,
         message_type: messageType,
-        content: content?.substring(0, 500), // Truncate for storage
+        content: content?.substring(0, 500),
         callback_data: extra?.callback_data,
         campaign_id: extra?.campaign_id,
         variant: extra?.variant,

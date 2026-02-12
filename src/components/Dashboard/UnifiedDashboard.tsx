@@ -12,6 +12,7 @@ import { generateSimulationInsights, type SimulationInsight } from '../../utils/
 import { Button } from '../ui/shim';
 import { Calculator } from 'lucide-react';
 import { useTrackedDegrees } from '../../context/TrackedDegreesContext';
+import { TelegramCTA } from '../TelegramCTA';
 
 export const UnifiedDashboard = () => {
     const navigate = useNavigate();
@@ -286,6 +287,11 @@ export const UnifiedDashboard = () => {
 
                     {/* Insights Overlay */}
                     <SimulationInsightOverlay insights={insights} isVisible={true} />
+                </div>
+
+                {/* Telegram CTA */}
+                <div className="max-w-[1920px] mx-auto px-0 lg:px-0">
+                    <TelegramCTA />
                 </div>
             </div>
         </ResultsAuthGate>

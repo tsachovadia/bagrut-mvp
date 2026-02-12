@@ -1,8 +1,9 @@
 import type { HandlerContext } from '../types.js';
-import { sendMessage, inlineKeyboard, keyboardRow, btn } from '../client.js';
+import { sendMessage, inlineKeyboard, keyboardRow, btn, urlBtn } from '../client.js';
 import { logMessage } from '../middleware.js';
-import { calculateForBot, type Sector } from '../../shared/calculator.js';
-import { ALL_PROGRAMS } from '../../shared/programs.js';
+import { getWebProfileSummary } from './start.js';
+
+const WEB_APP_URL = process.env.WEB_APP_URL || 'https://mitlabtim.co.il';
 
 /**
  * Handle /help command
@@ -12,18 +13,16 @@ export async function handleHelp(ctx: HandlerContext): Promise<void> {
 
     await sendMessage(chatId,
         `❓ <b>עזרה - מתלבטים בוט</b>\n\n` +
-        `📝 /grades - הזנת ציוני בגרות\n` +
-        `🧠 /psycho - הזנת ציוני פסיכומטרי\n` +
-        `📊 /calculate - חישוב ממוצע וסכמי קבלה\n` +
-        `🔍 /programs - חיפוש תוכניות לימודים\n` +
         `👥 /rooms - חדרי לימוד (קהילה)\n` +
         `📋 /status - הפרופיל שלי\n` +
         `📤 /share - שתף עם חברים\n` +
+        `✅ /consent - הגדרות פרטיות\n` +
         `❓ /help - עזרה\n\n` +
-        `💡 <b>טיפ:</b> התחל עם /grades כדי להזין ציונים, ואז /calculate לראות תוצאות!`,
+        `💡 <b>טיפ:</b> חשב את סיכויי הקבלה שלך באתר, ואז חבר את החשבון כדי לקבל עדכונים כאן!`,
         {
             reply_markup: inlineKeyboard([
-                keyboardRow(btn('📝 הזן ציונים', 'cmd:grades'), btn('📊 חשב', 'cmd:calculate')),
+                keyboardRow(urlBtn('🌐 חשב סיכויים באתר', WEB_APP_URL)),
+                keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📋 סטטוס', 'cmd:status')),
             ]),
         }
     );
@@ -32,68 +31,55 @@ export async function handleHelp(ctx: HandlerContext): Promise<void> {
 }
 
 /**
- * Handle /status command - show user profile summary
+ * Handle /status command - show profile from web app data
  */
 export async function handleStatus(ctx: HandlerContext): Promise<void> {
     const { chatId, user } = ctx;
 
-    const gradesCount = Array.isArray(user.grades) ? user.grades.length : 0;
-    const hasPsycho = user.psychometric?.general > 0;
-    const trackedCount = (user.tracked_programs || []).length;
+    const sectorNames: Record<string, string> = {
+        mamlachti: 'ממלכתי', mamlachti_dati: 'ממלכתי-דתי', arab: 'ערבי', druze: 'דרוזי'
+    };
 
     let msg = `📋 <b>הפרופיל שלי</b>\n\n`;
 
     // Sector
-    const sectorNames: Record<string, string> = {
-        mamlachti: 'ממלכתי', mamlachti_dati: 'ממלכתי-דתי', arab: 'ערבי', druze: 'דרוזי'
-    };
     msg += `🎓 מגזר: ${user.sector ? sectorNames[user.sector] || user.sector : 'לא נבחר'}\n`;
 
-    // Grades
-    msg += `📝 ציוני בגרות: ${gradesCount > 0 ? `${gradesCount} מקצועות` : 'לא הוזנו'}\n`;
-    if (gradesCount > 0 && Array.isArray(user.grades)) {
-        for (const g of user.grades.slice(0, 5)) {
-            msg += `   • ${g.subject} (${g.units} יח״ל): ${g.grade}\n`;
+    // Web account status
+    if (user.web_user_id) {
+        msg += `🔗 חשבון: <b>מחובר</b>\n`;
+
+        // Pull real data from web app
+        const profile = await getWebProfileSummary(user.web_user_id);
+
+        msg += `📝 ציוני בגרות: ${profile.gradesCount > 0 ? `${profile.gradesCount} מקצועות` : 'לא הוזנו באתר'}\n`;
+        if (profile.bagrutAvg) {
+            msg += `📊 ממוצע: <b>${profile.bagrutAvg.toFixed(1)}</b>\n`;
         }
-        if (gradesCount > 5) msg += `   ...ועוד ${gradesCount - 5}\n`;
+        msg += `🧠 פסיכומטרי: ${profile.psychoTotal ? `<b>${profile.psychoTotal}</b>` : 'לא הוזן באתר'}\n`;
+
+        const trackedCount = profile.trackedPrograms?.length || 0;
+        msg += `🎯 תוכניות בעקיבה: ${trackedCount}\n`;
+    } else {
+        msg += `🔗 חשבון: <b>לא מחובר</b>\n`;
+        msg += `\n💡 חבר את החשבון מהאתר כדי לראות את הנתונים שלך כאן.\n`;
     }
 
-    // Psychometric
-    msg += `🧠 פסיכומטרי: ${hasPsycho ? user.psychometric.general : 'לא הוזן'}\n`;
-
-    // Quick calculation if data available
-    if (gradesCount > 0) {
-        const psycho = {
-            general: user.psychometric?.general || 0,
-            quantitative: user.psychometric?.quantitative || 0,
-            verbal: user.psychometric?.verbal || 0,
-            english: user.psychometric?.english || 0,
-            total: user.psychometric?.total || user.psychometric?.general || 0,
-        };
-        const result = calculateForBot(user.grades, psycho, (user.sector as Sector) || undefined);
-        msg += `\n📊 ממוצע מותאם: <b>${result.bagrutAverage.toFixed(1)}</b>\n`;
-    }
-
-    // Tracked programs
-    msg += `\n🎯 תוכניות בעקיבה: ${trackedCount}\n`;
-    if (trackedCount > 0) {
-        for (const progId of user.tracked_programs.slice(0, 3)) {
-            const prog = ALL_PROGRAMS.find(p => p.program.id === progId);
-            if (prog) msg += `   • ${prog.program.name} (${prog.program.institution?.name || ''})\n`;
-        }
-    }
-
-    // Referral
+    // Referral info
     msg += `\n📤 קוד הפניה: <code>${user.referral_code}</code>\n`;
     msg += `👥 חברים שהזמנת: ${user.referral_count || 0}\n`;
 
-    await sendMessage(chatId, msg, {
-        reply_markup: inlineKeyboard([
-            keyboardRow(btn('📝 עדכן ציונים', 'cmd:grades'), btn('🧠 עדכן פסיכומטרי', 'cmd:psycho')),
-            keyboardRow(btn('📊 חשב תוצאות', 'cmd:calculate'), btn('📤 שתף', 'cmd:share')),
-        ]),
-    });
+    const buttons = user.web_user_id
+        ? [
+            keyboardRow(urlBtn('📊 עדכן נתונים באתר', `${WEB_APP_URL}/dashboard`)),
+            keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📤 שתף', 'cmd:share')),
+        ]
+        : [
+            keyboardRow(urlBtn('🌐 הירשם וחשב באתר', WEB_APP_URL)),
+            keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms'), btn('📤 שתף', 'cmd:share')),
+        ];
 
+    await sendMessage(chatId, msg, { reply_markup: inlineKeyboard(buttons) });
     await logMessage(user.id, 'outgoing', 'status');
 }
 
@@ -105,28 +91,8 @@ export async function handleShare(ctx: HandlerContext): Promise<void> {
 
     const referralLink = `https://t.me/MitlabtimBot?start=ref_${user.referral_code}`;
 
-    // Check if user has calculation results to share
-    const gradesCount = Array.isArray(user.grades) ? user.grades.length : 0;
-    let shareText = '';
-
-    if (gradesCount > 0) {
-        const psycho = {
-            general: user.psychometric?.general || 0,
-            quantitative: user.psychometric?.quantitative || 0,
-            verbal: user.psychometric?.verbal || 0,
-            english: user.psychometric?.english || 0,
-            total: user.psychometric?.total || user.psychometric?.general || 0,
-        };
-        const result = calculateForBot(user.grades, psycho, (user.sector as Sector) || undefined, ALL_PROGRAMS);
-        const reachableCount = result.programResults.filter(p => p.isReachable).length;
-
-        shareText = `🎓 בדקתי את סיכויי הקבלה שלי - עומד בתנאים ל-${reachableCount} תוכניות!\n` +
-            `ממוצע: ${result.bagrutAverage.toFixed(1)}\n` +
-            `גלה את הסיכויים שלך 👉 ${referralLink}`;
-    } else {
-        shareText = `🎓 גליתי את מתלבטים - כלי חינמי לבדיקת סיכויי קבלה לאוניברסיטה!\n` +
-            `בדוק את הסיכויים שלך 👉 ${referralLink}`;
-    }
+    const shareText = `🎓 גליתי את מתלבטים - כלי חינמי לבדיקת סיכויי קבלה לאוניברסיטה!\n` +
+        `בדוק את הסיכויים שלך 👉 ${referralLink}`;
 
     await sendMessage(chatId,
         `📤 <b>שתף עם חברים!</b>\n\n` +
