@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Calendar, Search, MapPin, ExternalLink, Bell, CheckCircle, ChevronDown } from 'lucide-react';
@@ -277,6 +278,13 @@ export function ImportantDatesPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
+            <Helmet>
+                <title>ימים פתוחים 2026 — כל התאריכים במקום אחד | מתלבטים בלימודים</title>
+                <meta name="description" content="לוח ימים פתוחים 2026 מעודכן — אוניברסיטת תל אביב, הטכניון, העברית, בר-אילן, בן גוריון, רייכמן ועוד. מועדי פסיכומטרי והרשמה." />
+                <meta property="og:title" content="ימים פתוחים 2026 — כל התאריכים במקום אחד" />
+                <meta property="og:description" content="לוח ימים פתוחים מעודכן לכל האוניברסיטאות והמכללות בישראל. סינון לפי סוג, תזכורות, וקישורים ישירים." />
+                <link rel="canonical" href="https://mitlabtim.co.il/open-days" />
+            </Helmet>
             <Header />
 
             <main className="flex-grow max-w-4xl mx-auto w-full px-4 py-8">

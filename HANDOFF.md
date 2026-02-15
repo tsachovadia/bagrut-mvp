@@ -20,6 +20,24 @@ Entry format:
 
 ## Sessions
 
+### 2026-02-15 — Claude Code (Session 7, SEO)
+**What was done**: Added SEO meta tags and HelmetProvider to all key pages. Fixed index.html for Hebrew SEO.
+**Files changed**:
+- **`index.html`** — `lang="en"` → `lang="he" dir="rtl"`, added meta description, og tags (title, description, image, url, locale), twitter card, canonical URL, keywords
+- **`src/main.tsx`** — Wrapped app with `HelmetProvider` (was local per-component)
+- **`src/components/blog/SmartArticleLayout.tsx`** — Removed local `HelmetProvider` (now at root), added og:title, og:description, og:image, canonical URL per article
+- **`src/pages/HomePage.tsx`** — Added Helmet with title, description, canonical
+- **`src/pages/ImportantDatesPage.tsx`** — Added Helmet targeting "ימים פתוחים 2026" keyword
+- **`src/pages/BlogPage.tsx`** — Added Helmet with title, description, canonical
+**Key decisions**:
+- og:image uses `https://mitlabtim.co.il/logo_new.png` (default) and article images (per article)
+- Canonical URLs all point to `mitlabtim.co.il` domain
+- HelmetProvider at root level so all pages can use Helmet without wrapping
+**Open items**:
+- Need a proper og:image (1200x630 social share card) instead of logo
+- robots.txt / sitemap.xml for Google indexing
+- Sprint 2 remaining: GroupLead integration, first 100 users
+
 ### 2026-02-15 — Claude Code (Session 6, Sprint 2 Start)
 **What was done**: Connected lead capture forms to Supabase and rebuilt the /open-days page as a monetization asset.
 **Files changed**:

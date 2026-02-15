@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import { Header } from '../components/Header';
 import { ConversationalHero } from '../components/marketing/ConversationalHero';
 import { WizardContainer } from '../components/Wizard/WizardContainer';
@@ -67,6 +68,11 @@ export const HomePage = ({
 
     return (
         <div className="min-h-screen flex flex-col font-sans" dir="rtl">
+            <Helmet>
+                <title>מתלבטים בלימודים — מחשבון סיכויי קבלה לתואר ראשון</title>
+                <meta name="description" content="מחשבון בגרויות חינמי — חשבו ממוצע בגרות, בדקו סיכויי קבלה ל-500+ תוכניות לימוד, וגלו לאן אתם יכולים להתקבל. קהילה של 50,000+ תלמידים." />
+                <link rel="canonical" href="https://mitlabtim.co.il" />
+            </Helmet>
             <Header />
 
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-6 py-2 space-y-2">

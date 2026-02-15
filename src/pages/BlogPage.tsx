@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { articles } from '../data/articles';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Calendar, User } from 'lucide-react';
@@ -10,6 +11,11 @@ export function BlogPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
+            <Helmet>
+                <title>בלוג — מתלבטים בלימודים</title>
+                <meta name="description" content="מאמרים, טיפים ומדריכים על בגרויות, פסיכומטרי, ימים פתוחים וקבלה לאוניברסיטה. כל מה שצריך לדעת לפני שבוחרים תואר." />
+                <link rel="canonical" href="https://mitlabtim.co.il/blog" />
+            </Helmet>
             <Header />
 
             <main className="flex-grow container mx-auto px-4 py-8 max-w-6xl">

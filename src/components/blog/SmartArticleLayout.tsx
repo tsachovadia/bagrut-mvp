@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { Helmet } from 'react-helmet-async';
 import type { Article } from '../../data/articles';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -117,11 +117,15 @@ export function SmartArticleLayout({ article }: SmartArticleLayoutProps) {
     };
 
     return (
-        <HelmetProvider>
             <div className="min-h-screen bg-white text-gray-900 font-sans" dir="rtl">
                 <Helmet>
                     <title>{article.title} | מתלבטים בלימודים</title>
                     <meta name="description" content={article.excerpt} />
+                    <meta property="og:title" content={article.title} />
+                    <meta property="og:description" content={article.excerpt} />
+                    {article.imageUrl && <meta property="og:image" content={article.imageUrl} />}
+                    <meta property="og:type" content="article" />
+                    <link rel="canonical" href={`https://mitlabtim.co.il/blog/${article.id}`} />
                     <script type="application/ld+json">
                         {JSON.stringify(structuredData)}
                     </script>
@@ -284,6 +288,5 @@ export function SmartArticleLayout({ article }: SmartArticleLayoutProps) {
                     </div>
                 </div>
             </div>
-        </HelmetProvider>
     );
 }
