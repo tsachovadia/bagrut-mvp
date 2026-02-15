@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Loader2, Users, Flame, Target, MapPin, GraduationCap, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Loader2, Users, Flame, Target, MapPin, GraduationCap, TrendingUp, ArrowLeft, Activity } from 'lucide-react';
 
 interface ClientViewData {
     partner_type: string;
@@ -118,11 +118,16 @@ export const ClientPortal: React.FC = () => {
                             {PARTNER_TYPE_LABELS[data.partner_type] || data.partner_type}
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
-                            <span className="text-white font-bold text-[10px]">M</span>
+                    <div className="flex items-center gap-4">
+                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                            נתונים בזמן אמת · {new Date().toLocaleDateString('he-IL', { month: 'long', year: 'numeric' })}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
+                                <span className="text-white font-bold text-[10px]">M</span>
+                            </div>
+                            <span className="text-xs text-gray-500">Powered by <b>Mitlabtim</b></span>
                         </div>
-                        <span className="text-xs text-gray-500">Powered by <b>Mitlabtim</b></span>
                     </div>
                 </div>
             </header>
@@ -221,6 +226,34 @@ export const ClientPortal: React.FC = () => {
                         ) : (
                             <p className="text-xs text-gray-400">אין מספיק נתונים גיאוגרפיים</p>
                         )}
+                    </div>
+                </div>
+
+                {/* Journey Stages Funnel */}
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                    <h2 className="text-sm font-bold text-gray-800 mb-4">
+                        <Activity className="w-4 h-4 inline ml-1" />
+                        משפך החלטה
+                    </h2>
+                    <div className="flex items-end gap-2 justify-center">
+                        {(['anonymous', 'exploring', 'comparing', 'deciding'] as const).map((stage, i) => {
+                            const count = data.journey_stages[stage] || 0;
+                            const maxCount = Math.max(...Object.values(data.journey_stages), 1);
+                            const heightPct = Math.max((count / maxCount) * 100, 8);
+                            const colors = ['bg-gray-300', 'bg-blue-400', 'bg-purple-500', 'bg-green-500'];
+                            return (
+                                <div key={stage} className="flex-1 flex flex-col items-center gap-1">
+                                    <span className="text-sm font-bold text-gray-900">{count}</span>
+                                    <div
+                                        className={`w-full rounded-t-lg ${colors[i]} transition-all`}
+                                        style={{ height: `${heightPct}px`, minHeight: '8px', maxHeight: '100px' }}
+                                    />
+                                    <span className="text-[10px] text-gray-500 text-center">
+                                        {JOURNEY_LABELS[stage]}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 

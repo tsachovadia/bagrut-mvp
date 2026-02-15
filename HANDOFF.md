@@ -20,6 +20,33 @@ Entry format:
 
 ## Sessions
 
+### 2026-02-15 — Claude Code (Session 9, OG Images + GroupLead + Client Portal)
+**What was done**: Dynamic OG image endpoint, GroupLead import infrastructure, fixed unified_profiles view bug, improved Client Portal.
+**Files changed**:
+- **`api/og.tsx`** — NEW: Dynamic OG image generation using `@vercel/og` (Edge Runtime). Brand purple gradient, Heebo Hebrew font, animated stats strip. Supports `?page=home|blog|programs|open-days` presets and custom `?title=&subtitle=` params. 1200x630px.
+- **`api/import-leads.ts`** — NEW: Admin-authenticated batch import endpoint for Facebook/GroupLead data. Deduplicates by email, auto-links to existing profiles via `profile-linking.ts`. Max 500 leads per batch.
+- **`supabase/migrations/20260216200000_create_facebook_leads.sql`** — NEW: `facebook_leads` table (fb_name, email, phone, interests[], source_group, import_batch, raw_data JSONB, user_profile_id FK). Indexed on email, phone, batch.
+- **`supabase/migrations/20260216210000_fix_unified_profiles_view.sql`** — FIX: Replaced `NULL::text` placeholders with actual column references for `temperature`, `gap_analysis`, `lead_routing_tags` from user_profiles, and `sector` + `phone_primary` from bot_users/user_profiles.
+- **`src/pages/ClientPortal.tsx`** — Added journey stages funnel visualization (bar chart), data freshness indicator in header ("נתונים בזמן אמת · פברואר 2026").
+- **`index.html`** — og:image → `/api/og?page=home`
+- **`src/pages/HomePage.tsx`** — Added og:image meta tag
+- **`src/pages/BlogPage.tsx`** — Added og:image → `/api/og?page=blog`
+- **`src/pages/ImportantDatesPage.tsx`** — Added og:image → `/api/og?page=open-days`
+- **`src/components/blog/SmartArticleLayout.tsx`** — og:image falls back to dynamic OG endpoint if article has no image
+- **`tsconfig.api.json`** — Added `"jsx": "react-jsx"` for OG endpoint .tsx support
+- **`package.json`** — Added `@vercel/og` dependency
+**Key decisions**:
+- OG images use Edge Runtime for fast generation — Hebrew text via Heebo font from Google Fonts CDN
+- GroupLead import uses admin Bearer token auth (`ADMIN_API_TOKEN`), not public
+- Facebook leads get `facebook_lead` source_type in profile_links (already supported)
+- Auto-link confidence for GroupLead imports set to 0.7 (lower than direct web/bot links)
+- unified_profiles view now correctly surfaces CRM columns that were NULL before
+**Open items**:
+- Apply migrations to production Supabase (20260216200000 + 20260216210000)
+- GroupLead: user needs to provide Google Sheet/CSV data for first import
+- Sprint 2 remaining: first 100 users (marketing push)
+- Client Portal: could add export-to-CSV feature for partners
+
 ### 2026-02-15 — Claude Code (Session 8, SEO Infrastructure + Code Splitting)
 **What was done**: Added robots.txt, sitemap.xml for Google indexing. Implemented React.lazy() code splitting for all secondary routes — main bundle now only includes landing page essentials.
 **Files changed**:

@@ -71,6 +71,7 @@ export const HomePage = ({
             <Helmet>
                 <title>מתלבטים בלימודים — מחשבון סיכויי קבלה לתואר ראשון</title>
                 <meta name="description" content="מחשבון בגרויות חינמי — חשבו ממוצע בגרות, בדקו סיכויי קבלה ל-500+ תוכניות לימוד, וגלו לאן אתם יכולים להתקבל. קהילה של 50,000+ תלמידים." />
+                <meta property="og:image" content="https://mitlabtim.co.il/api/og?page=home" />
                 <link rel="canonical" href="https://mitlabtim.co.il" />
             </Helmet>
             <Header />
