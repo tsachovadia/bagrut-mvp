@@ -28,3 +28,14 @@ dist-ssr
 *.sw?
 .vercel
 repomix_exports/
+
+# Archived old planning/research
+archive/
+
+# Marketing assets (large media files, stored locally only)
+marketing/
+
+# Data files (lead data, scraped data — privacy sensitive)
+*.csv
+scripts/fb-data/
+scripts/leads_data.json

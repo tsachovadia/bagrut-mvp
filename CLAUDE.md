@@ -2,9 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Cross-tool workflow**: This project is developed with both Claude Code and Google Antigravity. Before starting work, read `HANDOFF.md` for recent changes. After finishing work, update `HANDOFF.md` with what you did.
+
 ## Project Overview
 
-Israeli Bagrut (high school) grade calculator and university admission simulator. Students enter grades, get weighted averages with university-specific bonuses, and see admission eligibility across programs. Includes an admin CRM ("ShadowNet") for lead management. All UI is in Hebrew with RTL layout.
+Israeli Bagrut (high school) grade calculator and university admission simulator. Students enter grades, get weighted averages with university-specific bonuses, and see admission eligibility across programs. Includes a Telegram bot for community routing, an admin CRM ("ShadowNet") for lead management, and content marketing pages. All UI is in Hebrew with RTL layout.
 
 ## Commands
 
@@ -53,9 +55,76 @@ Programs have nested logic rules (AND/OR trees of conditions on sekhem, psychome
 
 Vercel serverless functions: `extract-grades.ts` (OCR via Google Vision), `send-email.ts` (Resend), webhook handlers, cron jobs.
 
+### Telegram Bot (Identity-First Architecture)
+
+Bot: @MitlabtimBot — a lightweight routing layer that pushes users to the web app.
+
+**Philosophy**: Bot collects minimal identity (sector), then redirects to web for data entry. No more in-bot grade entry or calculations.
+
+Key files:
+- Webhook router: `api/telegram-webhook.ts`
+- Handlers: `api/lib/telegram/handlers/` — start, rooms, misc, callback-router, consent, group-events
+- Client API: `api/lib/telegram/client.ts` (Telegram API wrapper + forum topic management)
+- Clusters: `api/lib/telegram/clusters.ts` (program → field cluster mapping)
+- Types: `api/lib/telegram/types.ts`
+- Rooms API: `api/telegram-rooms.ts` (admin actions for forum topics)
+- Middleware: `api/lib/telegram/middleware.ts` (verify, resolveUser, touchUser, logMessage)
+
+**Bot flows**:
+- `/start` → asks sector → CTA to website
+- `/start program_{id}` → deep link from program page → routes to relevant cluster group
+- `/start link_{token}` → token-based web-to-bot account linking
+- `/start return` → return from website, shows main menu
+- `/rooms` → shows forum-based community with smart recommendations
+
+**Deleted handlers** (data entry moved to web): grades.ts, psychometric.ts, calculate.ts, programs.ts
+
+### Community System (Clusters + Forum Topics)
+
+Programs are grouped into 6 field-based clusters: `tech`, `med`, `law`, `mind`, `business`, `design`. Each cluster maps to a Telegram group. Defined in `api/lib/telegram/clusters.ts`.
+
+Forum topics allow organized discussions within one supergroup. DB schema: `bot_groups.is_forum`, `forum_topic_id`, `parent_group_id`.
+
+### Unified Profile System
+
+- `profile_links` table links bot identity to web identity
+- `unified_profiles` VIEW: FULL OUTER JOIN of `user_profiles` + `bot_users`
+- Services: `api/lib/profile-linking.ts`, `api/lib/gap-analysis.ts`, `api/lib/lead-routing.ts`
+- Consent: progressive tiers in `src/lib/consent.ts`
+
 ### Routing
 
-React Router v7 in `App.tsx`. Main routes: `/` (calculator), `/programs` (search), `/program/:id`, `/dashboard` (simulator), `/tracking` (saved programs). Admin routes under `/admin/shadow/*` are blocked in production via `isProduction` from `utils/env.ts`.
+React Router v7 in `App.tsx`. Routes:
+
+**Public**:
+- `/` — calculator (HomePage)
+- `/programs` — program search (ProgramsExplorer)
+- `/program/:id` — program details
+- `/dashboard` — simulator (UnifiedDashboard)
+- `/tracking` — saved programs
+- `/blog`, `/blog/:id` — blog articles
+- `/community` — community landing page
+- `/collaborations` — partnerships page
+- `/open-days` — important dates
+- `/write-for-us` — content contributor page
+- `/client-portal` — client demo portal (token-gated)
+
+**Admin** (dev only, blocked in production via `isProduction`):
+- `/admin/shadow` — dashboard (KPIs, funnel, segments)
+- `/admin/shadow/people` — unified user management
+- `/admin/shadow/community` — forum/group management
+- `/admin/shadow/partners` — partner management
+- `/admin/shadow/metrics` — detailed metrics
+
+### Admin CRM (ShadowNet)
+
+- `src/pages/Admin/DashboardPage.tsx` — KPI cards, funnel, segment donuts
+- `src/pages/Admin/PeoplePage.tsx` — unified web+bot users, search, filters, profile drawer
+- `src/pages/Admin/CommunityPage.tsx` → `GroupsManager` — forum topic CRUD
+- `src/pages/Admin/PartnersPage.tsx` — partner management
+- `src/pages/Admin/MetricsDashboard.tsx` — real metrics via API
+- `src/components/Admin/AdminShell.tsx` — sidebar nav, global search (Ctrl+K)
+- `src/components/Admin/People/UserProfilePanel.tsx` — full profile drawer with gap analysis
 
 ## Design System
 
@@ -63,7 +132,7 @@ Brand colors: `brand-purple` (#7C3AED) and `brand-green` (#65A30D), configured i
 
 ## RTL / Hebrew
 
-All UI text is hardcoded Hebrew. Use `dir="rtl"` on containers. No i18n library. Tailwind handles RTL naturally; some components use explicit `text-right` and position-aware placement (`left-4`, `right-4`).
+All UI text is hardcoded Hebrew. Use `dir="rtl"` on containers. No i18n library. Tailwind handles RTL naturally; some components use explicit `text-right` and position-aware placement.
 
 ## Environment Differences
 
@@ -73,7 +142,7 @@ Controlled by `isProduction` in `src/utils/env.ts`:
 
 ## Supabase
 
-Key tables: `user_profiles`, `programs`, `admissions` (logic rules as JSON), `bug_reports`, `leads`, `soft_leads`, `partners`. Migrations in `supabase/migrations/`.
+Key tables: `user_profiles`, `programs`, `admissions`, `bug_reports`, `leads`, `soft_leads`, `partners`, `bot_users`, `bot_messages_log`, `bot_groups`, `bot_campaigns`, `profile_links`. Migrations in `supabase/migrations/`.
 
 ## Key Types (src/types/)
 
@@ -81,3 +150,28 @@ Key tables: `user_profiles`, `programs`, `admissions` (logic rules as JSON), `bu
 - `PsychometricScores`: `{general, quantitative, verbal, english, total?}`
 - `Program`, `AdmissionRequirement`, `LogicGroup`, `LogicCondition` — define program eligibility rules
 - `database.types.ts` — auto-generated Supabase types
+
+## Project Structure
+
+```
+api/                    Vercel serverless functions
+  lib/telegram/         Bot handlers, services, client
+  lib/shared/           Shared utilities
+  metrics/              Metrics API endpoints
+  cron/                 Cron jobs (drip campaigns, reminders)
+src/
+  components/           React components
+    Admin/              ShadowNet CRM components
+    Dashboard/          Student dashboard panels
+    ProgramsExplorer/   Program search/filter
+    blog/               Blog components
+  pages/                Page-level components
+    Admin/              Admin pages
+  utils/                Calculation engine, helpers
+  lib/                  Supabase client, consent, userData
+  types/                TypeScript type definitions
+  data/                 Static data (articles, etc.)
+supabase/migrations/    Database migrations
+scripts/                One-off utilities and dev scripts
+docs/                   Project documentation
+```
