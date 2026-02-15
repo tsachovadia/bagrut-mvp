@@ -6,39 +6,43 @@ const Agentation = lazy(() => import('agentation').then(module => ({ default: mo
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { TrackedDegreesProvider } from './context/TrackedDegreesContext';
 import './App.css';
+// Eagerly loaded — landing page + global shell
 import { HomePage } from './pages/HomePage';
-import { ProgramPage } from './pages/ProgramPage';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
 import { initializeGTM, trackEvent } from './utils/gtm';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
 import { loadUserData, saveUserData, type UserData } from './lib/userData';
-import { TermsOfUse } from './components/TermsOfUse';
 import { CookieConsent } from './components/CookieConsent';
 import { AccessibilityWidget } from './components/AccessibilityWidget';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { ReturnToBot } from './components/ReturnToBot';
 import { TrackedDegreesWidget } from './components/TrackedDegreesWidget';
 import { useNavigate } from 'react-router-dom';
-
-import { ProgramsExplorer } from './components/ProgramsExplorer/ProgramsExplorer';
-import { ProgramsDatabaseViewer } from './components/Debug/ProgramsDatabaseViewer';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import { UnifiedDashboard } from './components/Dashboard/UnifiedDashboard';
-import { DashboardPage } from './pages/Admin/DashboardPage';
-import { PeoplePage } from './pages/Admin/PeoplePage';
-import { CommunityPage as AdminCommunityPage } from './pages/Admin/CommunityPage';
-import { CollaborationsPage } from './pages/CollaborationsPage';
-import { ImportantDatesPage } from './pages/ImportantDatesPage';
-import { PartnersPage } from './pages/Admin/PartnersPage';
-import { MetricsDashboard } from './pages/Admin/MetricsDashboard';
-import { ClientPortal } from './pages/ClientPortal';
 import { isProduction } from './utils/env';
-import { TrackedDegreesPage } from './pages/TrackedDegreesPage';
-import { CampaignMobileFirst } from './pages/CampaignMobileFirst';
-import { BlogPage } from './pages/BlogPage';
-import { ArticlePage } from './pages/ArticlePage';
-import { WriteForUsPage } from './pages/WriteForUsPage';
+
+// Lazy loaded — secondary pages
+const ProgramPage = lazy(() => import('./pages/ProgramPage').then(m => ({ default: m.ProgramPage })));
+const ProgramsExplorer = lazy(() => import('./components/ProgramsExplorer/ProgramsExplorer').then(m => ({ default: m.ProgramsExplorer })));
+const UnifiedDashboard = lazy(() => import('./components/Dashboard/UnifiedDashboard').then(m => ({ default: m.UnifiedDashboard })));
+const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })));
+const ArticlePage = lazy(() => import('./pages/ArticlePage').then(m => ({ default: m.ArticlePage })));
+const ImportantDatesPage = lazy(() => import('./pages/ImportantDatesPage').then(m => ({ default: m.ImportantDatesPage })));
+const CollaborationsPage = lazy(() => import('./pages/CollaborationsPage').then(m => ({ default: m.CollaborationsPage })));
+const WriteForUsPage = lazy(() => import('./pages/WriteForUsPage').then(m => ({ default: m.WriteForUsPage })));
+const TrackedDegreesPage = lazy(() => import('./pages/TrackedDegreesPage').then(m => ({ default: m.TrackedDegreesPage })));
+const TermsOfUse = lazy(() => import('./components/TermsOfUse').then(m => ({ default: m.TermsOfUse })));
+const ClientPortal = lazy(() => import('./pages/ClientPortal').then(m => ({ default: m.ClientPortal })));
+const CampaignMobileFirst = lazy(() => import('./pages/CampaignMobileFirst').then(m => ({ default: m.CampaignMobileFirst })));
+const ProgramsDatabaseViewer = lazy(() => import('./components/Debug/ProgramsDatabaseViewer').then(m => ({ default: m.ProgramsDatabaseViewer })));
+
+// Lazy loaded — admin pages (dev only)
+const DashboardPage = lazy(() => import('./pages/Admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const PeoplePage = lazy(() => import('./pages/Admin/PeoplePage').then(m => ({ default: m.PeoplePage })));
+const AdminCommunityPage = lazy(() => import('./pages/Admin/CommunityPage').then(m => ({ default: m.CommunityPage })));
+const PartnersPage = lazy(() => import('./pages/Admin/PartnersPage').then(m => ({ default: m.PartnersPage })));
+const MetricsDashboard = lazy(() => import('./pages/Admin/MetricsDashboard').then(m => ({ default: m.MetricsDashboard })));
 
 
 function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
@@ -165,6 +169,7 @@ function App() {
       userData={userData}
       onUpdateUserData={handleUserDataUpdate}
     >
+      <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-400">טוען...</div>}>
       <Routes>
         <Route path="/" element={
           <HomePage
@@ -223,6 +228,7 @@ function App() {
         <Route path="/open-days" element={<ImportantDatesPage />} />
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
       </Routes>
+      </Suspense>
       <CookieConsent />
       <ReturnToBot />
       <AccessibilityWidget />

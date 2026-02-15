@@ -20,6 +20,23 @@ Entry format:
 
 ## Sessions
 
+### 2026-02-15 — Claude Code (Session 8, SEO Infrastructure + Code Splitting)
+**What was done**: Added robots.txt, sitemap.xml for Google indexing. Implemented React.lazy() code splitting for all secondary routes — main bundle now only includes landing page essentials.
+**Files changed**:
+- **`public/robots.txt`** — Created: allows all crawlers, blocks /admin/, /debug/, /client-portal, /campaign/. Points to sitemap.
+- **`public/sitemap.xml`** — Created: 13 URLs with priorities (homepage=1.0, programs/open-days=0.9, blog=0.8, etc.)
+- **`src/App.tsx`** — Converted 18 page imports from static to `React.lazy()`. Only HomePage + global shell (Header, Footer, CookieConsent, MobileBottomNav, etc.) eagerly loaded. All other routes lazy-loaded with `<Suspense>` wrapper and Hebrew fallback ("טוען...").
+**Key decisions**:
+- HomePage stays eagerly loaded (landing page — must be instant)
+- Admin pages lazy-loaded (dev-only, no production impact)
+- Suspense wraps all Routes but not global shell components (CookieConsent, ReturnToBot, etc.)
+- robots.txt blocks /campaign/ to prevent indexing of UTM landing pages
+**Build results**: Main bundle 182KB (42KB gzip). 18 separate route chunks created (largest: ArticlePage 170KB with markdown rendering).
+**Open items**:
+- Sprint 2 remaining: GroupLead integration, first 100 users
+- Proper og:image (1200x630) still needed
+- ArticlePage chunk is large (170KB) due to remark/rehype — could split markdown renderer
+
 ### 2026-02-15 — Claude Code (Session 7, SEO)
 **What was done**: Added SEO meta tags and HelmetProvider to all key pages. Fixed index.html for Hebrew SEO.
 **Files changed**:
