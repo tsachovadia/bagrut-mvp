@@ -46,18 +46,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     for (const lead of leads) {
         try {
-            // Skip rows with no contact info
-            if (!lead.email && !lead.phone) {
+            // Skip completely empty rows
+            if (!lead.name && !lead.email && !lead.phone) {
                 results.skipped++;
                 continue;
             }
 
-            // Dedup check — skip if email or phone already exists
+            // Dedup check — skip if email already exists
             if (lead.email) {
                 const { data: existing } = await supabase
                     .from('facebook_leads')
                     .select('id')
                     .eq('email', lead.email.toLowerCase().trim())
+                    .limit(1)
+                    .single();
+                if (existing) {
+                    results.skipped++;
+                    continue;
+                }
+            }
+
+            // Dedup by FB user ID (stored in raw_data)
+            const fbUserId = (lead.raw as Record<string, unknown> | undefined)?.fb_user_id as string | undefined;
+            if (fbUserId) {
+                const { data: existing } = await supabase
+                    .from('facebook_leads')
+                    .select('id')
+                    .contains('raw_data', { fb_user_id: fbUserId })
                     .limit(1)
                     .single();
                 if (existing) {

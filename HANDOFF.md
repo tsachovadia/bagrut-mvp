@@ -21,28 +21,30 @@ Entry format:
 ## Sessions
 
 ### 2026-02-15 — Claude Code (Session 9, OG Images + GroupLead + Client Portal)
-**What was done**: Dynamic OG image endpoint, GroupLead import infrastructure, fixed unified_profiles view bug, improved Client Portal.
+**What was done**: Dynamic OG image endpoint, GroupLead import infrastructure with Apps Script, fixed unified_profiles view bug (+ added missing columns), improved Client Portal.
 **Files changed**:
-- **`api/og.tsx`** — NEW: Dynamic OG image generation using `@vercel/og` (Edge Runtime). Brand purple gradient, Heebo Hebrew font, animated stats strip. Supports `?page=home|blog|programs|open-days` presets and custom `?title=&subtitle=` params. 1200x630px.
-- **`api/import-leads.ts`** — NEW: Admin-authenticated batch import endpoint for Facebook/GroupLead data. Deduplicates by email, auto-links to existing profiles via `profile-linking.ts`. Max 500 leads per batch.
-- **`supabase/migrations/20260216200000_create_facebook_leads.sql`** — NEW: `facebook_leads` table (fb_name, email, phone, interests[], source_group, import_batch, raw_data JSONB, user_profile_id FK). Indexed on email, phone, batch.
-- **`supabase/migrations/20260216210000_fix_unified_profiles_view.sql`** — FIX: Replaced `NULL::text` placeholders with actual column references for `temperature`, `gap_analysis`, `lead_routing_tags` from user_profiles, and `sector` + `phone_primary` from bot_users/user_profiles.
-- **`src/pages/ClientPortal.tsx`** — Added journey stages funnel visualization (bar chart), data freshness indicator in header ("נתונים בזמן אמת · פברואר 2026").
-- **`index.html`** — og:image → `/api/og?page=home`
-- **`src/pages/HomePage.tsx`** — Added og:image meta tag
-- **`src/pages/BlogPage.tsx`** — Added og:image → `/api/og?page=blog`
-- **`src/pages/ImportantDatesPage.tsx`** — Added og:image → `/api/og?page=open-days`
-- **`src/components/blog/SmartArticleLayout.tsx`** — og:image falls back to dynamic OG endpoint if article has no image
-- **`tsconfig.api.json`** — Added `"jsx": "react-jsx"` for OG endpoint .tsx support
-- **`package.json`** — Added `@vercel/og` dependency
+- **`api/og.tsx`** — NEW: Dynamic OG image generation using `@vercel/og` (Edge Runtime). Brand purple gradient, Heebo Hebrew font, stats strip. Supports `?page=home|blog|programs|open-days` presets and custom `?title=&subtitle=` params. 1200x630px.
+- **`api/import-leads.ts`** — NEW: Admin-authenticated batch import endpoint for Facebook/GroupLead data. Deduplicates by email AND FB user ID (via JSONB `raw_data.fb_user_id`). Auto-links to existing profiles. Max 500 per batch.
+- **`scripts/grouplead-sync.gs`** — NEW: Google Apps Script for GroupLead spreadsheet. Adds "Synced" column (U), tracks which rows were already sent, parses Q&A for interest keywords, sends batches to import API. Has custom menu (Mitlabtim → Sync / Reset / Stats). Setup: paste in Apps Script, add `MITLABTIM_API_TOKEN` to Script Properties, set hourly trigger.
+- **`supabase/migrations/20260216200000_create_facebook_leads.sql`** — NEW: `facebook_leads` table. APPLIED to production.
+- **`supabase/migrations/20260216210000_fix_unified_profiles_view.sql`** — FIX: Added missing columns (`temperature`, `gap_analysis`, `lead_routing_tags`, `journey_stage`) to `user_profiles`, then fixed view to reference them. APPLIED to production.
+- **`src/pages/ClientPortal.tsx`** — Added journey stages funnel + data freshness indicator
+- **`index.html`**, **`HomePage.tsx`**, **`BlogPage.tsx`**, **`ImportantDatesPage.tsx`**, **`SmartArticleLayout.tsx`** — og:image → dynamic `/api/og` endpoint
+- **`tsconfig.api.json`** — Added `"jsx": "react-jsx"`
+- **`package.json`** — Added `@vercel/og`
+**Migrations APPLIED to production**:
+- `facebook_leads` table created with GIN index on raw_data
+- `user_profiles` got 4 new columns: temperature, gap_analysis, lead_routing_tags, journey_stage
+- `unified_profiles` view recreated with correct column references
 **Key decisions**:
-- OG images use Edge Runtime for fast generation — Hebrew text via Heebo font from Google Fonts CDN
-- GroupLead import uses admin Bearer token auth (`ADMIN_API_TOKEN`), not public
-- Facebook leads get `facebook_lead` source_type in profile_links (already supported)
-- Auto-link confidence for GroupLead imports set to 0.7 (lower than direct web/bot links)
-- unified_profiles view now correctly surfaces CRM columns that were NULL before
+- GroupLead sync is "pull" model: Apps Script runs hourly, checks for unsynced rows, sends to API
+- Dedup is double-layer: Apps Script marks rows as synced (column U timestamp), API deduplicates by FB user ID in JSONB
+- GroupLead data has NO email/phone — only FB names + profile URLs. Interest parsing from Q&A answers (Hebrew keywords)
+- OG images use Edge Runtime + Heebo font from Google Fonts CDN
 **Open items**:
-- Apply migrations to production Supabase (20260216200000 + 20260216210000)
+- User needs to paste `grouplead-sync.gs` into their spreadsheet's Apps Script editor
+- User needs to set `MITLABTIM_API_TOKEN` in Apps Script Properties
+- Sprint 2 remaining: first 100 users (marketing push)
 - GroupLead: user needs to provide Google Sheet/CSV data for first import
 - Sprint 2 remaining: first 100 users (marketing push)
 - Client Portal: could add export-to-CSV feature for partners

@@ -2,6 +2,12 @@
 -- from user_profiles (temperature, gap_analysis, lead_routing_tags)
 -- and bot_users (sector)
 
+-- First add the missing CRM columns that lead-routing.ts writes to
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS temperature TEXT;
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS gap_analysis JSONB;
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS lead_routing_tags TEXT[];
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS journey_stage TEXT;
+
 DROP VIEW IF EXISTS unified_profiles;
 
 CREATE OR REPLACE VIEW unified_profiles AS
