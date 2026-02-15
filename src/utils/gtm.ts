@@ -10,7 +10,7 @@ declare global {
     }
 }
 
-export const GTM_ID = import.meta.env.VITE_GTM_ID || 'GTM-placeholder';
+export const GTM_ID = import.meta.env.VITE_GTM_ID || 'GTM-526PQ28M';
 
 export const initializeGTM = (containerId: string = GTM_ID) => {
     if (typeof window === 'undefined') return;

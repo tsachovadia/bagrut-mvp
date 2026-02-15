@@ -6,6 +6,7 @@ import {
     Users, MessageCircle, Plus, Globe
 } from 'lucide-react';
 import { admissionEngine } from '../services/admission-engine';
+import { trackEvent } from '../utils/gtm';
 import { Button, Badge } from '../components/ui/shim';
 import { checkReachable, type UserAdmissionStats } from '../utils/admission-evaluation';
 import { useTrackedDegrees } from '../context/TrackedDegreesContext';
@@ -106,7 +107,13 @@ export const ProgramPage = ({ userStats }: ProgramPageProps) => {
                 const allPrograms = await admissionEngine.getAllProgramsFull();
                 const found = allPrograms.find(p => p.id === id);
                 if (found) {
-                    setProgramData(admissionEngine.mapProgramToUI(found));
+                    const mapped = admissionEngine.mapProgramToUI(found);
+                    setProgramData(mapped);
+                    trackEvent('program_viewed', {
+                        program_id: id,
+                        program_name: mapped.program?.name,
+                        institution: mapped.program?.institution?.name,
+                    });
                 } else {
                     setError(true);
                 }

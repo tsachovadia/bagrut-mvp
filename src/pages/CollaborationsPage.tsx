@@ -29,7 +29,7 @@ export function CollaborationsPage() {
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <a
-                                href="mailto:contact@launchpad.co.il"
+                                href="mailto:contact@mitlabtim.co.il"
                                 className="inline-flex justify-center items-center gap-2 bg-white text-indigo-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
                             >
                                 <Mail size={20} />
@@ -73,7 +73,7 @@ export function CollaborationsPage() {
                             </div>
                             <h3 className="text-xl font-bold mb-3 text-gray-900">חיבור למותג מוביל</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Launch Pad נתפס כגורם אובייקטיבי ומקצועי, ושיתוף פעולה איתנו מחזק את האמינות שלכם בקרב קהל היעד.
+                                מתלבטים נתפס כגורם אובייקטיבי ומקצועי, ושיתוף פעולה איתנו מחזק את האמינות שלכם בקרב קהל היעד.
                             </p>
                         </div>
                     </div>
@@ -90,9 +90,9 @@ export function CollaborationsPage() {
                         </p>
 
                         <div className="flex flex-col gap-4 items-center">
-                            <a href="mailto:contact@launchpad.co.il" className="flex items-center gap-3 text-xl font-medium text-gray-800 hover:text-brand-purple-600 transition-colors bg-gray-50 px-8 py-4 rounded-xl w-full justify-center border border-gray-200 hover:border-brand-purple-200">
+                            <a href="mailto:contact@mitlabtim.co.il" className="flex items-center gap-3 text-xl font-medium text-gray-800 hover:text-brand-purple-600 transition-colors bg-gray-50 px-8 py-4 rounded-xl w-full justify-center border border-gray-200 hover:border-brand-purple-200">
                                 <Mail className="text-brand-purple-500" />
-                                contact@launchpad.co.il
+                                contact@mitlabtim.co.il
                             </a>
                             {/* Placeholder for phone if needed later
                             <a href="tel:+972500000000" className="flex items-center gap-3 text-xl font-medium text-gray-800 hover:text-brand-purple-600 transition-colors bg-gray-50 px-8 py-4 rounded-xl w-full justify-center border border-gray-200 hover:border-brand-purple-200">

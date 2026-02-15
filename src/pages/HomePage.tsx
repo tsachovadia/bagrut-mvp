@@ -1,17 +1,15 @@
-import { useNavigate, Link } from 'react-router-dom';
-import { ProgramsExplorer } from '../components/ProgramsExplorer/ProgramsExplorer';
 import { Header } from '../components/Header';
 import { ConversationalHero } from '../components/marketing/ConversationalHero';
 import { WizardContainer } from '../components/Wizard/WizardContainer';
-import { AccessibilityWidget } from '../components/AccessibilityWidget';
 import { CookieConsent } from '../components/CookieConsent';
+import { AccessibilityWidget } from '../components/AccessibilityWidget';
 import type { SubjectGrade, PsychometricScores } from '../utils/calculator';
 import { SmartWelcomeModal } from '../components/marketing/SmartWelcomeModal';
-import { GuidedTour } from '../components/GuidedTour';
 import { useFirstVisit } from '../hooks/useFirstVisit';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { Footer } from '../components/Footer';
+import { ValuePropositionSection } from '../components/marketing/ValuePropositionSection';
 
 interface HomePageProps {
     wizardStarted: boolean;
@@ -39,13 +37,12 @@ export const HomePage = ({
 }: HomePageProps) => {
 
     const isFirstVisit = useFirstVisit();
-    const [showModal, setShowModal] = useState(false);
-    const [startTour, setStartTour] = useState(false);
     const [wizardMode, setWizardMode] = useState<'manual' | 'upload'>('manual');
     const [pendingAction, setPendingAction] = useState<'manual' | 'upload' | null>(null);
 
-    // Auto-modal removed to prevent "wall" effect. 
-    // Modal now triggers only on valid user interaction (see handleHeroAction).
+    // Auto-show lead capture modal for first-time visitors who haven't submitted/skipped
+    const hasSeenModal = typeof window !== 'undefined' && localStorage.getItem('lead_captured');
+    const [showModal, setShowModal] = useState(!wizardStarted && !hasSeenModal);
 
     const handleModalClose = () => {
         setShowModal(false);
@@ -73,12 +70,7 @@ export const HomePage = ({
             <Header />
 
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-6 py-2 space-y-2">
-                {/* Powered By Section */}
                 <SmartWelcomeModal isOpen={showModal} onClose={handleModalClose} />
-                {/* <GuidedTour startTrigger={startTour} onEnd={() => setStartTour(false)} /> */}
-
-                {/* WhatsApp Group CTA - Visible always or conditionally */}
-
 
                 {!wizardStarted && (
                     <section id="hero-section" className="animate-in fade-in zoom-in-95 duration-500">
@@ -104,6 +96,8 @@ export const HomePage = ({
                     </div>
                 )}
             </main>
+
+            {!wizardStarted && <ValuePropositionSection />}
 
             <Footer />
             <CookieConsent />

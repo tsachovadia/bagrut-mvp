@@ -27,6 +27,15 @@ export function BlogPage() {
                             onClick={() => navigate(`/blog/${article.id}`)}
                             className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden border border-gray-100 flex flex-col h-full group"
                         >
+                            {article.imageUrl && (
+                                <div className="w-full h-48 overflow-hidden">
+                                    <img
+                                        src={article.imageUrl}
+                                        alt={article.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                </div>
+                            )}
                             <div className="p-6 flex flex-col flex-grow">
                                 <div className="flex items-center gap-2 mb-3">
                                     {article.tags.map((tag) => (

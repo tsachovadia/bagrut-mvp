@@ -33,7 +33,7 @@ repomix_exports/
 archive/
 
 # Marketing assets (large media files, stored locally only)
-marketing/
+/marketing/
 
 # Data files (lead data, scraped data — privacy sensitive)
 *.csv

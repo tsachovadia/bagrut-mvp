@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isProduction } from '../utils/env';
+import { trackEvent } from '../utils/gtm';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label } from './ui/shim';
 import { Plus, Trash2, GraduationCap, UploadCloud, FileText, ExternalLink, BookOpen, AlertCircle, RefreshCw, Sparkles, ChevronDown } from 'lucide-react';
 import { SECTOR_MANDATORY_SUBJECTS, SECTOR_NAMES, type Sector, getSubjectByName, ELECTIVE_SUBJECTS, type BagrutSubject } from '../utils/subjects';
@@ -94,6 +95,9 @@ export const BagrutForm = ({ onDataUpdate, initialData, fillSampleData, variant 
     const handleGradeChange = (id: string, field: keyof SubjectGrade, value: any) => {
         setGrades(prev => prev.map(g => {
             if (g.id === id) {
+                if (field === 'grade' && typeof value === 'number' && value > 0) {
+                    trackEvent('grade_entered', { subject: g.subject, grade: value, units: g.units });
+                }
                 return { ...g, [field]: value };
             }
             return g;

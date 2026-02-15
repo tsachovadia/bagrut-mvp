@@ -17,7 +17,10 @@ export function MobileBottomNav() {
         { label: 'בית', icon: Home, path: '/', action: () => navigate('/') },
         { label: 'חיפוש', icon: Search, path: '/programs', action: () => navigate('/programs') },
         { label: 'סימולטור', icon: BarChart2, path: '/dashboard', action: () => navigate('/dashboard') },
-        { label: 'קהילה', icon: Users, path: '/community', action: () => navigate('/community') },
+        { label: 'קהילה', icon: Users, path: '/', action: () => {
+            navigate('/');
+            setTimeout(() => document.getElementById('community')?.scrollIntoView({ behavior: 'smooth' }), 100);
+        } },
         { label: 'תפריט', icon: Menu, path: '#menu', action: () => setIsMenuOpen(true) },
     ];
 

@@ -24,7 +24,7 @@ export function WriteForUsPage() {
                             אנחנו מחפשים מומחים, מורים וסטודנטים מצטיינים שיעזרו לנו לבנות את מאגר הידע הגדול ביותר לתלמידי תיכון בישראל.
                         </p>
                         <a
-                            href="https://forms.gle/placeholder-link"
+                            href="https://t.me/MitlabtimBot"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 bg-white text-brand-purple-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-brand-purple-50 transition-colors shadow-lg shadow-brand-purple-900/50"
@@ -37,7 +37,7 @@ export function WriteForUsPage() {
 
                 {/* Benefits Section */}
                 <div className="py-20 px-4 container mx-auto max-w-6xl">
-                    <h2 className="text-3xl font-bold text-center mb-16">למה כדאי לכתוב ב-Launch Pad?</h2>
+                    <h2 className="text-3xl font-bold text-center mb-16">למה כדאי לכתוב אצל מתלבטים?</h2>
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
                             {

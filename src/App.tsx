@@ -9,7 +9,7 @@ import './App.css';
 import { HomePage } from './pages/HomePage';
 import { ProgramPage } from './pages/ProgramPage';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
-import { initializeGTM } from './utils/gtm';
+import { initializeGTM, trackEvent } from './utils/gtm';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
 import { loadUserData, saveUserData, type UserData } from './lib/userData';
 import { TermsOfUse } from './components/TermsOfUse';
@@ -28,7 +28,6 @@ import { UnifiedDashboard } from './components/Dashboard/UnifiedDashboard';
 import { DashboardPage } from './pages/Admin/DashboardPage';
 import { PeoplePage } from './pages/Admin/PeoplePage';
 import { CommunityPage as AdminCommunityPage } from './pages/Admin/CommunityPage';
-import { CommunityPage } from './pages/CommunityPage';
 import { CollaborationsPage } from './pages/CollaborationsPage';
 import { ImportantDatesPage } from './pages/ImportantDatesPage';
 import { PartnersPage } from './pages/Admin/PartnersPage';
@@ -124,9 +123,13 @@ function App() {
   // Auto-calculate whenever data changes
   useEffect(() => {
     if (bagrutGrades.length > 0 || psychometric.general > 0) {
-      // Debounce could be added here if needed, but calculation is fast
       const stats = calculateAdmissionStats(bagrutGrades, psychometric);
       setResults(stats.degrees);
+      trackEvent('sekem_calculated', {
+        bagrut_count: bagrutGrades.filter(g => g.grade > 0).length,
+        has_psychometric: psychometric.general > 0,
+        eligible_count: stats.degrees.filter((d: any) => d.status === 'excellent' || d.status === 'good').length,
+      });
     }
 
     // Update master userData object for context consumers
@@ -215,7 +218,7 @@ function App() {
         <Route path="/admin/shadow/metrics" element={!isProduction ? <MetricsDashboard /> : <Navigate to="/" />} />
         <Route path="/client-portal" element={<ClientPortal />} />
         <Route path="/tracking" element={<TrackedDegreesPage />} />
-        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/community" element={<Navigate to="/" replace />} />
         <Route path="/collaborations" element={<CollaborationsPage />} />
         <Route path="/open-days" element={<ImportantDatesPage />} />
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />

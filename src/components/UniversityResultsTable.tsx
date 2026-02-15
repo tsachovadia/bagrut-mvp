@@ -157,13 +157,13 @@ export const UniversityResultsTable: React.FC<UniversityResultsTableProps> = ({ 
             {/* Conversion Button */}
             <div className="p-4 pt-0 flex justify-center pb-6">
                 <Button
-                    onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')}
-                    className="bg-[#25D366] hover:bg-[#128C7E] text-white font-semibold py-3 px-6 rounded-full shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 text-sm w-full sm:w-auto"
+                    onClick={() => window.open('https://t.me/MitlabtimBot', '_blank')}
+                    className="bg-[#2AABEE] hover:bg-[#229ED9] text-white font-semibold py-3 px-6 rounded-full shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 text-sm w-full sm:w-auto"
                 >
                     <MessageCircle className="h-5 w-5" />
                     <div className="flex flex-col items-start leading-tight sm:flex-row sm:items-center sm:gap-1">
                         <span className="opacity-90 font-normal">מבולבל? בא להתייעץ ב</span>
-                        <span className="font-bold">קבוצה הווצאפ השקטה</span>
+                        <span className="font-bold">קהילת הטלגרם שלנו</span>
                     </div>
                 </Button>
             </div>

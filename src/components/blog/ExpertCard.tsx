@@ -8,17 +8,7 @@ interface ExpertCardProps {
 
 export function ExpertCard({ author }: ExpertCardProps) {
     const handleConsultationClick = () => {
-        // WhatsApp format: https://wa.me/972546330010?text=...
-        const message = `היי ${author.name}, קראתי את המאמר שלך ב"מתלבטים" ואשמח להתייעץ איתך.`;
-        const encodedMessage = encodeURIComponent(message);
-        // Using the community manager number as the central hub for now, or author's if available
-        // For the plan, we route to the author if social links exist, otherwise fallback? 
-        // The plan says "Direct contact via WhatsApp".
-        // Let's assume the author object might have a specific whatsapp link or we use a generic one if not found.
-        // For now, I'll check if there is a 'website' or 'email' link and use that, 
-        // but ideally we need a phone number field in the Author interface.
-        // I will add a placeholder alerting this.
-        window.open(`https://wa.me/972546330010?text=${encodedMessage}`, '_blank');
+        window.open('https://t.me/MitlabtimBot', '_blank');
     };
 
     return (
@@ -50,14 +40,14 @@ export function ExpertCard({ author }: ExpertCardProps) {
 
                 <button
                     onClick={handleConsultationClick}
-                    className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    className="w-full flex items-center justify-center gap-2 bg-[#2AABEE] hover:bg-[#229ED9] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                     <MessageCircle size={20} />
-                    <span>התייעצות עם {author.name.split(' ')[0]}</span>
+                    <span>שאלו אותנו בטלגרם</span>
                 </button>
 
                 <p className="text-xs text-gray-400 mt-3">
-                    *פניה ישירה דרך וואטסאפ
+                    *פניה ישירה דרך הבוט בטלגרם
                 </p>
             </div>
         </div>

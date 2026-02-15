@@ -88,20 +88,25 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
                         className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative border border-gray-100"
                     >
                         {/* Decorative gradient header */}
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 pb-6 border-b border-indigo-100/50">
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-8 pb-6 border-b border-purple-100/50">
+                            <div className="flex justify-center mb-3">
+                                <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
+                                    50,000+ תלמידים בקהילה
+                                </span>
+                            </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center leading-tight">
-                                ברוכים הבאים למחשבון הבגרויות<br /><span className="text-indigo-600">המדויק בישראל 🎓</span>
+                                אל תתלבט לבד.<br /><span className="text-brand-purple-600">אנחנו פה בשבילך.</span>
                             </h2>
                             <p className="text-gray-600 text-sm leading-relaxed text-center max-w-md mx-auto">
-                                לקחנו מאות אלפי תגובות מקבוצת הפייסבוק (הפעילה כבר 6 שנים!) ואימנו מודל חכם על כל תנאי הקבלה של האוניברסיטאות.
-                                המטרה שלנו היא לעשות לך סדר בבלאגן: מה הממוצע שלך, מה הסכם, ואיך הכי נכון לשפר.
+                                מעל 7 שנים של ליווי תלמידים — קהילה פעילה, מחשבון הבגרויות המדויק ביותר, ומידע אמין ישירות מהאוניברסיטאות.
+                                תנו לנו לעזור לכם לדעת בדיוק לאיפה אתם יכולים להתקבל.
                             </p>
                         </div>
 
                         <div className="p-8 pt-6">
-                            <div className="mb-6 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                                <p className="text-indigo-900 font-medium text-center text-sm">
-                                    נוסיף אתכם לקהילה השקטה שלנו לקבלת עדכונים רלוונטיים ונקשר אותך עם סטודנטים שבאמת לומדים את התואר שמעניין אותך.
+                            <div className="mb-6 bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+                                <p className="text-purple-900 font-medium text-center text-sm">
+                                    נחבר אותך לקהילה שלנו ונקשר אותך עם סטודנטים שלומדים את התואר שמעניין אותך.
                                     <br />
                                     <strong>תרשו לנו לחזור אליכם?</strong>
                                 </p>

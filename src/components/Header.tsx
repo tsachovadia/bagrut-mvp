@@ -1,5 +1,5 @@
 import { Button } from './ui/shim';
-import { LogOut, User, GraduationCap, Users, TrendingUp, BookOpen, Heart, FileText } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { isProduction } from '../utils/env';
@@ -46,16 +46,19 @@ export function Header() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex flex-1 items-center justify-center space-x-1 space-x-reverse">
-                        <NavItem onClick={() => navigate('/')} icon={<GraduationCap className="w-4 h-4" />} text="מחשבון בגרויות" />
-                        <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
-                        <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="סימולטור שיפורים" />
-                        <NavItem onClick={() => navigate('/blog')} icon={<FileText className="w-4 h-4" />} text="בלוג" />
-                        <NavItem onClick={() => navigate('/community')} icon={<Users className="w-4 h-4" />} text="קהילה" />
-                        <NavItem onClick={() => navigate('/open-days')} icon={<FileText className="w-4 h-4" />} text="ימים פתוחים" />
-                        <NavItem onClick={() => navigate('/collaborations')} icon={<Heart className="w-4 h-4" />} text="שיתופי פעולה" />
+                        <NavItem onClick={() => navigate('/')} text="מחשבון" />
+                        <NavItem onClick={() => navigate('/programs')} text="תארים" />
+                        <NavItem onClick={() => navigate('/dashboard')} text="סימולטור" />
+                        <NavItem onClick={() => navigate('/blog')} text="בלוג" />
+                        <NavItem onClick={() => {
+                            navigate('/');
+                            setTimeout(() => document.getElementById('community')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                        }} text="קהילה" />
+                        <NavItem onClick={() => navigate('/open-days')} text="ימים פתוחים" />
+                        <NavItem onClick={() => navigate('/collaborations')} text="שיתופי פעולה" />
 
                         {!isProduction && (
-                            <NavItem onClick={() => navigate('/admin/shadow')} icon={<Users className="w-4 h-4" />} text="CRM (Admin)" />
+                            <NavItem onClick={() => navigate('/admin/shadow')} text="CRM" />
                         )}
                     </nav>
 
@@ -124,14 +127,13 @@ export function Header() {
     );
 }
 
-function NavItem({ text, icon, onClick }: { text: string; icon?: React.ReactNode; onClick?: () => void }) {
+function NavItem({ text, onClick }: { text: string; onClick?: () => void }) {
     return (
         <a
             href="#"
             onClick={(e) => { e.preventDefault(); onClick?.(); }}
-            className="group inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-brand-purple-600 hover:bg-brand-purple-50 rounded-md transition-all duration-200"
+            className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-brand-purple-600 hover:bg-brand-purple-50 rounded-md transition-all duration-200"
         >
-            {icon && <span className="ml-2 text-gray-400 group-hover:text-brand-purple-500 transition-colors">{icon}</span>}
             {text}
         </a>
     );

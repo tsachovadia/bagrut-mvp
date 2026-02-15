@@ -10,13 +10,22 @@ export default {
                 brand: {
                     purple: {
                         50: '#F5F3FF',
-                        DEFAULT: '#7C3AED', // Violet-600
+                        100: '#EDE9FE',
+                        200: '#DDD6FE',
+                        300: '#C4B5FD',
+                        400: '#A78BFA',
+                        500: '#8B5CF6',
+                        DEFAULT: '#7C3AED',
                         600: '#7C3AED',
-                        700: '#6D28D9', // Violet-700
+                        700: '#6D28D9',
+                        800: '#5B21B6',
+                        900: '#4C1D95',
                     },
                     green: {
                         100: '#ECFCCB',
-                        DEFAULT: '#65A30D', // Lime-600
+                        400: '#A3E635',
+                        500: '#84CC16',
+                        DEFAULT: '#65A30D',
                         600: '#65A30D',
                     }
                 },
@@ -52,6 +61,7 @@ export default {
             animation: {
                 blob: 'blob 7s infinite',
                 'bounce-slow': 'bounce 3s infinite',
+                marquee: 'marquee 30s linear infinite',
             },
             keyframes: {
                 blob: {
@@ -67,6 +77,10 @@ export default {
                     '100%': {
                         transform: 'translate(0px, 0px) scale(1)',
                     },
+                },
+                marquee: {
+                    '0%': { transform: 'translateX(0)' },
+                    '100%': { transform: 'translateX(50%)' },
                 },
             },
         },
