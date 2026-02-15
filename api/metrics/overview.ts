@@ -12,7 +12,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Simple admin auth via bearer token
     const authHeader = req.headers.authorization;
-    if (authHeader !== `Bearer ${process.env.ADMIN_API_TOKEN}`) {
+    const validToken = process.env.ADMIN_API_TOKEN || process.env.VITE_ADMIN_API_TOKEN;
+    if (authHeader !== `Bearer ${validToken}`) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 

@@ -25,15 +25,22 @@ import { ProgramsDatabaseViewer } from './components/Debug/ProgramsDatabaseViewe
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { UnifiedDashboard } from './components/Dashboard/UnifiedDashboard';
-import { CRMPage } from './pages/Admin/CRMPage';
-import { SignalsPage } from './pages/Admin/SignalsPage';
-import { GroupsPage } from './pages/Admin/GroupsPage';
+import { DashboardPage } from './pages/Admin/DashboardPage';
+import { PeoplePage } from './pages/Admin/PeoplePage';
+import { CommunityPage as AdminCommunityPage } from './pages/Admin/CommunityPage';
+import { CommunityPage } from './pages/CommunityPage';
+import { CollaborationsPage } from './pages/CollaborationsPage';
+import { ImportantDatesPage } from './pages/ImportantDatesPage';
 import { PartnersPage } from './pages/Admin/PartnersPage';
 import { MetricsDashboard } from './pages/Admin/MetricsDashboard';
 import { ClientPortal } from './pages/ClientPortal';
 import { isProduction } from './utils/env';
 import { TrackedDegreesPage } from './pages/TrackedDegreesPage';
 import { CampaignMobileFirst } from './pages/CampaignMobileFirst';
+import { BlogPage } from './pages/BlogPage';
+import { ArticlePage } from './pages/ArticlePage';
+import { WriteForUsPage } from './pages/WriteForUsPage';
+
 
 function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
   return (
@@ -188,6 +195,9 @@ function App() {
             </div>
           </SidebarLayout>
         } />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:id" element={<ArticlePage />} />
+        <Route path="/write-for-us" element={<WriteForUsPage />} />
         <Route path="/dashboard" element={
           <SidebarLayout userStats={userStats}>
             <div className="min-h-screen flex flex-col font-sans" dir="rtl">
@@ -198,14 +208,16 @@ function App() {
         } />
         <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
         <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
-        <Route path="/admin/shadow" element={!isProduction ? <CRMPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/signals" element={!isProduction ? <SignalsPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/groups" element={<GroupsPage />} />
+        <Route path="/admin/shadow" element={!isProduction ? <DashboardPage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/people" element={!isProduction ? <PeoplePage /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/community" element={!isProduction ? <AdminCommunityPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
         <Route path="/admin/shadow/metrics" element={!isProduction ? <MetricsDashboard /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/client-demo" element={!isProduction ? <ClientPortal /> : <Navigate to="/" />} />
         <Route path="/client-portal" element={<ClientPortal />} />
         <Route path="/tracking" element={<TrackedDegreesPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/collaborations" element={<CollaborationsPage />} />
+        <Route path="/open-days" element={<ImportantDatesPage />} />
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
       </Routes>
       <CookieConsent />

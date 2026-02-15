@@ -21,6 +21,94 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const partnerType = (req.query.type as PartnerType) || 'university_registration';
 
+    // Return mock data for demo token
+    if (token === 'demo') {
+        return res.status(200).json({
+            partner_type: partnerType,
+            total_relevant_leads: 142,
+            lead_breakdown: { hot: 28, warm: 64, cold: 50 },
+            academic_profile: {
+                avg_bagrut: 104.5,
+                avg_psychometric: 685,
+                top_fields: [
+                    { field: 'מדעי המחשב', count: 45 },
+                    { field: 'פסיכולוגיה', count: 32 },
+                    { field: 'משפטים', count: 28 },
+                    { field: 'הנדסת חשמל', count: 20 },
+                    { field: 'ניהול', count: 17 }
+                ],
+            },
+            intent_signals: {
+                actively_comparing: 56,
+                tracked_programs: 89,
+            },
+            journey_stages: {
+                anonymous: 20,
+                exploring: 45,
+                comparing: 50,
+                deciding: 15,
+                applied: 12
+            },
+            geographic: [
+                { city: 'תל אביב', count: 52 },
+                { city: 'ראשון לציון', count: 24 },
+                { city: 'חיפה', count: 18 },
+                { city: 'ירושלים', count: 15 },
+                { city: 'רמת גן', count: 12 },
+                { city: 'פתח תקווה', count: 10 },
+                { city: 'הרצליה', count: 8 },
+                { city: 'כפר סבא', count: 3 }
+            ],
+            sample_profiles: [
+                {
+                    id: 'lead_8492',
+                    bagrut_avg: 112,
+                    psychometric: 740,
+                    temperature: 'hot',
+                    fields: ['רפואה', 'מדעי המוח'],
+                    journey_stage: 'deciding',
+                    city: 'תל אביב',
+                },
+                {
+                    id: 'lead_3821',
+                    bagrut_avg: 108,
+                    psychometric: 690,
+                    temperature: 'warm',
+                    fields: ['מדעי המחשב', 'מתמטיקה'],
+                    journey_stage: 'comparing',
+                    city: 'חיפה',
+                },
+                {
+                    id: 'lead_9921',
+                    bagrut_avg: 98,
+                    psychometric: 620,
+                    temperature: 'warm',
+                    fields: ['ניהול', 'כלכלה'],
+                    journey_stage: 'exploring',
+                    city: 'ראשון לציון',
+                },
+                {
+                    id: 'lead_1102',
+                    bagrut_avg: 102,
+                    psychometric: 650,
+                    temperature: 'cold',
+                    fields: ['פסיכולוגיה', 'סוציולוגיה'],
+                    journey_stage: 'exploring',
+                    city: 'ירושלים',
+                },
+                {
+                    id: 'lead_5543',
+                    bagrut_avg: 105,
+                    psychometric: 680,
+                    temperature: 'hot',
+                    fields: ['משפטים'],
+                    journey_stage: 'applied',
+                    city: 'רמת גן',
+                }
+            ],
+        });
+    }
+
     try {
         // Fetch profiles with routing tags matching this partner type
         const { data: profiles } = await supabase

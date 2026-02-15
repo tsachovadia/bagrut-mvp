@@ -1,5 +1,5 @@
 import { Button } from './ui/shim';
-import { LogOut, User, GraduationCap, Users, TrendingUp, BookOpen, Heart } from 'lucide-react';
+import { LogOut, User, GraduationCap, Users, TrendingUp, BookOpen, Heart, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { isProduction } from '../utils/env';
@@ -48,9 +48,12 @@ export function Header() {
                     <nav className="hidden md:flex flex-1 items-center justify-center space-x-1 space-x-reverse">
                         <NavItem onClick={() => navigate('/')} icon={<GraduationCap className="w-4 h-4" />} text="מחשבון בגרויות" />
                         <NavItem onClick={() => navigate('/programs')} icon={<BookOpen className="w-4 h-4" />} text="חיפוש תארים" />
-                        <NavItem onClick={() => navigate('/tracking')} icon={<Heart className="w-4 h-4 text-pink-500" />} text="התארים שלי" />
-                        <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="הקוקפיט (סימולטור)" />
-                        <NavItem onClick={() => window.open('https://chat.whatsapp.com/F3Kc5oNu2o46YNdGHxHTYm', '_blank')} icon={<Users className="w-4 h-4" />} text="קהילה בוואטסאפ" />
+                        <NavItem onClick={() => navigate('/dashboard')} icon={<TrendingUp className="w-4 h-4" />} text="סימולטור שיפורים" />
+                        <NavItem onClick={() => navigate('/blog')} icon={<FileText className="w-4 h-4" />} text="בלוג" />
+                        <NavItem onClick={() => navigate('/community')} icon={<Users className="w-4 h-4" />} text="קהילה" />
+                        <NavItem onClick={() => navigate('/open-days')} icon={<FileText className="w-4 h-4" />} text="ימים פתוחים" />
+                        <NavItem onClick={() => navigate('/collaborations')} icon={<Heart className="w-4 h-4" />} text="שיתופי פעולה" />
+
                         {!isProduction && (
                             <NavItem onClick={() => navigate('/admin/shadow')} icon={<Users className="w-4 h-4" />} text="CRM (Admin)" />
                         )}

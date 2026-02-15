@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { trackEvent } from '../utils/gtm';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 interface LeadCaptureModalProps {
     isOpen: boolean;
@@ -13,27 +14,47 @@ export function LeadCaptureModal({ isOpen, onClose }: LeadCaptureModalProps) {
     const [agreed, setAgreed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name || !phone || !agreed) return;
 
         setIsSubmitting(true);
 
-        // Simulate submission - in real app would go to backend
-        // For now we just track to GTM and close
-        trackEvent('generate_lead', {
-            lead_source: 'landing_modal',
-            // Don't send PII (Personally Identifiable Information) to GTM unless configured securely
-            // Usually you send a hashed ID or just the event
-        });
+        try {
+            // Track to GTM
+            trackEvent('generate_lead', {
+                lead_source: 'landing_modal',
+            });
 
-        // Save to local storage that user has registered/seen modal
-        localStorage.setItem('lead_captured', 'true');
+            // Save to Supabase
+            const { error } = await supabase
+                .from('soft_leads')
+                .insert({
+                    name,
+                    phone,
+                    source: 'landing_modal',
+                    metadata: {
+                        page_url: window.location.href,
+                        referrer: document.referrer
+                    }
+                });
 
-        setTimeout(() => {
+            if (error) {
+                console.error('Error saving lead:', error);
+                // We still close the modal to not block the user
+            }
+
+            localStorage.setItem('lead_captured', 'true');
+
+            setTimeout(() => {
+                setIsSubmitting(false);
+                onClose();
+            }, 500);
+        } catch (err) {
+            console.error('Lead capture exception:', err);
             setIsSubmitting(false);
             onClose();
-        }, 500);
+        }
     };
 
     const handleSkip = () => {

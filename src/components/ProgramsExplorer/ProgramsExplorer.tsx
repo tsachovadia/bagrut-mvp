@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useProgramFilters } from '../../hooks/useProgramFilters';
-import { Search, Filter, X, Sparkles, ArrowLeft } from 'lucide-react';
+import { Search, Filter, X, Sparkles, ArrowLeft, ChevronDown } from 'lucide-react';
 import { Button, Badge } from '../ui/shim';
 import { CompactProgramRow } from '../CompactProgramRow';
 import { ProgramSummaryPanel } from '../ProgramSummaryPanel';
@@ -9,6 +9,7 @@ import { ProgramDetailsDrawer } from '../ui/ProgramDetailsDrawer';
 import { admissionEngine } from '../../services/admission-engine';
 import { ProgramFilterPanel } from '../ProgramFilterPanel';
 import type { UserAdmissionStats } from '../../utils/admission-evaluation';
+import { cn } from '../../lib/utils';
 
 interface ProgramsExplorerProps {
     userStats: UserAdmissionStats;
@@ -41,6 +42,9 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
     // Details Drawer State
     const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+    // University group expand/collapse — all collapsed by default
+    const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
     // First visit guidance
     const [showGuide, setShowGuide] = useState(() => {
@@ -95,12 +99,14 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
         return results;
     }, [programs, selectedFields, selectedInstIds, searchQuery]);
 
-    // Auto-select first program on load/filter change if none selected (Desktop)
-    useEffect(() => {
-        if (!selectedProgramId && filteredPrograms.length > 0) {
-            setSelectedProgramId(filteredPrograms[0].program.id);
-        }
-    }, [filteredPrograms, selectedProgramId]);
+    const toggleGroup = (instName: string) => {
+        setExpandedGroups(prev => {
+            const next = new Set(prev);
+            if (next.has(instName)) next.delete(instName);
+            else next.add(instName);
+            return next;
+        });
+    };
 
     const groupedPrograms = useMemo(() => {
         const groups: Record<string, typeof programs> = {};
@@ -301,23 +307,29 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
                     <div className="col-span-1 lg:col-span-6 space-y-6 order-2 lg:order-1">
                         {Object.entries(groupedPrograms).map(([instName, progs]) => (
                             <section key={instName} className="scroll-mt-32">
-                                <div className="flex items-center gap-2 mb-2 sticky top-[160px] lg:top-[165px] z-10 bg-gray-50/95 backdrop-blur-sm py-1.5">
-                                    <h2 className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-2.5 py-0.5 rounded-full shadow-sm">
+                                <button
+                                    onClick={() => toggleGroup(instName)}
+                                    className="flex items-center gap-2 mb-2 sticky top-[160px] lg:top-[165px] z-10 bg-gray-50/95 backdrop-blur-sm py-1.5 w-full text-right"
+                                >
+                                    <h2 className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1.5">
+                                        <ChevronDown className={cn("w-3 h-3 transition-transform", !expandedGroups.has(instName) && "-rotate-90")} />
                                         {instName} <span className="text-gray-300 mx-0.5">|</span> {progs.length}
                                     </h2>
-                                </div>
-                                <div className="space-y-1.5">
-                                    {progs.map(({ program, admission }) => (
-                                        <CompactProgramRow
-                                            key={program.id}
-                                            program={program}
-                                            admission={admission}
-                                            userStats={userStats}
-                                            isSelected={selectedProgramId === program.id}
-                                            onClick={() => handleProgramClick(program.id)}
-                                        />
-                                    ))}
-                                </div>
+                                </button>
+                                {expandedGroups.has(instName) && (
+                                    <div className="space-y-1.5">
+                                        {progs.map(({ program, admission }) => (
+                                            <CompactProgramRow
+                                                key={program.id}
+                                                program={program}
+                                                admission={admission}
+                                                userStats={userStats}
+                                                isSelected={selectedProgramId === program.id}
+                                                onClick={() => handleProgramClick(program.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </section>
                         ))}
 

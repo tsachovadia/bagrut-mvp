@@ -36,6 +36,20 @@ export function Footer() {
                 <p>© 2025 מתלבטים בלימודים. נבנה לתלמידים, על ידי סטודנטים.</p>
                 <div className="flex gap-4 items-center">
                     <Link
+                        to="/blog"
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="text-gray-400 hover:text-blue-500 underline decoration-gray-300 underline-offset-4 transition-colors text-xs"
+                    >
+                        בלוג
+                    </Link>
+                    <Link
+                        to="/write-for-us"
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="text-gray-400 hover:text-blue-500 underline decoration-gray-300 underline-offset-4 transition-colors text-xs"
+                    >
+                        כתבו אצלנו
+                    </Link>
+                    <Link
                         to="/terms"
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                         className="text-gray-400 hover:text-blue-500 underline decoration-gray-300 underline-offset-4 transition-colors text-xs"

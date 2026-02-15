@@ -34,7 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_API_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY}`) {
+    if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_API_SECRET || process.env.VITE_ADMIN_API_TOKEN || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY}`) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -57,6 +57,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return handleToggleTopic(req, res, false);
         case 'reopen_topic':
             return handleToggleTopic(req, res, true);
+        case 'broadcast_to_topics':
+            return handleBroadcastToTopics(req, res);
         default:
             return res.status(400).json({ error: `Unknown action: ${action}` });
     }
@@ -313,3 +315,84 @@ async function handleToggleTopic(req: VercelRequest, res: VercelResponse, reopen
 
     return res.status(200).json({ ok: true, telegram_result: result });
 }
+
+/**
+ * Broadcast a message to multiple forum topics
+ */
+async function handleBroadcastToTopics(req: VercelRequest, res: VercelResponse) {
+    const { message, topic_ids, exclude_topic_ids, topic_type } = req.body;
+
+    if (!message) {
+        return res.status(400).json({ error: 'Missing message' });
+    }
+
+    let query = supabase
+        .from('bot_groups')
+        .select('id, telegram_group_id, forum_topic_id, name')
+        .eq('is_active', true)
+        .not('forum_topic_id', 'is', null);
+
+    if (topic_ids && Array.isArray(topic_ids) && topic_ids.length > 0) {
+        query = query.in('id', topic_ids);
+    }
+
+    if (topic_type) {
+        query = query.eq('type', topic_type);
+    }
+
+    const { data: topics, error } = await query;
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    if (!topics || topics.length === 0) {
+        return res.status(200).json({ ok: true, sent_count: 0, message: 'No active topics found matching criteria' });
+    }
+
+    // Filter excludes in memory if needed
+    const finalTopics = exclude_topic_ids && Array.isArray(exclude_topic_ids)
+        ? topics.filter(t => !exclude_topic_ids.includes(t.id))
+        : topics;
+
+    let sentCount = 0;
+    const errors: any[] = [];
+
+    for (const topic of finalTopics) {
+        try {
+            await sendTelegramToGroup(
+                topic.telegram_group_id,
+                message,
+                topic.forum_topic_id
+            );
+            sentCount++;
+            // Small delay to be nice to Telegram API
+            await new Promise(resolve => setTimeout(resolve, 300));
+        } catch (err: any) {
+            console.error(`Failed to send to topic ${topic.id}:`, err);
+            errors.push({ topic_id: topic.id, error: err.message });
+        }
+    }
+
+    // Log the broadcast
+    await supabase.from('bot_messages_log').insert({
+        bot_user_id: 'admin',
+        direction: 'outgoing',
+        message_type: 'broadcast',
+        content: message.substring(0, 500),
+        campaign_id: `broadcast_${Date.now()}`,
+        metadata: {
+            sent_count: sentCount,
+            target_count: finalTopics.length,
+            topic_type
+        }
+    });
+
+    return res.status(200).json({
+        ok: true,
+        sent_count: sentCount,
+        total_targets: finalTopics.length,
+        errors: errors.length > 0 ? errors : undefined
+    });
+}
+

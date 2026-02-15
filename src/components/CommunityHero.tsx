@@ -3,11 +3,11 @@ import { ArrowLeft, Sparkles, MessageCircle, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { LeadCaptureModal } from './LeadCaptureModal';
 
-interface HeroOverlayProps {
+interface CommunityHeroProps {
     onStart: () => void;
 }
 
-export function HeroOverlay({ onStart }: HeroOverlayProps) {
+export function CommunityHero({ onStart }: CommunityHeroProps) {
     const [typedText, setTypedText] = useState('');
     const fullText = "אל תתלבט לבד";
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +49,7 @@ export function HeroOverlay({ onStart }: HeroOverlayProps) {
         { name: 'אוניברסיטת חיפה', score: 104.75, status: 'accepted' },
         { name: 'רופין', score: 101.20, status: 'accepted' },
         { name: 'HIT', score: 107.50, status: 'accepted' },
+        { name: 'הבינתחומי', score: 108.00, status: 'accepted' },
     ];
 
     return (

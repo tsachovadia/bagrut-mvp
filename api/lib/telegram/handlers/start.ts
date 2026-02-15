@@ -176,52 +176,84 @@ async function sendUnlinkedReturningMenu(ctx: HandlerContext, firstName: string)
 /**
  * Handle program deep-link from web
  */
+/**
+ * Handle program deep-link from web
+ */
 async function handleProgramDeepLink(ctx: HandlerContext, programId: string): Promise<void> {
     const { chatId, user } = ctx;
+    const cleanProgramId = programId.replace('program_', '');
 
     await updateBotUser(user.id, {
-        deep_link_program_id: programId,
-        source: user.source === 'organic' ? 'web' : user.source,
+        deep_link_program_id: cleanProgramId,
+        source: user.source === 'organic' ? 'web_program' : user.source,
     } as any);
 
     await updateLeadScore(user, 'deep_link_from_program');
 
-    // Fetch program info from DB
-    const { data: program } = await supabase
-        .from('programs')
-        .select('id, name, degree_type, duration_years, faculties ( name, institutions ( name ) )')
-        .eq('id', programId)
-        .single();
+    // 1. Resolve Cluster
+    const { getClusterByProgramId } = await import('../clusters.js');
+    const clusterId = getClusterByProgramId(cleanProgramId);
 
-    if (program) {
-        const instName = (program.faculties as any)?.institutions?.name || '';
-        const facName = (program.faculties as any)?.name || '';
-
-        await sendMessage(chatId,
-            `🎓 <b>${program.name}</b>\n` +
-            `🏛️ ${instName}${facName ? ` | ${facName}` : ''}\n` +
-            `📚 ${program.degree_type} | ${program.duration_years} שנים\n\n` +
-            `רוצה לבדוק אם תתקבל? חשב את הסיכויים באתר!`,
-            {
-                reply_markup: inlineKeyboard([
-                    keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl(`/program/${programId}`))),
-                    keyboardRow(btn('👥 הצטרף לקהילה', 'cmd:rooms'), btn('❓ עזרה', 'cmd:help')),
-                ]),
-            }
-        );
+    // 2. Fetch linked Telegram Group for this cluster
+    let group = null;
+    if (clusterId) {
+        const { data } = await supabase
+            .from('bot_groups')
+            .select('name, telegram_group_id, invite_link, is_forum, forum_topic_id')
+            .eq('linked_field', clusterId)
+            .single();
+        group = data;
     } else {
-        await sendMessage(chatId,
-            `היי ${user.first_name || ''}! 👋\n\nרוצה לבדוק את סיכויי הקבלה שלך?`,
-            {
-                reply_markup: inlineKeyboard([
-                    keyboardRow(urlBtn('🌐 חשב סיכויים באתר', webUrl())),
-                    keyboardRow(btn('👥 חדרי לימוד', 'cmd:rooms')),
-                ]),
-            }
-        );
+        // Fallback: Try legacy lookup if cluster not found
+        const { data } = await supabase
+            .from('bot_groups')
+            .select('name, telegram_group_id, invite_link, is_forum, forum_topic_id')
+            .eq('linked_program_id', cleanProgramId)
+            .single();
+        group = data;
     }
 
-    await logMessage(user.id, 'outgoing', 'deep_link', programId);
+    // 3. Fetch program details for the message
+    const { data: program } = await supabase
+        .from('programs')
+        .select('name, degree_type, institutions ( name )')
+        .eq('id', cleanProgramId)
+        .single();
+
+    const programName = program?.name || 'התואר';
+    const institutionName = (program?.institutions as any)?.name || '';
+    const fullName = `${programName} ${institutionName ? `ב${institutionName}` : ''}`;
+
+    if (group) {
+        let header = `👋 <b>ברוכים הבאים לקהילת ${programName}!</b>\n`;
+        let text = `מצאנו את קבוצת הדיון המתאימה בול בשבילך (${group.name}).\nסטודנטים אמיתיים שילמדו איתך (או שנה מעליך) כבר מחכים שם.`;
+        let btnText = `הצטרף לקהילה`;
+        let link = group.invite_link;
+
+        await sendMessage(chatId, header + '\n' + text, {
+            reply_markup: inlineKeyboard([
+                keyboardRow(urlBtn(btnText, link || 'https://t.me/MitlabtimBot')),
+                keyboardRow(urlBtn('🌐 חשב סיכויי קבלה', webUrl(`/program/${cleanProgramId}`))),
+            ])
+        });
+
+        await logMessage(user.id, 'outgoing', 'deep_link_found_group', `${cleanProgramId} -> ${group.name}`);
+
+    } else {
+        // No specific group found -> Fallback to "Check Chances" or General Community
+        await sendMessage(chatId,
+            `היי ${user.first_name || ''}! 👋\n\n` +
+            `ראינו שאת/ה מתעניין ב<b>${fullName}</b>.\n` +
+            `עדיין לא פתחנו קבוצה ספציפית לתואר הזה, אבל הקהילה הכללית שלנו תשמח לעזור!`,
+            {
+                reply_markup: inlineKeyboard([
+                    keyboardRow(urlBtn('🌐 בדוק סיכויי קבלה', webUrl(`/program/${cleanProgramId}`))),
+                    keyboardRow(btn('👥 כניסה לקהילה הכללית', 'cmd:rooms')),
+                ]),
+            }
+        );
+        await logMessage(user.id, 'outgoing', 'deep_link_no_group', cleanProgramId);
+    }
 }
 
 /**

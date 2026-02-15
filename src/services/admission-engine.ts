@@ -55,14 +55,14 @@ export interface ExamEvent {
 }
 
 // --- Service ---
-export class AdmissionEngine {
-    private supabase;
+import { supabase } from '@/lib/supabase';
 
-    constructor() {
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        this.supabase = createClient(supabaseUrl, supabaseKey);
-    }
+// ... (keep types)
+
+export class AdmissionEngine {
+    private supabase = supabase;
+
+    constructor() { }
 
     async getAllUniversities(): Promise<University[]> {
         const { data, error } = await this.supabase

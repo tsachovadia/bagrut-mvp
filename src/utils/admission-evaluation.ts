@@ -115,3 +115,108 @@ function getSubjectGrade(grades: SubjectGrade[], subjectName: string, minUnits?:
     // Return max grade
     return Math.max(...valid.map(g => g.grade));
 }
+
+// --- Condition status extraction for UI display ---
+
+export interface ConditionStatus {
+    label: string;
+    met: boolean;
+    required: string;
+    actual: number;
+}
+
+export function getConditionStatuses(
+    stats: UserAdmissionStats | undefined,
+    admission: AdmissionRequirement | null | undefined
+): ConditionStatus[] {
+    if (!stats || !admission?.logic_rules) return [];
+    return extractConditions(admission.logic_rules, stats);
+}
+
+function extractConditions(group: LogicGroup, stats: UserAdmissionStats): ConditionStatus[] {
+    if (group.OR && group.OR.length > 0) {
+        // Find the path with fewest failures (closest to meeting)
+        let bestPath: ConditionStatus[] = [];
+        let minFailures = Infinity;
+        for (const item of group.OR) {
+            const conditions = 'type' in item
+                ? [buildConditionStatus(item as LogicCondition, stats)]
+                : extractConditions(item as LogicGroup, stats);
+            const failures = conditions.filter(c => !c.met).length;
+            if (failures < minFailures) {
+                minFailures = failures;
+                bestPath = conditions;
+            }
+        }
+        return bestPath;
+    }
+
+    if (group.AND && group.AND.length > 0) {
+        return group.AND.flatMap(item =>
+            'type' in item
+                ? [buildConditionStatus(item as LogicCondition, stats)]
+                : extractConditions(item as LogicGroup, stats)
+        );
+    }
+
+    return [];
+}
+
+function buildConditionStatus(condition: LogicCondition, stats: UserAdmissionStats): ConditionStatus {
+    const actual = getActualValueForCondition(condition, stats);
+    const met = evaluateCondition(condition, stats);
+    const label = getConditionLabel(condition);
+    const required = `${condition.operator || '>='} ${condition.value}`;
+    return { label, met, required, actual };
+}
+
+function getActualValueForCondition(condition: LogicCondition, stats: UserAdmissionStats): number {
+    const { type, subject } = condition;
+    switch (type) {
+        case 'sekhem_general': case 'sekhem_quant': case 'sekhem_engineering':
+        case 'sekhem_technion': case 'sekhem_huji': case 'sekhem_bgu':
+            return stats.estimatedSekhem;
+        case 'bagrut_average':
+            return stats.bagrutAverage;
+        case 'psychometric_general':
+            return stats.psychometric.general || 0;
+        case 'psychometric_quant':
+            return stats.psychometric.quantitative || 0;
+        case 'psychometric_verbal':
+            return stats.psychometric.verbal || 0;
+        case 'psychometric_english':
+            return stats.psychometric.english || 0;
+        case 'bagrut_subject': case 'bagrut_math': case 'bagrut_english': case 'bagrut_physics': {
+            let subjName = subject;
+            if (subject === 'math' || type === 'bagrut_math') subjName = 'מתמטיקה';
+            if (subject === 'english' || type === 'bagrut_english') subjName = 'אנגלית';
+            if (subject === 'physics' || type === 'bagrut_physics') subjName = 'פיזיקה';
+            if (subject === 'cs' || subject === 'computer_science') subjName = 'מדעי המחשב';
+            return subjName ? getSubjectGrade(stats.bagrutGrades, subjName, condition.units) : 0;
+        }
+        default:
+            return 0;
+    }
+}
+
+function getConditionLabel(condition: LogicCondition): string {
+    if (condition.label) return condition.label;
+    switch (condition.type) {
+        case 'sekhem_general': case 'sekhem_quant': case 'sekhem_engineering':
+        case 'sekhem_technion': case 'sekhem_huji': case 'sekhem_bgu':
+            return 'סכם';
+        case 'bagrut_average': return 'ממוצע בגרות';
+        case 'psychometric_general': return 'ציון פסיכומטרי';
+        case 'psychometric_quant': return 'פסיכומטרי כמותי';
+        case 'psychometric_verbal': return 'פסיכומטרי מילולי';
+        case 'psychometric_english': return 'פסיכומטרי אנגלית';
+        case 'bagrut_subject': case 'bagrut_math': case 'bagrut_english': case 'bagrut_physics': {
+            let subj = condition.subject || condition.type.replace('bagrut_', '');
+            if (subj === 'math') subj = 'מתמטיקה';
+            if (subj === 'english') subj = 'אנגלית';
+            if (subj === 'physics') subj = 'פיזיקה';
+            return condition.units ? `${subj} (${condition.units} יח"ל)` : subj;
+        }
+        default: return condition.type;
+    }
+}

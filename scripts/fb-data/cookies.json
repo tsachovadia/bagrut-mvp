@@ -1,0 +1,72 @@
+[
+  {
+    "name": "datr",
+    "value": "O9WOafuNxzb8InhElBe6O4Ay",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1805528503.711845,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "sb",
+    "value": "O9WOaWrDMIJAQ_Quao-xJoFK",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1805528379.500039,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "m_pixel_ratio",
+    "value": "1",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "wd",
+    "value": "390x844",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "test_cookie",
+    "value": "CheckForPermission",
+    "domain": ".doubleclick.net",
+    "path": "/",
+    "expires": 1770969283.361518,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "sfiu",
+    "value": "AYjVHXKNxWpaz_49q_P8rYMy9p77FZ5uUI53adFRJB7O4q5G9Hp4S8dl4lOTaK68WOPkrBrA8eqICyyxUa7cxDqxjJ3oLbXkCPmx3JkYwGkhEvWQoUgRmVyl_B_a_d3LvDudeCxTR1T5XioWyJ58kry2LLxiL0G0mw9En0X9EeMeRSvKrlDjVlcYLm6MGKfCB9uH_pspr7-eejay9oEyDxeuxI28NH9ySs6zsdriKR2jmw_KeUz2uBYpaG7vnTuwJsrIQX87ng7uIup_2f1xV_o7",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "fr",
+    "value": "0klYOX8w4ZkUPtSO4..BpjtU7..AAA.0.0.BpjtW6.AWfAZ6M1eulv5xMF3x8IL2MJHEY",
+    "domain": ".facebook.com",
+    "path": "/",
+    "expires": 1778744506.513885,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  }
+]

@@ -148,6 +148,103 @@ export function extractGradesMiddleware() {
                     }
                 }
 
+                // 5. ADMIN API PROXY (Local Simulation)
+                const adminRoutes = [
+                    '/api/telegram-rooms',
+                    '/api/admin/partners',
+                    '/api/admin/partner-billing',
+                    '/api/metrics/overview',
+                    '/api/metrics/funnel',
+                    '/api/metrics/segments',
+                    '/api/metrics/timeseries',
+                    '/api/metrics/client-view',
+                    '/api/client-portal-auth'
+                ];
+
+                if (adminRoutes.some(route => req.url.startsWith(route))) {
+                    try {
+                        console.log(`[API] ${req.url} handled by local proxy`);
+                        if (!process.env.VITE_ADMIN_API_TOKEN) {
+                            console.warn('[API] WARNING: VITE_ADMIN_API_TOKEN is missing in server process.env!');
+                        }
+
+                        // Parse body for POST/PUT/PATCH
+                        let body = {};
+                        if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+                            body = await parseBody();
+                        }
+
+                        // Parse Query Params
+                        const url = new URL(req.url, `http://${req.headers.host}`);
+                        const query: Record<string, string> = {};
+                        url.searchParams.forEach((value, key) => {
+                            query[key] = value;
+                        });
+
+                        // Mock Vercel Request
+                        const vercelReq: any = {
+                            method: req.method,
+                            body: body,
+                            headers: req.headers,
+                            query: query,
+                            cookies: {}
+                        };
+
+                        // Mock Vercel Response
+                        const vercelRes: any = {
+                            statusCode: 200,
+                            status: (code: number) => {
+                                res.statusCode = code;
+                                return vercelRes;
+                            },
+                            json: (data: any) => {
+                                sendJson(data);
+                                return vercelRes;
+                            },
+                            send: (data: any) => {
+                                res.end(data);
+                                return vercelRes;
+                            },
+                            setHeader: (name: string, value: string) => {
+                                res.setHeader(name, value);
+                                return vercelRes;
+                            }
+                        };
+
+                        // Route to appropriate handler
+                        const cleanUrl = req.url.split('?')[0];
+                        let handlerPath = '';
+
+                        if (cleanUrl === '/api/telegram-rooms') handlerPath = './api/telegram-rooms.ts';
+                        else if (cleanUrl === '/api/admin/partners') handlerPath = './api/admin/partners.ts';
+                        else if (cleanUrl === '/api/admin/partner-billing') handlerPath = './api/admin/partner-billing.ts';
+                        else if (cleanUrl === '/api/client-portal-auth') handlerPath = './api/client-portal-auth.ts';
+                        else if (cleanUrl.startsWith('/api/metrics/')) {
+                            const metricName = cleanUrl.replace('/api/metrics/', '');
+                            handlerPath = `./api/metrics/${metricName}.ts`;
+                        }
+
+                        if (handlerPath) {
+                            // Use jiti or similar if needed, but for now assuming ts-node or vite handles the import
+                            // Note: Vite's ssrLoadModule is perfect for this!
+                            const mod = await server.ssrLoadModule(handlerPath);
+                            if (mod.default) {
+                                await mod.default(vercelReq, vercelRes);
+                            } else {
+                                console.error(`[Local API] No default export in ${handlerPath}`);
+                                sendError(500, 'Handler configuration error');
+                            }
+                        } else {
+                            sendError(404, 'Route handler not found');
+                        }
+                        return;
+
+                    } catch (e: any) {
+                        console.error(`[Local API] Error handling ${req.url}:`, e);
+                        return sendError(500, e.message);
+                    }
+                }
+
                 next();
             });
         }

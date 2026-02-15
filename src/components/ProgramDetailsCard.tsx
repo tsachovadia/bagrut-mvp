@@ -196,7 +196,7 @@ export const ProgramDetailsCard: React.FC<ProgramDetailsCardProps> = ({ program,
 
                         <div className="flex flex-col sm:flex-row items-center gap-4 mt-8 pt-6 border-t border-gray-100">
                             <button
-                                onClick={() => window.open(`https://t.me/MitlabtimBot?start=${program.id}`, '_blank')}
+                                onClick={() => window.open(`https://t.me/MitlabtimBot?start=program_${program.id}`, '_blank')}
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0088cc] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#006da3] transition-all shadow-sm hover:shadow-md group"
                             >
                                 <Send className="w-5 h-5" />
