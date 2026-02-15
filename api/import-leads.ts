@@ -18,7 +18,7 @@ interface LeadRow {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Admin auth
     const authHeader = req.headers.authorization;
-    const adminToken = process.env.ADMIN_API_TOKEN;
+    const adminToken = process.env.ADMIN_API_TOKEN || process.env.VITE_ADMIN_API_TOKEN;
     if (!adminToken || authHeader !== `Bearer ${adminToken}`) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
