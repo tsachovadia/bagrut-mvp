@@ -4,20 +4,30 @@ import { trackEvent } from '../utils/gtm';
 import { BugReportWidget } from './BugReportWidget';
 import { clearAllUserData } from '../lib/userData';
 import { isProduction } from '../utils/env';
+import { supabase } from '../lib/supabase';
 
 export function Footer() {
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
-    const handleLeadSubmit = (e: React.FormEvent) => {
+    const handleLeadSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!phone && !email) return;
         trackEvent('footer_lead_submit', { has_email: !!email, has_phone: !!phone });
-        const lead = { email, phone, source: 'footer', timestamp: new Date().toISOString() };
-        const existing = JSON.parse(localStorage.getItem('footer_leads') || '[]');
-        existing.push(lead);
-        localStorage.setItem('footer_leads', JSON.stringify(existing));
+
+        // Save to Supabase
+        const { error } = await supabase
+            .from('soft_leads')
+            .insert([{
+                phone,
+                email: email || null,
+                interest: 'general',
+                source: 'footer_form',
+            }]);
+
+        if (error) console.error('Footer lead save error:', error);
+
         setSubmitted(true);
     };
 

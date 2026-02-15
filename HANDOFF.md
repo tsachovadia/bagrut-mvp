@@ -20,6 +20,31 @@ Entry format:
 
 ## Sessions
 
+### 2026-02-15 — Claude Code (Session 6, Sprint 2 Start)
+**What was done**: Connected lead capture forms to Supabase and rebuilt the /open-days page as a monetization asset.
+**Files changed**:
+- **`src/components/Footer.tsx`** — Footer lead form now inserts to Supabase `soft_leads` table (was localStorage-only). Fields: phone, email, source=`footer_form`, interest=`general`
+- **`src/pages/ImportantDatesPage.tsx`** — Complete rewrite:
+  - 15 real events: 10 open days (TAU, Ariel, Technion×2, BIU×2, BGU, HUJI×2, Reichman), 2 psychometric, 3 registration deadlines
+  - 4 event types with color-coded filter buttons (ימים פתוחים, פסיכומטרי, בגרויות, מועדי הרשמה)
+  - Grouped by month with collapsible sections
+  - Countdown badges (בעוד X ימים, מחר!, היום!)
+  - "הזכירו לי" button per event → phone input → saves to `soft_leads` (source=`open_days_reminder`)
+  - "לאתר המוסד" links with GTM tracking (`open_day_click` event — tracks institution + type)
+  - Search across title, description, institution
+  - Auto-hides past events
+  - Bottom CTA: calculator + Telegram community
+  - "עודכן פברואר 2026" badge + source disclaimer
+**Key decisions**:
+- Every "לאתר המוסד" click fires `open_day_click` GTM event — data for future monetization (show colleges their click volume)
+- "הזכירו לי" saves to `soft_leads` with interest=`reminder_{eventId}` — can filter by event for targeted outreach
+- Added `registration` event type (deadline tracking) alongside existing types
+- Past events auto-hidden (no manual cleanup needed)
+**Open items**:
+- Sprint 2 remaining: GroupLead integration, first 100 users
+- Actual reminder sending (cron/SMS) not implemented — currently just captures the lead
+- Open days data is static — could move to Supabase for admin editing later
+
 ### 2026-02-15 — Claude Code (Session 5, UX Feedback Round)
 **What was done**: Implemented 10 UX feedback items across blog articles and homepage.
 **Files changed**:
