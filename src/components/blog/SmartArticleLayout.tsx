@@ -123,7 +123,7 @@ export function SmartArticleLayout({ article }: SmartArticleLayoutProps) {
                     <meta name="description" content={article.excerpt} />
                     <meta property="og:title" content={article.title} />
                     <meta property="og:description" content={article.excerpt} />
-                    <meta property="og:image" content={article.imageUrl || `https://mitlabtim.co.il/api/og?title=${encodeURIComponent(article.title)}`} />
+                    <meta property="og:image" content={article.imageUrl || 'https://mitlabtim.co.il/logo_new.png'} />
                     <meta property="og:type" content="article" />
                     <link rel="canonical" href={`https://mitlabtim.co.il/blog/${article.id}`} />
                     <script type="application/ld+json">

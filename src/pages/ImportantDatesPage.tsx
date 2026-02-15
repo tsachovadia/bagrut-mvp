@@ -283,7 +283,7 @@ export function ImportantDatesPage() {
                 <meta name="description" content="לוח ימים פתוחים 2026 מעודכן — אוניברסיטת תל אביב, הטכניון, העברית, בר-אילן, בן גוריון, רייכמן ועוד. מועדי פסיכומטרי והרשמה." />
                 <meta property="og:title" content="ימים פתוחים 2026 — כל התאריכים במקום אחד" />
                 <meta property="og:description" content="לוח ימים פתוחים מעודכן לכל האוניברסיטאות והמכללות בישראל. סינון לפי סוג, תזכורות, וקישורים ישירים." />
-                <meta property="og:image" content="https://mitlabtim.co.il/api/og?page=open-days" />
+                <meta property="og:image" content="https://mitlabtim.co.il/logo_new.png" />
                 <link rel="canonical" href="https://mitlabtim.co.il/open-days" />
             </Helmet>
             <Header />

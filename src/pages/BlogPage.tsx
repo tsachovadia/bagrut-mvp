@@ -14,7 +14,7 @@ export function BlogPage() {
             <Helmet>
                 <title>בלוג — מתלבטים בלימודים</title>
                 <meta name="description" content="מאמרים, טיפים ומדריכים על בגרויות, פסיכומטרי, ימים פתוחים וקבלה לאוניברסיטה. כל מה שצריך לדעת לפני שבוחרים תואר." />
-                <meta property="og:image" content="https://mitlabtim.co.il/api/og?page=blog" />
+                <meta property="og:image" content="https://mitlabtim.co.il/logo_new.png" />
                 <link rel="canonical" href="https://mitlabtim.co.il/blog" />
             </Helmet>
             <Header />
