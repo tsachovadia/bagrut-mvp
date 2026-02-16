@@ -46,7 +46,7 @@ export function Header() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex flex-1 items-center justify-center space-x-1 space-x-reverse">
-                        <NavItem onClick={() => navigate('/')} text="מחשבון" />
+                        <NavItem onClick={() => navigate('/calculator')} text="מחשבון" />
                         <NavItem onClick={() => navigate('/programs')} text="תארים" />
                         <NavItem onClick={() => navigate('/dashboard')} text="סימולטור" />
                         <NavItem onClick={() => navigate('/blog')} text="בלוג" />

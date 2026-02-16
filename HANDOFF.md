@@ -20,18 +20,54 @@ Entry format:
 
 ## Sessions
 
-### 2026-02-15 — Claude Code (Session 9, OG Images + GroupLead + Client Portal)
-**What was done**: Dynamic OG image endpoint, GroupLead import infrastructure with Apps Script, fixed unified_profiles view bug (+ added missing columns), improved Client Portal.
+### 2026-02-16 — Claude Code (Session 11, Homepage Redesign + Route Separation)
+**What was done**: Completed homepage redesign (plan from plan file) and separated homepage from calculator into distinct routes.
 **Files changed**:
-- **`api/og.tsx`** — NEW: Dynamic OG image generation using `@vercel/og` (Edge Runtime). Brand purple gradient, Heebo Hebrew font, stats strip. Supports `?page=home|blog|programs|open-days` presets and custom `?title=&subtitle=` params. 1200x630px.
+- **`src/components/marketing/ConversationalHero.tsx`** — Rewritten: replaced dashed drop-zone CTA with two clean gradient buttons (AI scan primary + manual secondary). Added subtle purple gradient background (`from-brand-purple-50/60 via-white to-white`). Updated GTM tracking `hero_v5`. Added animated stat counters via `useAnimatedCounter` hook.
+- **`src/pages/CalculatorPage.tsx`** — NEW: Dedicated calculator page wrapping WizardContainer with Header/Footer. Reads `?mode=upload` or `?mode=manual` from URL search params. Lazy-loaded (55.65 kB chunk).
+- **`src/pages/HomePage.tsx`** — SIMPLIFIED: Removed all calculator/wizard props and state. Now a clean marketing landing page that always shows hero + ValuePropositionSection. Hero CTAs navigate to `/calculator?mode=...`. Lead capture modal preserved for first-time visitors.
+- **`src/App.tsx`** — Added `/calculator` route with lazy loading. Removed `wizardStarted` state. Simplified HomePage to take no props. CommunityPage route redirects to `/`.
+- **`src/hooks/useAnimatedCounter.ts`** — NEW: Hook for animated number display in hero stats.
+**Key decisions**:
+- Homepage and calculator are now separate routes: `/` always shows hero, `/calculator` shows the wizard
+- Lead capture modal flow preserved: first-time visitors see modal before being navigated to `/calculator`
+- Returning users land on homepage (not auto-redirected to calculator)
+- CalculatorPage is lazy-loaded for code splitting
+- CommunityPage deleted, route redirects to `/`
+**Notion updates**:
+- 6 backlog tasks marked as completed (homepage redesign, GTM events, articles, broken links, GroupLead, open days)
+- Project page rewritten with business context, 3-phase roadmap, tools section
+- 3 existing tasks moved to Sprint; 3 new Sprint tasks created (B2B landing, prospects list, competitive research)
+**Open items**:
+- `public/sitemap.xml` should be updated to include `/calculator` route
+- Visual QA on mobile + desktop
+- Sprint 3 remaining: B2B landing page, prospect list, competitive research, sales meetings
+
+### 2026-02-15 — Claude Code (Session 10, Fix Vercel Deployment)
+**What was done**: Fixed Vercel deployment broken by Edge Runtime `api/og.tsx`. All 3 previous deployments were in ERROR state.
+**Root cause**: Vercel's serverless function compiler doesn't use `tsconfig.api.json` — it compiles each API file independently. The `api/og.tsx` file failed with TS17004 ("Cannot use JSX unless --jsx flag is provided") AND "Edge Function referencing unsupported modules: @vercel/og".
+**Files changed**:
+- **`api/og.tsx`** — DELETED (Edge Runtime OG image generation — incompatible with project setup)
+- **`index.html`**, **`HomePage.tsx`**, **`BlogPage.tsx`**, **`ImportantDatesPage.tsx`**, **`SmartArticleLayout.tsx`** — og:image reverted to static `/logo_new.png`
+- **`tsconfig.api.json`** — Removed `"jsx": "react-jsx"` (no longer needed)
+- **`package.json`** — Removed `@vercel/og` dependency
+**Key decisions**:
+- Dynamic OG images need a different approach (not Edge Runtime in this Vite+Vercel setup). Can revisit with a static generation approach or a Node.js serverless function instead of Edge.
+- Static logo_new.png is fine as OG image for now — it shows the brand.
+**Deployment**: Commit `ba03dac` deployed successfully. `/api/import-leads` endpoint confirmed live (returns 401 for invalid auth).
+**Open items**:
+- User needs to re-run Apps Script sync (should work now that API is live)
+- OG images: revisit later with Node.js serverless approach or pre-generated static images
+- Sprint 2 remaining: first 100 users (marketing push)
+
+### 2026-02-15 — Claude Code (Session 9, OG Images + GroupLead + Client Portal)
+**What was done**: GroupLead import infrastructure with Apps Script, fixed unified_profiles view bug (+ added missing columns), improved Client Portal. (OG image endpoint was added but later removed in Session 10 due to Vercel incompatibility.)
+**Files changed**:
 - **`api/import-leads.ts`** — NEW: Admin-authenticated batch import endpoint for Facebook/GroupLead data. Deduplicates by email AND FB user ID (via JSONB `raw_data.fb_user_id`). Auto-links to existing profiles. Max 500 per batch.
 - **`scripts/grouplead-sync.gs`** — NEW: Google Apps Script for GroupLead spreadsheet. Adds "Synced" column (U), tracks which rows were already sent, parses Q&A for interest keywords, sends batches to import API. Has custom menu (Mitlabtim → Sync / Reset / Stats). Setup: paste in Apps Script, add `MITLABTIM_API_TOKEN` to Script Properties, set hourly trigger.
 - **`supabase/migrations/20260216200000_create_facebook_leads.sql`** — NEW: `facebook_leads` table. APPLIED to production.
 - **`supabase/migrations/20260216210000_fix_unified_profiles_view.sql`** — FIX: Added missing columns (`temperature`, `gap_analysis`, `lead_routing_tags`, `journey_stage`) to `user_profiles`, then fixed view to reference them. APPLIED to production.
 - **`src/pages/ClientPortal.tsx`** — Added journey stages funnel + data freshness indicator
-- **`index.html`**, **`HomePage.tsx`**, **`BlogPage.tsx`**, **`ImportantDatesPage.tsx`**, **`SmartArticleLayout.tsx`** — og:image → dynamic `/api/og` endpoint
-- **`tsconfig.api.json`** — Added `"jsx": "react-jsx"`
-- **`package.json`** — Added `@vercel/og`
 **Migrations APPLIED to production**:
 - `facebook_leads` table created with GIN index on raw_data
 - `user_profiles` got 4 new columns: temperature, gap_analysis, lead_routing_tags, journey_stage
@@ -40,12 +76,9 @@ Entry format:
 - GroupLead sync is "pull" model: Apps Script runs hourly, checks for unsynced rows, sends to API
 - Dedup is double-layer: Apps Script marks rows as synced (column U timestamp), API deduplicates by FB user ID in JSONB
 - GroupLead data has NO email/phone — only FB names + profile URLs. Interest parsing from Q&A answers (Hebrew keywords)
-- OG images use Edge Runtime + Heebo font from Google Fonts CDN
 **Open items**:
 - User needs to paste `grouplead-sync.gs` into their spreadsheet's Apps Script editor
 - User needs to set `MITLABTIM_API_TOKEN` in Apps Script Properties
-- Sprint 2 remaining: first 100 users (marketing push)
-- GroupLead: user needs to provide Google Sheet/CSV data for first import
 - Sprint 2 remaining: first 100 users (marketing push)
 - Client Portal: could add export-to-CSV feature for partners
 

@@ -23,6 +23,7 @@ import { Footer } from './components/Footer';
 import { isProduction } from './utils/env';
 
 // Lazy loaded — secondary pages
+const CalculatorPage = lazy(() => import('./pages/CalculatorPage').then(m => ({ default: m.CalculatorPage })));
 const ProgramPage = lazy(() => import('./pages/ProgramPage').then(m => ({ default: m.ProgramPage })));
 const ProgramsExplorer = lazy(() => import('./components/ProgramsExplorer/ProgramsExplorer').then(m => ({ default: m.ProgramsExplorer })));
 const UnifiedDashboard = lazy(() => import('./components/Dashboard/UnifiedDashboard').then(m => ({ default: m.UnifiedDashboard })));
@@ -77,7 +78,6 @@ function App() {
   });
   const [results, setResults] = useState<any[]>([]);
   const [formKey, setFormKey] = useState(0); // Kept for forced re-renders if needed
-  const [wizardStarted, setWizardStarted] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [userData, setUserData] = useState<any>(null); // Store full user data for context
 
@@ -92,7 +92,6 @@ function App() {
         if (data.bagrut) setBagrutGrades(data.bagrut);
         if (data.psychometric) setPsychometric(data.psychometric);
         if (data.preferences) setPreferences(data.preferences);
-        setWizardStarted(true); // If data exists, likely returning user
         // Sync local state to avoid re-showing modal
         localStorage.setItem('lead_captured', 'true');
         setUserData(data); // Save for provider
@@ -171,16 +170,14 @@ function App() {
     >
       <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-400">טוען...</div>}>
       <Routes>
-        <Route path="/" element={
-          <HomePage
-            wizardStarted={wizardStarted}
-            setWizardStarted={setWizardStarted}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/calculator" element={
+          <CalculatorPage
             bagrutGrades={bagrutGrades}
             handleBagrutUpdate={handleBagrutUpdate}
             psychometric={psychometric}
             handlePsychometricUpdate={handlePsychometricUpdate}
             results={results}
-
             preferences={preferences}
             onPreferencesUpdate={handlePreferencesUpdate}
           />
