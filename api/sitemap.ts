@@ -37,11 +37,11 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         // Fetch all program IDs from Supabase
         const { data: programs, error } = await supabase
             .from('programs')
-            .select('id, updated_at')
+            .select('id')
             .order('id');
 
         if (error) {
-            console.error('Sitemap: failed to fetch programs', error);
+            console.error('Sitemap: failed to fetch programs', error.message);
         }
 
         const today = new Date().toISOString().split('T')[0];
@@ -71,19 +71,16 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         // Dynamic program pages
         if (programs && programs.length > 0) {
             for (const program of programs) {
-                const lastmod = program.updated_at
-                    ? new Date(program.updated_at as string).toISOString().split('T')[0]
-                    : today;
                 xml += `  <url>\n`;
                 xml += `    <loc>${BASE_URL}/program/${escapeXml(program.id)}</loc>\n`;
-                xml += `    <lastmod>${lastmod}</lastmod>\n`;
+                xml += `    <lastmod>${today}</lastmod>\n`;
                 xml += `    <changefreq>monthly</changefreq>\n`;
                 xml += `    <priority>0.7</priority>\n`;
                 xml += `  </url>\n`;
             }
         }
 
-        xml += '</urlset>';
+        xml += `</urlset>\n<!-- programs: ${programs?.length ?? 0}, error: ${error?.message ?? 'none'} -->`;
 
         res.setHeader('Content-Type', 'application/xml');
         res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
