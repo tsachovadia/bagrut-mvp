@@ -80,7 +80,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
             }
         }
 
-        xml += `</urlset>\n<!-- programs: ${programs?.length ?? 0}, error: ${error?.message ?? 'none'} -->`;
+        xml += '</urlset>';
 
         res.setHeader('Content-Type', 'application/xml');
         res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
