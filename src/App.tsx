@@ -37,6 +37,11 @@ const TermsOfUse = lazy(() => import('./components/TermsOfUse').then(m => ({ def
 const CampaignMobileFirst = lazy(() => import('./pages/CampaignMobileFirst').then(m => ({ default: m.CampaignMobileFirst })));
 const ProgramsDatabaseViewer = lazy(() => import('./components/Debug/ProgramsDatabaseViewer').then(m => ({ default: m.ProgramsDatabaseViewer })));
 const Backstage = lazy(() => import('./pages/Backstage').then(m => ({ default: m.Backstage })));
+const BagrutDatesPage = lazy(() => import('./pages/BagrutDatesPage').then(m => ({ default: m.BagrutDatesPage })));
+const PsychometricDatesPage = lazy(() => import('./pages/PsychometricDatesPage').then(m => ({ default: m.PsychometricDatesPage })));
+const SubjectGradeCalculatorPage = lazy(() => import('./pages/SubjectGradeCalculatorPage').then(m => ({ default: m.SubjectGradeCalculatorPage })));
+const ImproveSekemPage = lazy(() => import('./pages/ImproveSekemPage').then(m => ({ default: m.ImproveSekemPage })));
+const SimulatorPage = lazy(() => import('./pages/SimulatorPage').then(m => ({ default: m.SimulatorPage })));
 
 
 function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
@@ -213,6 +218,11 @@ function App() {
         <Route path="/collaborations" element={<CollaborationsPage />} />
         <Route path="/open-days" element={<ImportantDatesPage />} />
         <Route path="/campaign/mobile-first" element={<CampaignMobileFirst />} />
+        <Route path="/bagrut-dates" element={<BagrutDatesPage />} />
+        <Route path="/psychometric-dates" element={<PsychometricDatesPage />} />
+        <Route path="/calculate-grade" element={<SubjectGradeCalculatorPage />} />
+        <Route path="/calculate-grade/:subject" element={<SubjectGradeCalculatorPage />} />
+        <Route path="/improve-sekem" element={<ImproveSekemPage />} />
       </Routes>
       </Suspense>
       <CookieConsent />

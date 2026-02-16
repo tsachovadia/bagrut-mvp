@@ -18,6 +18,18 @@ const STATIC_PAGES = [
     { path: '/tracking', priority: '0.6', changefreq: 'weekly' },
     { path: '/collaborations', priority: '0.5', changefreq: 'monthly' },
     { path: '/write-for-us', priority: '0.4', changefreq: 'monthly' },
+    { path: '/bagrut-dates', priority: '0.8', changefreq: 'monthly' },
+    { path: '/psychometric-dates', priority: '0.8', changefreq: 'monthly' },
+    { path: '/improve-sekem', priority: '0.8', changefreq: 'monthly' },
+    { path: '/calculate-grade', priority: '0.7', changefreq: 'monthly' },
+    { path: '/calculate-grade/math', priority: '0.7', changefreq: 'monthly' },
+    { path: '/calculate-grade/english', priority: '0.7', changefreq: 'monthly' },
+    { path: '/calculate-grade/physics', priority: '0.7', changefreq: 'monthly' },
+    { path: '/calculate-grade/bible', priority: '0.6', changefreq: 'monthly' },
+    { path: '/calculate-grade/history', priority: '0.6', changefreq: 'monthly' },
+    { path: '/calculate-grade/literature', priority: '0.6', changefreq: 'monthly' },
+    { path: '/calculate-grade/chemistry', priority: '0.6', changefreq: 'monthly' },
+    { path: '/calculate-grade/biology', priority: '0.6', changefreq: 'monthly' },
 ];
 
 // Known blog article slugs (mirrored from src/data/articles.ts to avoid importing frontend code)
