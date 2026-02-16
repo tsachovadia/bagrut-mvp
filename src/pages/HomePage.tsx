@@ -46,6 +46,24 @@ export const HomePage = () => {
                 <meta name="description" content="מחשבון בגרויות חינמי — חשבו ממוצע בגרות, בדקו סיכויי קבלה ל-500+ תוכניות לימוד, וגלו לאן אתם יכולים להתקבל. קהילה של 50,000+ תלמידים." />
                 <meta property="og:image" content="https://mitlabtim.co.il/logo_new.png" />
                 <link rel="canonical" href="https://mitlabtim.co.il" />
+                <script type="application/ld+json">{JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "WebApplication",
+                    "name": "מתלבטים בלימודים",
+                    "url": "https://mitlabtim.co.il",
+                    "description": "מחשבון סיכויי קבלה לאוניברסיטאות ומכללות בישראל — בדקו ממוצע בגרות, סכם אוניברסיטאי וסיכויי קבלה ל-500+ תוכניות.",
+                    "applicationCategory": "EducationalApplication",
+                    "operatingSystem": "Web",
+                    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ILS" },
+                    "inLanguage": "he",
+                    "provider": {
+                        "@type": "Organization",
+                        "name": "מתלבטים בלימודים",
+                        "url": "https://mitlabtim.co.il",
+                        "logo": "https://mitlabtim.co.il/logo_new.png",
+                        "sameAs": ["https://t.me/MitlabtimBot"]
+                    }
+                })}</script>
             </Helmet>
             <Header />
 

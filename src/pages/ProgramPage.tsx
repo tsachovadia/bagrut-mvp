@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
     ChevronRight, Loader2, School, BookOpen, Briefcase, Clock,
     GraduationCap, ExternalLink, Send, CheckCircle2, AlertCircle,
@@ -165,8 +166,43 @@ export const ProgramPage = ({ userStats }: ProgramPageProps) => {
         );
     }
 
+    const pageTitle = `${program.name} — ${program.institution?.name} | מתלבטים בלימודים`;
+    const pageDescription = program.description
+        || `תוכנית ${program.name} ב${program.institution?.name} — ${program.degree_type}, ${program.duration_years} שנים. בדקו תנאי קבלה, סיכויי קבלה ושוחחו עם סטודנטים.`;
+
     return (
         <div className="flex-1 bg-gray-50 pb-20">
+            <Helmet>
+                <title>{pageTitle}</title>
+                <meta name="description" content={pageDescription} />
+                <meta property="og:title" content={pageTitle} />
+                <meta property="og:description" content={pageDescription} />
+                <meta property="og:type" content="website" />
+                <link rel="canonical" href={`https://mitlabtim.co.il/program/${id}`} />
+                <script type="application/ld+json">{JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "EducationalOccupationalProgram",
+                    "name": program.name,
+                    "description": pageDescription,
+                    "provider": {
+                        "@type": "EducationalOrganization",
+                        "name": program.institution?.name,
+                        ...(program.institution?.website_url && { "url": program.institution.website_url }),
+                    },
+                    "educationalProgramMode": "full-time",
+                    "timeToComplete": `P${program.duration_years}Y`,
+                    "educationalCredentialAwarded": program.degree_type,
+                    "url": `https://mitlabtim.co.il/program/${id}`,
+                })}</script>
+                <script type="application/ld+json">{JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "תוכניות לימוד", "item": "https://mitlabtim.co.il/programs" },
+                        { "@type": "ListItem", "position": 2, "name": program.name, "item": `https://mitlabtim.co.il/program/${id}` },
+                    ],
+                })}</script>
+            </Helmet>
             {/* Breadcrumb */}
             <div className="bg-white border-b border-gray-100">
                 <div className="max-w-4xl mx-auto px-4 h-10 flex items-center">

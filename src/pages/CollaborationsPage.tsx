@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { Handshake, Target, Users, Zap, Mail, Phone, ArrowLeft } from 'lucide-react';
@@ -6,6 +7,12 @@ import { Handshake, Target, Users, Zap, Mail, Phone, ArrowLeft } from 'lucide-re
 export function CollaborationsPage() {
     return (
         <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
+            <Helmet>
+                <title>שיתופי פעולה — מתלבטים בלימודים</title>
+                <meta name="description" content="רוצים לשתף פעולה עם הפלטפורמה הגדולה בישראל לבדיקת סיכויי קבלה? מוסדות אקדמיים, מכינות ומותגים — בואו נעשה ביחד." />
+                <meta property="og:title" content="שיתופי פעולה — מתלבטים בלימודים" />
+                <link rel="canonical" href="https://mitlabtim.co.il/collaborations" />
+            </Helmet>
             <Header />
 
             <main className="flex-grow">

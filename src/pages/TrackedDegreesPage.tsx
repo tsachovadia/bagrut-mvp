@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { TrackedDegreesWidget } from '../components/TrackedDegreesWidget';
@@ -33,6 +34,11 @@ export const TrackedDegreesPage = () => {
 
     return (
         <div className="min-h-screen flex flex-col font-sans bg-gray-50" dir="rtl">
+            <Helmet>
+                <title>התוכניות שלי — מתלבטים בלימודים</title>
+                <meta name="description" content="עקבו אחרי תוכניות הלימוד שמעניינות אתכם ובדקו את סיכויי הקבלה שלכם בכל אחת מהן." />
+                <link rel="canonical" href="https://mitlabtim.co.il/tracking" />
+            </Helmet>
             <Header />
             <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
                 <div className="mb-6">

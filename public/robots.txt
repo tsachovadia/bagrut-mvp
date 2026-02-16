@@ -1,10 +1,11 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mitlabtim.co.il/sitemap.xml
+Sitemap: https://mitlabtim.co.il/api/sitemap
 
 # Block admin/debug routes
 Disallow: /admin/
 Disallow: /debug/
+Disallow: /backstage
 Disallow: /client-portal
 Disallow: /campaign/

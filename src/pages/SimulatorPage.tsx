@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Sparkles, ArrowRight, AlertCircle, Calculator, TrendingUp, RotateCcw } from 'lucide-react';
 import { Button } from '../components/ui/shim';
 import { loadUserData } from '../lib/userData';
@@ -138,6 +138,13 @@ export const SimulatorPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans" dir="rtl">
+            <Helmet>
+                <title>סימולטור שיפור ציונים — מתלבטים בלימודים</title>
+                <meta name="description" content="שחקו עם הציונים וראו איך שיפור בגרויות או פסיכומטרי ישפיע על סיכויי הקבלה שלכם לאוניברסיטאות בישראל." />
+                <meta property="og:title" content="סימולטור שיפור ציונים — מתלבטים בלימודים" />
+                <meta property="og:description" content="גלו כמה נקודות סכם תרוויחו משיפור הציונים שלכם." />
+                <link rel="canonical" href="https://mitlabtim.co.il/dashboard" />
+            </Helmet>
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Header Section */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">

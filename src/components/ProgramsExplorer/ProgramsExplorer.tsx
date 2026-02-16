@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useProgramFilters } from '../../hooks/useProgramFilters';
 import { Search, Filter, X, Sparkles, ArrowLeft, ChevronDown } from 'lucide-react';
 import { Button, Badge } from '../ui/shim';
@@ -169,6 +170,13 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
 
     return (
         <div className="w-full relative min-h-screen pb-20 bg-gray-50">
+            <Helmet>
+                <title>חיפוש תוכניות לימוד — מתלבטים בלימודים</title>
+                <meta name="description" content="חפשו וסננו מבין 500+ תוכניות לימוד בכל האוניברסיטאות והמכללות בישראל. בדקו תנאי קבלה, סכם נדרש וסיכויי קבלה לפי הציונים שלכם." />
+                <meta property="og:title" content="סייר התוכניות — מתלבטים בלימודים" />
+                <meta property="og:description" content="500+ תוכניות לימוד, תנאי קבלה וסיכויים — הכל במקום אחד." />
+                <link rel="canonical" href="https://mitlabtim.co.il/programs" />
+            </Helmet>
             {/* Sticky Header */}
             <div className="sticky top-10 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 py-2.5">

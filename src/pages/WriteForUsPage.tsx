@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { PenTool, Target, Users, CheckCircle, ArrowLeft } from 'lucide-react';
@@ -6,6 +7,12 @@ import { PenTool, Target, Users, CheckCircle, ArrowLeft } from 'lucide-react';
 export function WriteForUsPage() {
     return (
         <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
+            <Helmet>
+                <title>כתבו אצלנו — מתלבטים בלימודים</title>
+                <meta name="description" content="סטודנטים, בוגרים ואנשי חינוך — שתפו את הידע שלכם! כתבו מאמרים על לימודים אקדמיים, קבלה לאוניברסיטאות ותכנון קריירה." />
+                <meta property="og:title" content="כתבו אצלנו — מתלבטים בלימודים" />
+                <link rel="canonical" href="https://mitlabtim.co.il/write-for-us" />
+            </Helmet>
             <Header />
 
             <main className="flex-grow">
