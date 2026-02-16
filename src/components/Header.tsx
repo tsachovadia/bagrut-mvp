@@ -2,8 +2,8 @@ import { Button } from './ui/shim';
 import { LogOut, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { isProduction } from '../utils/env';
 import { useNavigate } from 'react-router-dom';
+import { isProduction } from '../utils/env';
 
 export function Header() {
     const navigate = useNavigate();
@@ -56,9 +56,8 @@ export function Header() {
                         }} text="קהילה" />
                         <NavItem onClick={() => navigate('/open-days')} text="ימים פתוחים" />
                         <NavItem onClick={() => navigate('/collaborations')} text="שיתופי פעולה" />
-
                         {!isProduction && (
-                            <NavItem onClick={() => navigate('/admin/shadow')} text="CRM" />
+                            <NavItem onClick={() => navigate('/backstage')} text="Backstage" />
                         )}
                     </nav>
 

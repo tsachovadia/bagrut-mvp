@@ -132,13 +132,13 @@ export function MobileBottomNav() {
                                 ))}
                                 {!import.meta.env.PROD && (
                                     <button
-                                        onClick={() => { setIsMenuOpen(false); navigate('/admin/shadow'); }}
+                                        onClick={() => { setIsMenuOpen(false); navigate('/backstage'); }}
                                         className="w-full flex items-center p-4 rounded-xl hover:bg-gray-50 text-gray-700"
                                     >
                                         <div className="p-2 rounded-lg ml-4 bg-gray-100">
                                             <Users size={20} className="text-gray-500" />
                                         </div>
-                                        <span className="font-medium text-lg">Admin CRM</span>
+                                        <span className="font-medium text-lg">Backstage</span>
                                     </button>
                                 )}
                             </div>

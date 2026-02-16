@@ -21,7 +21,6 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { isProduction } from './utils/env';
-
 // Lazy loaded — secondary pages
 const CalculatorPage = lazy(() => import('./pages/CalculatorPage').then(m => ({ default: m.CalculatorPage })));
 const ProgramPage = lazy(() => import('./pages/ProgramPage').then(m => ({ default: m.ProgramPage })));
@@ -34,12 +33,9 @@ const CollaborationsPage = lazy(() => import('./pages/CollaborationsPage').then(
 const WriteForUsPage = lazy(() => import('./pages/WriteForUsPage').then(m => ({ default: m.WriteForUsPage })));
 const TrackedDegreesPage = lazy(() => import('./pages/TrackedDegreesPage').then(m => ({ default: m.TrackedDegreesPage })));
 const TermsOfUse = lazy(() => import('./components/TermsOfUse').then(m => ({ default: m.TermsOfUse })));
-const ClientPortal = lazy(() => import('./pages/ClientPortal').then(m => ({ default: m.ClientPortal })));
 const CampaignMobileFirst = lazy(() => import('./pages/CampaignMobileFirst').then(m => ({ default: m.CampaignMobileFirst })));
 const ProgramsDatabaseViewer = lazy(() => import('./components/Debug/ProgramsDatabaseViewer').then(m => ({ default: m.ProgramsDatabaseViewer })));
-
-// Lazy loaded — admin (dev only, single page)
-const DashboardPage = lazy(() => import('./pages/Admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const Backstage = lazy(() => import('./pages/Backstage').then(m => ({ default: m.Backstage })));
 
 
 function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
@@ -209,9 +205,7 @@ function App() {
         } />
         <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
         <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
-        <Route path="/admin/shadow" element={!isProduction ? <DashboardPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/*" element={<Navigate to="/admin/shadow" replace />} />
-        <Route path="/client-portal" element={<ClientPortal />} />
+        <Route path="/backstage" element={!isProduction ? <Backstage /> : <Navigate to="/" />} />
         <Route path="/tracking" element={<TrackedDegreesPage />} />
         <Route path="/community" element={<Navigate to="/" replace />} />
         <Route path="/collaborations" element={<CollaborationsPage />} />

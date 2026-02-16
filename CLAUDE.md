@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Israeli Bagrut (high school) grade calculator and university admission simulator. Students enter grades, get weighted averages with university-specific bonuses, and see admission eligibility across programs. Includes a Telegram bot for community routing, an admin CRM ("ShadowNet") for lead management, and content marketing pages. All UI is in Hebrew with RTL layout.
+Israeli Bagrut (high school) grade calculator and university admission simulator. Students enter grades, get weighted averages with university-specific bonuses, and see admission eligibility across programs. Includes a Telegram bot for community routing, a lightweight admin page ("Backstage") for viewing all users/leads, and content marketing pages. All UI is in Hebrew with RTL layout.
 
 ## Commands
 
@@ -107,24 +107,17 @@ React Router v7 in `App.tsx`. Routes:
 - `/collaborations` — partnerships page
 - `/open-days` — important dates
 - `/write-for-us` — content contributor page
-- `/client-portal` — client demo portal (token-gated)
-
 **Admin** (dev only, blocked in production via `isProduction`):
-- `/admin/shadow` — dashboard (KPIs, funnel, segments)
-- `/admin/shadow/people` — unified user management
-- `/admin/shadow/community` — forum/group management
-- `/admin/shadow/partners` — partner management
-- `/admin/shadow/metrics` — detailed metrics
+- `/backstage` — people-first admin dashboard (Backstage)
 
-### Admin CRM (ShadowNet)
+### Admin — Backstage (מאחורי הקלעים)
 
-- `src/pages/Admin/DashboardPage.tsx` — KPI cards, funnel, segment donuts
-- `src/pages/Admin/PeoplePage.tsx` — unified web+bot users, search, filters, profile drawer
-- `src/pages/Admin/CommunityPage.tsx` → `GroupsManager` — forum topic CRUD
-- `src/pages/Admin/PartnersPage.tsx` — partner management
-- `src/pages/Admin/MetricsDashboard.tsx` — real metrics via API
-- `src/components/Admin/AdminShell.tsx` — sidebar nav, global search (Ctrl+K)
-- `src/components/Admin/People/UserProfilePanel.tsx` — full profile drawer with gap analysis
+Single-page admin at `src/pages/Backstage.tsx` with 3 tabs:
+1. **אנשים** (People) — `unified_profiles` VIEW: searchable table with name, source icon, lead score, last active, phone. Click → profile drawer with contact/academic/engagement/timeline/bot messages sections
+2. **לידים מהירים** (Soft Leads) — `soft_leads` table: quick leads from website modals/forms (name, phone, email, source)
+3. **פייסבוק** (Facebook) — merges `leads` + `facebook_leads` tables: FB group imports with name, email, dilemma/interests, status
+
+Dev-only: guarded by `!isProduction` in route + `!import.meta.env.PROD` in nav menus
 
 ## Design System
 
@@ -137,12 +130,12 @@ All UI text is hardcoded Hebrew. Use `dir="rtl"` on containers. No i18n library.
 ## Environment Differences
 
 Controlled by `isProduction` in `src/utils/env.ts`:
-- Dev: Admin CRM accessible, sample data button visible, debug routes available
-- Prod: Admin routes redirect to home, sample data hidden
+- Dev: Backstage accessible, sample data button visible, debug routes available
+- Prod: Backstage redirects to home, sample data hidden
 
 ## Supabase
 
-Key tables: `user_profiles`, `programs`, `admissions`, `bug_reports`, `leads`, `soft_leads`, `partners`, `bot_users`, `bot_messages_log`, `bot_groups`, `bot_campaigns`, `profile_links`. Migrations in `supabase/migrations/`.
+Key tables: `user_profiles`, `programs`, `admissions`, `bug_reports`, `leads`, `soft_leads`, `facebook_leads`, `partners`, `bot_users`, `bot_messages_log`, `bot_groups`, `bot_campaigns`, `profile_links`. View: `unified_profiles`. Migrations in `supabase/migrations/`.
 
 ## Key Types (src/types/)
 
@@ -157,16 +150,14 @@ Key tables: `user_profiles`, `programs`, `admissions`, `bug_reports`, `leads`, `
 api/                    Vercel serverless functions
   lib/telegram/         Bot handlers, services, client
   lib/shared/           Shared utilities
-  metrics/              Metrics API endpoints
+  metrics/social-proof  Public social proof endpoint (only surviving metrics endpoint)
   cron/                 Cron jobs (drip campaigns, reminders)
 src/
   components/           React components
-    Admin/              ShadowNet CRM components
     Dashboard/          Student dashboard panels
     ProgramsExplorer/   Program search/filter
     blog/               Blog components
-  pages/                Page-level components
-    Admin/              Admin pages
+  pages/                Page-level components (incl. Backstage.tsx)
   utils/                Calculation engine, helpers
   lib/                  Supabase client, consent, userData
   types/                TypeScript type definitions

@@ -20,6 +20,65 @@ Entry format:
 
 ## Sessions
 
+### 2026-02-16 — Claude Code (Session 13, ShadowNet Deleted → Backstage Built)
+**What was done**: Deleted the entire ShadowNet admin CRM (31 files) and replaced it with a single lightweight "Backstage" page. Backstage is people-first: 3 tabs (unified profiles, soft leads, Facebook leads) + profile drawer.
+**Files deleted** (31 files):
+- `src/pages/Admin/` — 7 pages (DashboardPage, PeoplePage, MetricsDashboard, CRMPage, GroupsPage, CommunityPage, PartnersPage)
+- `src/components/Admin/` — 10 components (AdminShell, KPICard, FunnelChart, TimeSeriesChart, SegmentDonut, UserProfilePanel, GroupsManager, UsersTable, SoftLeadsTable, FeedbackTable, JourneyStageFlow)
+- `src/hooks/useMetrics.ts`, `useUnifiedPeople.ts`, `usePartners.ts`
+- `api/metrics/overview.ts`, `funnel.ts`, `timeseries.ts`, `segments.ts`, `client-view.ts`
+- `api/admin/partner-billing.ts`, `partners.ts`
+- `src/pages/ClientPortal.tsx`
+**Files created**:
+- **`src/pages/Backstage.tsx`** — Single admin page (~580 lines) with:
+  - 3 tabs: אנשים (unified_profiles), לידים מהירים (soft_leads), פייסבוק (leads + facebook_leads merged)
+  - People table: name, source icon (web/bot/linked), lead score badge, last active, phone
+  - Profile drawer: contact, academic (bagrut/psychometric), engagement (lead score, stage, temperature), timeline, bot messages
+  - Search (debounced, ilike on name/email/phone/telegram)
+  - Dev-only access (`!isProduction` route guard)
+**Files modified**:
+- `src/App.tsx` — Removed all ShadowNet imports/routes, added Backstage lazy import + dev-only route
+- `src/components/Header.tsx` — Replaced Admin CRM nav link with Backstage (dev only)
+- `src/components/MobileBottomNav.tsx` — Added Backstage to menu drawer (dev only)
+**Key decisions**:
+- Name: "Backstage" (מאחורי הקלעים) — friendlier than ShadowNet
+- Single page replaces 5 admin pages — KISS for a pre-revenue project
+- Facebook tab merges both `leads` and `facebook_leads` tables (normalized into FbLead[])
+- Kept `api/metrics/social-proof.ts` (public, used by landing page hero)
+- No charts, no funnels, no export — just see your people and their data
+**Open items**:
+- Consider adding inline search for soft leads and Facebook tabs
+- Could add quick-action buttons (WhatsApp, email) in profile drawer later
+- CLAUDE.md needs ShadowNet references updated to Backstage
+
+### 2026-02-16 — Claude Code (Session 12, Open Days Page Expansion + SEO + Table Redesign)
+**What was done**: Massively expanded ImportantDatesPage with verified 2026 data and SEO optimization, then redesigned UI from card-based to minimal table layout per user feedback.
+**Files changed**:
+- **`src/pages/ImportantDatesPage.tsx`** — Complete rewrite (two iterations):
+  - 33 events (was 15): 20 open days (10 universities + 7 colleges incl. past), 4 psychometric, 2 bagrut, 7 registration deadlines
+  - New institutions: חיפה, רייכמן, המכללה למינהל, רופין, ספיר, שנקר, אפקה, עזריאלי, סמי שמעון
+  - BIU now has 4 dates (Feb, Mar, Jun, Sep) — verified from official site
+  - Psychometric: 4 NITE dates with registration deadlines and exam locations
+  - Bagrut: Summer exam period (May 12 – Jul 3) with link to official MoE PDF
+  - Registration deadlines: TAU (Feb 1 – May 31), HUJI (Feb 1 – Aug 31, medicine Apr 30), Haifa (May 15), BIU, Technion
+  - **SEO**: JSON-LD structured data (Event + ItemList schema), FAQPage schema with 6 Q&As
+  - **SEO**: Enhanced meta tags — title, description, keywords, og tags, canonical
+  - **SEO**: FAQ section with expandable `<details>` — targets long-tail Hebrew search queries
+  - **Design (v2 — table redesign)**: Minimal table-based layout with CSS Grid rows (`grid-cols-[56px_8px_1fr_80px_90px_auto]`), color-coded dots per event type (purple/orange/blue/red), grouped by month headers, compact filter pills, max-w-3xl. Removed card-based design, stats cards, collapsible months, framer-motion month animations. White background, clean typography.
+  - Performance: `useMemo` for filtered events and grouped months
+- **`public/sitemap.xml`** — Added `/calculator` route (was missing from Session 11)
+**Key decisions**:
+- Past events kept in data (hidden by default, toggle to show) — useful for completeness
+- Technion open day removed — couldn't verify 2026 date (2025 was Feb 20, no 2026 announced yet)
+- Reichman date estimated as Mar 20 — couldn't find exact 2026 date, used approximate
+- FAQ answers include internal links text (calculator, programs) for cross-page SEO
+- Table redesign: user preferred minimal/compact over card-based layout
+**Data sources**: TAU official, BIU official, BGU official, HUJI official, Haifa official, NITE, MoE exams PDF, Sapir, Shenkar, Afeka, Azrieli, SCE, Colman, Ruppin
+**Open items**:
+- Some college dates may not be announced yet — check back in March
+- Reichman exact date needs verification
+- Could add Technion when they announce 2026 date
+
 ### 2026-02-16 — Claude Code (Session 11, Homepage Redesign + Route Separation)
 **What was done**: Completed homepage redesign (plan from plan file) and separated homepage from calculator into distinct routes.
 **Files changed**:
