@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useAnalytics } from '../../hooks/useAnalytics';
+import { getUtmParams } from '../../utils/utm';
+import { trackFbEvent } from '../../utils/fb-pixel';
 
 interface SmartWelcomeModalProps {
     isOpen: boolean;
@@ -23,15 +25,7 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
         setIsSubmitting(true);
 
         try {
-            // Extract UTM parameters
-            const params = new URLSearchParams(window.location.search);
-            const utmPayload = {
-                utm_source: params.get('utm_source'),
-                utm_medium: params.get('utm_medium'),
-                utm_campaign: params.get('utm_campaign'),
-                utm_content: params.get('utm_content'),
-                utm_term: params.get('utm_term')
-            };
+            const utmPayload = getUtmParams();
 
             const { error } = await supabase
                 .from('soft_leads')
@@ -56,6 +50,7 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
                 source: 'welcome_modal_v2',
                 ...utmPayload
             });
+            trackFbEvent('Lead', { source: 'welcome_modal_v2' });
 
             setTimeout(() => {
                 setIsSubmitting(false);

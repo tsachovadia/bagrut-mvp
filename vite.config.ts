@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => {
       {
         name: 'html-transform',
         transformIndexHtml(html) {
-          return html.replace(/%VITE_GTM_ID%/g, env.VITE_GTM_ID || 'GTM-526PQ28M')
+          return html
+            .replace(/%VITE_GTM_ID%/g, env.VITE_GTM_ID || 'GTM-526PQ28M')
+            .replace(/%VITE_FB_PIXEL_ID%/g, env.VITE_FB_PIXEL_ID || '')
         }
       }
     ],

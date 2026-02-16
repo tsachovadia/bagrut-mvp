@@ -13,6 +13,7 @@ import { Button } from '../ui/shim';
 import { Calculator } from 'lucide-react';
 import { useTrackedDegrees } from '../../context/TrackedDegreesContext';
 import { TelegramCTA } from '../TelegramCTA';
+import { ShareResultsBanner } from '../ShareResultsBanner';
 
 export const UnifiedDashboard = () => {
     const navigate = useNavigate();
@@ -236,9 +237,20 @@ export const UnifiedDashboard = () => {
         );
     }
 
+    const eligibleCount = originalStats?.degrees?.filter(
+        (d: any) => d.status === 'excellent' || d.status === 'good'
+    ).length ?? 0;
+
     return (
         <ResultsAuthGate>
             <div className="min-h-screen bg-[#F5F5F7] font-sans p-2 lg:p-3 dir-rtl lg:overflow-hidden overflow-y-auto" dir="rtl">
+                {/* Share Results Banner */}
+                <div className="max-w-[1920px] mx-auto mb-2">
+                    <ShareResultsBanner
+                        eligibleCount={eligibleCount}
+                        bagrutAverage={originalStats?.bagrutAverage ?? 0}
+                    />
+                </div>
                 <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row gap-3 h-auto lg:h-[calc(100vh-24px)] overflow-hidden">
 
                     {/* 1. Sidebar (Rightmost in RTL) */}

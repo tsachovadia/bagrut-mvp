@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { trackFbEvent } from '../utils/fb-pixel';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
@@ -28,6 +29,7 @@ export function ResultsAuthGate({ children }: ResultsAuthGateProps) {
                 verified: true,
                 method: 'google_auth_phone'
             });
+            trackFbEvent('CompleteRegistration');
         }
     }, [session, hasPhone, trackEvent]);
 

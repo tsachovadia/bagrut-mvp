@@ -10,6 +10,7 @@ import './App.css';
 import { HomePage } from './pages/HomePage';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
 import { initializeGTM, trackEvent } from './utils/gtm';
+import { captureUtm } from './utils/utm';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
 import { loadUserData, saveUserData, type UserData } from './lib/userData';
 import { CookieConsent } from './components/CookieConsent';
@@ -76,8 +77,9 @@ function App() {
   // Load initial data
   useEffect(() => {
     async function init() {
-      // Initialize GTM
+      // Initialize tracking
       initializeGTM();
+      captureUtm();
 
       const data = await loadUserData();
       if (data) {

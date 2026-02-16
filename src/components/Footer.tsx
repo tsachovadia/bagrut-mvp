@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { trackEvent } from '../utils/gtm';
+import { trackFbEvent } from '../utils/fb-pixel';
+import { getUtmParams } from '../utils/utm';
 import { BugReportWidget } from './BugReportWidget';
 import { clearAllUserData } from '../lib/userData';
 import { isProduction } from '../utils/env';
@@ -16,7 +18,7 @@ export function Footer() {
         if (!phone && !email) return;
         trackEvent('footer_lead_submit', { has_email: !!email, has_phone: !!phone });
 
-        // Save to Supabase
+        // Save to Supabase with UTM
         const { error } = await supabase
             .from('soft_leads')
             .insert([{
@@ -24,9 +26,11 @@ export function Footer() {
                 email: email || null,
                 interest: 'general',
                 source: 'footer_form',
+                ...getUtmParams(),
             }]);
 
         if (error) console.error('Footer lead save error:', error);
+        trackFbEvent('Lead', { source: 'footer_form' });
 
         setSubmitted(true);
     };
