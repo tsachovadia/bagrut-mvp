@@ -8,23 +8,35 @@ import { clearAllUserData } from '../lib/userData';
 import { isProduction } from '../utils/env';
 import { supabase } from '../lib/supabase';
 
+const interestOptions = [
+    { value: '', label: 'מה מעניין אותך?' },
+    { value: 'calculator', label: 'מחשבון בגרויות' },
+    { value: 'programs', label: 'חיפוש תוכניות לימוד' },
+    { value: 'psychometric', label: 'פסיכומטרי' },
+    { value: 'community', label: 'קהילה וייעוץ' },
+    { value: 'general', label: 'מידע כללי' },
+];
+
 export function Footer() {
+    const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
+    const [interest, setInterest] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
     const handleLeadSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!phone && !email) return;
-        trackEvent('footer_lead_submit', { has_email: !!email, has_phone: !!phone });
+        if (!name || (!phone && !email)) return;
+        trackEvent('footer_lead_submit', { has_email: !!email, has_phone: !!phone, interest: interest || 'none' });
 
         // Save to Supabase with UTM
         const { error } = await supabase
             .from('soft_leads')
             .insert([{
+                full_name: name,
                 phone,
                 email: email || null,
-                interest: 'general',
+                interest: interest || 'general',
                 source: 'footer_form',
                 ...getUtmParams(),
             }]);
@@ -41,32 +53,51 @@ export function Footer() {
             <div className="bg-brand-purple-50/50 border-b border-brand-purple-100">
                 <div className="max-w-3xl mx-auto px-4 py-6">
                     {!submitted ? (
-                        <form onSubmit={handleLeadSubmit} className="flex flex-col sm:flex-row items-center gap-3">
-                            <p className="text-sm font-bold text-gray-800 shrink-0">
+                        <form onSubmit={handleLeadSubmit} className="space-y-3">
+                            <p className="text-sm font-bold text-gray-800 text-center">
                                 השאירו פרטים ונחזור אליכם
                             </p>
-                            <input
-                                type="tel"
-                                placeholder="טלפון"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full sm:w-40 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-purple-400 focus:ring-1 focus:ring-brand-purple-200"
-                                dir="ltr"
-                            />
-                            <input
-                                type="email"
-                                placeholder="אימייל (אופציונלי)"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full sm:w-48 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-purple-400 focus:ring-1 focus:ring-brand-purple-200"
-                                dir="ltr"
-                            />
-                            <button
-                                type="submit"
-                                className="w-full sm:w-auto bg-brand-purple-600 hover:bg-brand-purple-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition-colors shrink-0"
-                            >
-                                שלחו לי
-                            </button>
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="שם מלא"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full sm:w-36 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-purple-400 focus:ring-1 focus:ring-brand-purple-200"
+                                    required
+                                />
+                                <input
+                                    type="tel"
+                                    placeholder="טלפון"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    className="w-full sm:w-36 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-purple-400 focus:ring-1 focus:ring-brand-purple-200"
+                                    dir="ltr"
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="אימייל (אופציונלי)"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full sm:w-44 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-purple-400 focus:ring-1 focus:ring-brand-purple-200"
+                                    dir="ltr"
+                                />
+                                <select
+                                    value={interest}
+                                    onChange={(e) => setInterest(e.target.value)}
+                                    className="w-full sm:w-44 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-purple-400 focus:ring-1 focus:ring-brand-purple-200 bg-white text-gray-700"
+                                >
+                                    {interestOptions.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto bg-brand-purple-600 hover:bg-brand-purple-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition-colors shrink-0"
+                                >
+                                    שלחו לי
+                                </button>
+                            </div>
                         </form>
                     ) : (
                         <p className="text-center text-sm font-bold text-brand-purple-700">

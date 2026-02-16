@@ -20,6 +20,41 @@ Entry format:
 
 ## Sessions
 
+### 2026-02-16 — Claude Code (Session 14, Growth Infrastructure + Backstage Redesign)
+**What was done**:
+1. **Viral sharing loop**: Created ShareResultsBanner on dashboard — WhatsApp share + Copy Link with UTM tracking
+2. **Facebook Pixel activation**: Pixel ID was in .env but never wired up. Now active with PageView, Lead, CompleteRegistration, and Share events
+3. **UTM tracking centralized**: Created shared utilities, extended UTM capture to all lead forms (was only in SmartWelcomeModal)
+4. **Backstage redesign**: User said it was "ממש גרוע". Rebuilt with:
+   - KPI summary cards at top (leads today, this week, total, registered users)
+   - UTM source breakdown badges
+   - Soft leads tab as default (was people) with full UTM columns, interest, and click-to-detail drawer
+   - Soft lead detail drawer: contact, UTM source/medium/campaign/content/term, interest, metadata (page_url, referrer), timeline
+   - People tab: added bagrut avg, psychometric, tracked programs columns + last active
+   - Search works on all tabs (was people-only)
+**Files created**:
+- `src/utils/utm.ts` — centralized UTM capture to sessionStorage + retrieval
+- `src/utils/fb-pixel.ts` — thin `trackFbEvent()` wrapper with safe guard
+- `src/components/ShareResultsBanner.tsx` — WhatsApp + Copy Link viral share banner
+**Files modified**:
+- `index.html` — Facebook Pixel base code (init + PageView), noscript fallback in body
+- `vite.config.ts` — Added FB pixel ID replacement (`%VITE_FB_PIXEL_ID%`)
+- `src/App.tsx` — Added `captureUtm()` on app load
+- `src/components/marketing/SmartWelcomeModal.tsx` — Refactored UTM to use shared utility, added FB Lead event
+- `src/components/Footer.tsx` — Added UTM params + FB Lead event to soft_leads insert
+- `src/components/ResultsAuthGate.tsx` — Added FB CompleteRegistration event
+- `src/components/Dashboard/UnifiedDashboard.tsx` — Wired ShareResultsBanner at top
+- `src/pages/Backstage.tsx` — Full redesign (see above)
+**Key decisions**:
+- Soft leads tab is now default in Backstage (most actionable for growth)
+- UTM stored in sessionStorage (persists across SPA navigation, clears on tab close)
+- FB Pixel noscript must go in body, not head (parse5 error)
+- ShareResultsBanner dismissable per session, hidden when eligibleCount <= 0
+**Open items**:
+- LeadCaptureModal.tsx may also need UTM params (wasn't modified — check if it inserts to soft_leads)
+- No Google Ads conversion tags yet (add when running Google ads)
+- Consider adding WhatsApp/email quick-action buttons in Backstage lead drawer
+
 ### 2026-02-16 — Claude Code (Session 13, ShadowNet Deleted → Backstage Built)
 **What was done**: Deleted the entire ShadowNet admin CRM (31 files) and replaced it with a single lightweight "Backstage" page. Backstage is people-first: 3 tabs (unified profiles, soft leads, Facebook leads) + profile drawer.
 **Files deleted** (31 files):

@@ -40,9 +40,18 @@ const features = [
 ];
 
 const universities = [
-    'הטכניון', 'אוניברסיטת תל אביב', 'האוניברסיטה העברית', 'אוניברסיטת בן גוריון',
-    'בר-אילן', 'אוניברסיטת חיפה', 'אוניברסיטת אריאל', 'רייכמן', 'המכללה למנהל',
-    'ספיר', 'שנקר', 'בצלאל', 'MTA', 'עזריאלי',
+    { name: 'הטכניון', short: 'TECHNION', logo: '/logos/technion.png' },
+    { name: 'אוניברסיטת תל אביב', short: 'TAU', logo: '/logos/tau.png' },
+    { name: 'האוניברסיטה העברית', short: 'HUJI', logo: '/logos/huji.png' },
+    { name: 'אוניברסיטת בן גוריון', short: 'BGU', logo: '/logos/bgu.png' },
+    { name: 'בר-אילן', short: 'BIU', logo: '/logos/biu.png' },
+    { name: 'אוניברסיטת חיפה', short: 'UOH', logo: '/logos/haifa.png' },
+    { name: 'אוניברסיטת אריאל', short: 'AU', logo: '/logos/ariel.png' },
+    { name: 'רייכמן', short: 'IDC', logo: '/logos/reichman.png' },
+    { name: 'המכללה למנהל', short: 'MLA', logo: '/logos/colman.png' },
+    { name: 'מכון ויצמן', short: 'WEIZMANN', logo: '/logos/weizmann.png' },
+    { name: 'HIT — מכון טכנולוגי חולון', short: 'HIT', logo: '/logos/hit.png' },
+    { name: 'האוניברסיטה הפתוחה', short: 'OPENU', logo: '/logos/openu.png' },
 ];
 
 const containerVariants = {
@@ -119,17 +128,30 @@ export function ValuePropositionSection() {
             </div>
 
             {/* University Logos Banner */}
-            <div className="py-8 bg-gray-50/80 border-y border-gray-100 overflow-hidden">
-                <p className="text-center text-xs text-gray-400 font-medium mb-4 tracking-wide">נתוני קבלה מעודכנים מהמוסדות המובילים</p>
-                <div className="relative">
-                    <div className="flex animate-marquee whitespace-nowrap">
-                        {[...universities, ...universities].map((name, i) => (
-                            <span
-                                key={i}
-                                className="mx-6 text-sm font-semibold text-gray-400 hover:text-brand-purple-500 transition-colors shrink-0"
+            <div className="py-10 bg-gray-50/80 border-y border-gray-100">
+                <p className="text-center text-xs text-gray-400 font-medium mb-6 tracking-wide">נתוני קבלה מעודכנים מהמוסדות המובילים</p>
+                <div className="max-w-4xl mx-auto px-4">
+                    <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-4 md:gap-x-10 md:gap-y-5">
+                        {universities.map((u) => (
+                            <div
+                                key={u.short}
+                                className="flex items-center gap-2 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                                title={u.name}
                             >
-                                {name}
-                            </span>
+                                <img
+                                    src={u.logo}
+                                    alt={u.name}
+                                    className="h-8 md:h-10 w-auto object-contain"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                        // Fallback to text if logo not found
+                                        const target = e.currentTarget;
+                                        target.style.display = 'none';
+                                        target.nextElementSibling?.classList.remove('hidden');
+                                    }}
+                                />
+                                <span className="hidden text-sm font-bold text-gray-400 tracking-wide">{u.short}</span>
+                            </div>
                         ))}
                     </div>
                 </div>

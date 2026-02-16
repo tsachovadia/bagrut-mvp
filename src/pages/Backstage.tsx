@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Search, ArrowRight, X, Loader2,
     Globe, Bot, Link2, MessageSquare, Phone, Mail, Send as TelegramIcon,
     GraduationCap, Brain, Calculator, Clock, Users, Facebook, Zap,
+    ExternalLink, TrendingUp, MousePointerClick, Eye,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
 // --- Types ---
 
-type Tab = 'people' | 'soft_leads' | 'fb_leads';
+type Tab = 'soft_leads' | 'people' | 'fb_leads';
 
 interface UnifiedPerson {
     canonical_id: string;
@@ -45,7 +46,15 @@ interface SoftLead {
     email: string | null;
     interest: string | null;
     source: string | null;
+    utm_source: string | null;
+    utm_medium: string | null;
+    utm_campaign: string | null;
+    utm_content: string | null;
+    utm_term: string | null;
+    metadata: Record<string, any> | null;
+    user_profile_id: string | null;
     created_at: string;
+    updated_at: string | null;
 }
 
 interface FbLead {
@@ -107,24 +116,43 @@ function scoreBadge(score: number | null) {
     return <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${color}`}>{s}</span>;
 }
 
+function utmBadge(source: string | null, medium: string | null) {
+    if (!source && !medium) return <span className="text-gray-300 text-[10px]">ישיר</span>;
+    const label = [source, medium].filter(Boolean).join(' / ');
+    const colorMap: Record<string, string> = {
+        google: 'bg-blue-50 text-blue-700 border-blue-200',
+        facebook: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        whatsapp: 'bg-green-50 text-green-700 border-green-200',
+        share: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        telegram: 'bg-sky-50 text-sky-700 border-sky-200',
+    };
+    const color = colorMap[source?.toLowerCase() || ''] || 'bg-purple-50 text-purple-700 border-purple-200';
+    return (
+        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${color}`}>
+            {label}
+        </span>
+    );
+}
+
 // --- Main Component ---
 
 export function Backstage() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<Tab>('people');
+    const [activeTab, setActiveTab] = useState<Tab>('soft_leads');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
 
     // People state
     const [people, setPeople] = useState<UnifiedPerson[]>([]);
-    const [peopleLoading, setPeopleLoading] = useState(true);
+    const [peopleLoading, setPeopleLoading] = useState(false);
     const [selectedPerson, setSelectedPerson] = useState<UnifiedPerson | null>(null);
     const [botMessages, setBotMessages] = useState<BotMessage[]>([]);
     const [messagesLoading, setMessagesLoading] = useState(false);
 
     // Soft leads state
     const [softLeads, setSoftLeads] = useState<SoftLead[]>([]);
-    const [softLeadsLoading, setSoftLeadsLoading] = useState(false);
+    const [softLeadsLoading, setSoftLeadsLoading] = useState(true);
+    const [selectedLead, setSelectedLead] = useState<SoftLead | null>(null);
 
     // Facebook leads state
     const [fbLeads, setFbLeads] = useState<FbLead[]>([]);
@@ -135,6 +163,29 @@ export function Backstage() {
         const t = setTimeout(() => setDebouncedSearch(search), 300);
         return () => clearTimeout(t);
     }, [search]);
+
+    // Fetch soft leads (default tab)
+    const fetchSoftLeads = useCallback(async () => {
+        setSoftLeadsLoading(true);
+        let query = supabase
+            .from('soft_leads')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(200);
+
+        if (debouncedSearch.length >= 2) {
+            const q = `%${debouncedSearch}%`;
+            query = query.or(`full_name.ilike.${q},name.ilike.${q},phone.ilike.${q},email.ilike.${q}`);
+        }
+
+        const { data } = await query;
+        setSoftLeads((data as SoftLead[]) || []);
+        setSoftLeadsLoading(false);
+    }, [debouncedSearch]);
+
+    useEffect(() => {
+        if (activeTab === 'soft_leads') fetchSoftLeads();
+    }, [activeTab, fetchSoftLeads]);
 
     // Fetch people
     const fetchPeople = useCallback(async () => {
@@ -159,26 +210,10 @@ export function Backstage() {
         if (activeTab === 'people') fetchPeople();
     }, [activeTab, fetchPeople]);
 
-    // Fetch soft leads
-    useEffect(() => {
-        if (activeTab !== 'soft_leads') return;
-        setSoftLeadsLoading(true);
-        supabase
-            .from('soft_leads')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(200)
-            .then(({ data }) => {
-                setSoftLeads((data as SoftLead[]) || []);
-                setSoftLeadsLoading(false);
-            });
-    }, [activeTab]);
-
-    // Fetch facebook leads (from both tables)
+    // Fetch facebook leads
     useEffect(() => {
         if (activeTab !== 'fb_leads') return;
         setFbLeadsLoading(true);
-
         Promise.all([
             supabase.from('leads').select('id, full_name, email, age, dilemma, status, created_at').order('created_at', { ascending: false }).limit(200),
             supabase.from('facebook_leads').select('id, fb_name, email, phone, interests, source_group, created_at').order('created_at', { ascending: false }).limit(200),
@@ -224,9 +259,28 @@ export function Backstage() {
         return null;
     }, []);
 
+    // KPI computations
+    const kpis = useMemo(() => {
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const weekAgo = todayStart - 7 * 24 * 60 * 60 * 1000;
+
+        const leadsToday = softLeads.filter(l => new Date(l.created_at).getTime() >= todayStart).length;
+        const leadsThisWeek = softLeads.filter(l => new Date(l.created_at).getTime() >= weekAgo).length;
+
+        // UTM source breakdown
+        const utmBreakdown: Record<string, number> = {};
+        softLeads.forEach(l => {
+            const key = l.utm_source || 'ישיר';
+            utmBreakdown[key] = (utmBreakdown[key] || 0) + 1;
+        });
+
+        return { leadsToday, leadsThisWeek, utmBreakdown };
+    }, [softLeads]);
+
     const tabs: { id: Tab; label: string; count: number }[] = [
-        { id: 'people', label: 'אנשים', count: people.length },
-        { id: 'soft_leads', label: 'לידים מהירים', count: softLeads.length },
+        { id: 'soft_leads', label: 'לידים', count: softLeads.length },
+        { id: 'people', label: 'משתמשים', count: people.length },
         { id: 'fb_leads', label: 'פייסבוק', count: fbLeads.length },
     ];
 
@@ -244,22 +298,45 @@ export function Backstage() {
                     <h1 className="text-lg font-bold text-gray-800">Backstage</h1>
                 </div>
 
-                {activeTab === 'people' && (
-                    <div className="relative">
-                        <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="חיפוש שם, אימייל, טלפון..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-4 pr-9 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-56 sm:w-72"
-                        />
-                    </div>
-                )}
+                <div className="relative">
+                    <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="חיפוש שם, טלפון, אימייל..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-4 pr-9 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-48 sm:w-64"
+                    />
+                </div>
             </header>
 
-            {/* Tabs */}
+            {/* KPI Cards */}
             <div className="px-4 sm:px-6 max-w-6xl mx-auto pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                    <KpiCard label="לידים היום" value={kpis.leadsToday} icon={<Zap className="w-4 h-4" />} color="yellow" />
+                    <KpiCard label="לידים השבוע" value={kpis.leadsThisWeek} icon={<TrendingUp className="w-4 h-4" />} color="green" />
+                    <KpiCard label="סה״כ לידים" value={softLeads.length} icon={<MousePointerClick className="w-4 h-4" />} color="blue" />
+                    <KpiCard label="משתמשים רשומים" value={people.length} icon={<Users className="w-4 h-4" />} color="purple" />
+                </div>
+
+                {/* UTM Breakdown (only if there are leads) */}
+                {Object.keys(kpis.utmBreakdown).length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap mb-4 text-xs">
+                        <span className="text-gray-400 font-medium">מקורות:</span>
+                        {Object.entries(kpis.utmBreakdown)
+                            .sort(([, a], [, b]) => b - a)
+                            .map(([source, count]) => (
+                                <span key={source} className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-600">
+                                    {source} <span className="font-bold text-gray-800">{count}</span>
+                                </span>
+                            ))
+                        }
+                    </div>
+                )}
+            </div>
+
+            {/* Tabs */}
+            <div className="px-4 sm:px-6 max-w-6xl mx-auto">
                 <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200 w-fit">
                     {tabs.map((tab) => (
                         <button
@@ -281,14 +358,80 @@ export function Backstage() {
             <div className="p-4 sm:p-6 pt-3 max-w-6xl mx-auto">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-                    {/* People Tab */}
+                    {/* ========== Soft Leads Tab ========== */}
+                    {activeTab === 'soft_leads' && (
+                        softLeadsLoading ? (
+                            <div className="flex justify-center py-16">
+                                <Loader2 className="w-6 h-6 text-yellow-500 animate-spin" />
+                            </div>
+                        ) : softLeads.length === 0 ? (
+                            <div className="text-center py-16 text-gray-400 text-sm">אין לידים עדיין</div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-right">
+                                    <thead className="bg-gray-50 text-gray-500 text-xs font-medium border-b border-gray-200">
+                                        <tr>
+                                            <th className="px-4 py-3">שם</th>
+                                            <th className="px-3 py-3">טלפון</th>
+                                            <th className="px-3 py-3 hidden sm:table-cell">אימייל</th>
+                                            <th className="px-3 py-3 hidden sm:table-cell">מקור UTM</th>
+                                            <th className="px-3 py-3 hidden md:table-cell">עניין</th>
+                                            <th className="px-3 py-3">מתי</th>
+                                            <th className="px-3 py-3 w-10"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {softLeads.map((lead) => (
+                                            <tr
+                                                key={lead.id}
+                                                onClick={() => setSelectedLead(lead)}
+                                                className="hover:bg-yellow-50/50 cursor-pointer transition-colors"
+                                            >
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <Zap className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+                                                        <div className="min-w-0">
+                                                            <span className="font-medium text-gray-900 block truncate">
+                                                                {lead.full_name || lead.name || '-'}
+                                                            </span>
+                                                            {lead.source && (
+                                                                <span className="text-[10px] text-gray-400">{lead.source}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-3 font-mono text-gray-600 text-xs">{lead.phone || '-'}</td>
+                                                <td className="px-3 py-3 hidden sm:table-cell text-gray-500 text-xs truncate max-w-[180px]">
+                                                    {lead.email || '-'}
+                                                </td>
+                                                <td className="px-3 py-3 hidden sm:table-cell">
+                                                    {utmBadge(lead.utm_source, lead.utm_medium)}
+                                                </td>
+                                                <td className="px-3 py-3 hidden md:table-cell text-gray-500 text-xs truncate max-w-[150px]">
+                                                    {lead.interest || '-'}
+                                                </td>
+                                                <td className="px-3 py-3 text-gray-400 text-[10px] font-mono whitespace-nowrap">
+                                                    {relativeTime(lead.created_at)}
+                                                </td>
+                                                <td className="px-3 py-3">
+                                                    <Eye className="w-3.5 h-3.5 text-gray-300" />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    )}
+
+                    {/* ========== People Tab ========== */}
                     {activeTab === 'people' && (
                         peopleLoading ? (
                             <div className="flex justify-center py-16">
                                 <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
                             </div>
                         ) : people.length === 0 ? (
-                            <div className="text-center py-16 text-gray-400 text-sm">לא נמצאו אנשים</div>
+                            <div className="text-center py-16 text-gray-400 text-sm">לא נמצאו משתמשים</div>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-right">
@@ -297,8 +440,10 @@ export function Backstage() {
                                             <th className="px-4 py-3">שם</th>
                                             <th className="px-3 py-3">מקור</th>
                                             <th className="px-3 py-3">ניקוד</th>
-                                            <th className="px-3 py-3 hidden sm:table-cell">פעילות</th>
-                                            <th className="px-3 py-3 hidden md:table-cell">טלפון</th>
+                                            <th className="px-3 py-3 hidden sm:table-cell">בגרות</th>
+                                            <th className="px-3 py-3 hidden sm:table-cell">פסיכומטרי</th>
+                                            <th className="px-3 py-3 hidden md:table-cell">מעקב</th>
+                                            <th className="px-3 py-3">פעילות אחרונה</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -323,12 +468,24 @@ export function Backstage() {
                                                 </td>
                                                 <td className="px-3 py-3">{sourceIcon(p)}</td>
                                                 <td className="px-3 py-3">{scoreBadge(p.lead_score)}</td>
-                                                <td className="px-3 py-3 hidden sm:table-cell text-gray-400 text-xs font-mono">
+                                                <td className="px-3 py-3 hidden sm:table-cell text-xs text-gray-600 font-mono">
+                                                    {p.bagrut_avg_raw ? Number(p.bagrut_avg_raw).toFixed(1) : '-'}
+                                                </td>
+                                                <td className="px-3 py-3 hidden sm:table-cell text-xs text-gray-600 font-mono">
+                                                    {p.psycho_total || '-'}
+                                                </td>
+                                                <td className="px-3 py-3 hidden md:table-cell">
+                                                    {p.tracked_programs && p.tracked_programs.length > 0 ? (
+                                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200 font-medium">
+                                                            {p.tracked_programs.length} תוכניות
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-300 text-xs">-</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-3 text-gray-400 text-xs font-mono whitespace-nowrap">
                                                     {relativeTime(lastActive(p))}
                                                 </td>
-                                                <td className="px-3 py-3 hidden md:table-cell text-gray-500 text-xs font-mono">
-                                                    {p.phone || '-'}
-                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -337,52 +494,7 @@ export function Backstage() {
                         )
                     )}
 
-                    {/* Soft Leads Tab */}
-                    {activeTab === 'soft_leads' && (
-                        softLeadsLoading ? (
-                            <div className="flex justify-center py-16">
-                                <Loader2 className="w-6 h-6 text-yellow-500 animate-spin" />
-                            </div>
-                        ) : softLeads.length === 0 ? (
-                            <div className="text-center py-16 text-gray-400 text-sm">אין לידים מהירים</div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-right">
-                                    <thead className="bg-gray-50 text-gray-500 text-xs font-medium border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-4 py-3">שם</th>
-                                            <th className="px-3 py-3">טלפון</th>
-                                            <th className="px-3 py-3 hidden sm:table-cell">אימייל</th>
-                                            <th className="px-3 py-3 hidden sm:table-cell">מקור</th>
-                                            <th className="px-3 py-3">נוצר</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {softLeads.map((lead) => (
-                                            <tr key={lead.id} className="hover:bg-yellow-50/50 transition-colors">
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <Zap className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-                                                        <span className="font-medium text-gray-900">{lead.full_name || lead.name || '-'}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-3 py-3 font-mono text-gray-600 text-xs">{lead.phone || '-'}</td>
-                                                <td className="px-3 py-3 hidden sm:table-cell text-gray-500 text-xs">{lead.email || '-'}</td>
-                                                <td className="px-3 py-3 hidden sm:table-cell">
-                                                    <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
-                                                        {lead.source || '-'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-3 py-3 text-gray-400 text-[10px] font-mono">{relativeTime(lead.created_at)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )
-                    )}
-
-                    {/* Facebook Leads Tab */}
+                    {/* ========== Facebook Leads Tab ========== */}
                     {activeTab === 'fb_leads' && (
                         fbLeadsLoading ? (
                             <div className="flex justify-center py-16">
@@ -442,7 +554,82 @@ export function Backstage() {
                 </div>
             </div>
 
-            {/* Profile Drawer */}
+            {/* ========== Soft Lead Detail Drawer ========== */}
+            {selectedLead && (
+                <>
+                    <div
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
+                        onClick={() => setSelectedLead(null)}
+                    />
+                    <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white z-40 shadow-2xl overflow-y-auto" dir="rtl">
+                        <div className="sticky top-0 bg-white border-b border-gray-200 px-5 py-4 flex items-center justify-between z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold text-sm">
+                                    <Zap className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="font-bold text-gray-900">
+                                        {selectedLead.full_name || selectedLead.name || 'ליד ללא שם'}
+                                    </div>
+                                    <div className="text-[10px] text-gray-400 font-mono">
+                                        {formatDate(selectedLead.created_at)}
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedLead(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
+
+                        <div className="p-5 space-y-5">
+                            {/* Contact */}
+                            <Section title="פרטי קשר" icon={Phone}>
+                                <InfoRow label="טלפון" value={selectedLead.phone} icon={<Phone className="w-3.5 h-3.5" />} />
+                                <InfoRow label="אימייל" value={selectedLead.email} icon={<Mail className="w-3.5 h-3.5" />} />
+                                <InfoRow label="שם מלא" value={selectedLead.full_name} />
+                                <InfoRow label="שם" value={selectedLead.name} />
+                            </Section>
+
+                            {/* Source & UTM */}
+                            <Section title="מקור הגעה" icon={ExternalLink}>
+                                <InfoRow label="מקור" value={selectedLead.source} />
+                                <InfoRow label="UTM Source" value={selectedLead.utm_source} />
+                                <InfoRow label="UTM Medium" value={selectedLead.utm_medium} />
+                                <InfoRow label="UTM Campaign" value={selectedLead.utm_campaign} />
+                                <InfoRow label="UTM Content" value={selectedLead.utm_content} />
+                                <InfoRow label="UTM Term" value={selectedLead.utm_term} />
+                            </Section>
+
+                            {/* Interest */}
+                            {selectedLead.interest && (
+                                <Section title="תחום עניין" icon={GraduationCap}>
+                                    <p className="text-sm text-gray-700">{selectedLead.interest}</p>
+                                </Section>
+                            )}
+
+                            {/* Metadata */}
+                            {selectedLead.metadata && Object.keys(selectedLead.metadata).length > 0 && (
+                                <Section title="מטא-דאטה" icon={Eye}>
+                                    {Object.entries(selectedLead.metadata).map(([key, val]) => (
+                                        <InfoRow key={key} label={key} value={typeof val === 'string' ? val : JSON.stringify(val)} />
+                                    ))}
+                                </Section>
+                            )}
+
+                            {/* Timeline */}
+                            <Section title="ציר זמן" icon={Clock}>
+                                <InfoRow label="נוצר" value={formatDate(selectedLead.created_at)} />
+                                <InfoRow label="עודכן" value={formatDate(selectedLead.updated_at)} />
+                                {selectedLead.user_profile_id && (
+                                    <InfoRow label="משויך לפרופיל" value="כן" icon={<Link2 className="w-3.5 h-3.5 text-purple-500" />} />
+                                )}
+                            </Section>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* ========== Person Detail Drawer ========== */}
             {selectedPerson && (
                 <>
                     <div
@@ -500,10 +687,10 @@ export function Backstage() {
                                 <InfoRow label="הודעות בוט" value={selectedPerson.bot_messages ? String(selectedPerson.bot_messages) : null} />
                             </Section>
 
-                            <Section title="ציר זמן" icon={Clock}>
+                            <Section title="פעילות באתר" icon={MousePointerClick}>
                                 <InfoRow label="נראה לראשונה" value={formatDate(selectedPerson.first_seen)} />
-                                <InfoRow label="אתר - אחרון" value={formatDate(selectedPerson.web_last_active)} />
-                                <InfoRow label="בוט - אחרון" value={formatDate(selectedPerson.bot_last_active)} />
+                                <InfoRow label="אתר — אחרון" value={formatDate(selectedPerson.web_last_active)} />
+                                <InfoRow label="בוט — אחרון" value={formatDate(selectedPerson.bot_last_active)} />
                             </Section>
 
                             {selectedPerson.bot_user_id && (
@@ -552,6 +739,32 @@ export function Backstage() {
 
 // --- Sub-components ---
 
+function KpiCard({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) {
+    const colorMap: Record<string, string> = {
+        yellow: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+        green: 'bg-green-50 text-green-600 border-green-200',
+        blue: 'bg-blue-50 text-blue-600 border-blue-200',
+        purple: 'bg-purple-50 text-purple-600 border-purple-200',
+    };
+    const iconBg: Record<string, string> = {
+        yellow: 'bg-yellow-100 text-yellow-600',
+        green: 'bg-green-100 text-green-600',
+        blue: 'bg-blue-100 text-blue-600',
+        purple: 'bg-purple-100 text-purple-600',
+    };
+    return (
+        <div className={`rounded-xl border p-3 ${colorMap[color]}`}>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium opacity-80">{label}</span>
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBg[color]}`}>
+                    {icon}
+                </div>
+            </div>
+            <div className="text-2xl font-bold">{value}</div>
+        </div>
+    );
+}
+
 function Section({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
     return (
         <div>
@@ -574,7 +787,7 @@ function InfoRow({ label, value, icon }: { label: string; value: string | null |
                 {icon}
                 <span className="text-xs">{label}</span>
             </div>
-            <span className="text-gray-900 font-medium text-xs">{value}</span>
+            <span className="text-gray-900 font-medium text-xs max-w-[220px] truncate text-left" dir="ltr">{value}</span>
         </div>
     );
 }

@@ -74,32 +74,31 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative border border-gray-100"
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="bg-white rounded-t-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto relative border border-gray-100"
                     >
                         {/* Decorative gradient header */}
-                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-8 pb-6 border-b border-purple-100/50">
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-5 sm:p-8 pb-4 sm:pb-6 border-b border-purple-100/50">
                             <div className="flex justify-center mb-3">
                                 <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
                                     50,000+ תלמידים בקהילה
                                 </span>
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center leading-tight">
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3 text-center leading-tight">
                                 אל תתלבט לבד.<br /><span className="text-brand-purple-600">אנחנו פה בשבילך.</span>
                             </h2>
-                            <p className="text-gray-600 text-sm leading-relaxed text-center max-w-md mx-auto">
+                            <p className="text-gray-600 text-xs sm:text-sm leading-relaxed text-center max-w-md mx-auto">
                                 מעל 7 שנים של ליווי תלמידים — קהילה פעילה, מחשבון הבגרויות המדויק ביותר, ומידע אמין ישירות מהאוניברסיטאות.
-                                תנו לנו לעזור לכם לדעת בדיוק לאיפה אתם יכולים להתקבל.
                             </p>
                         </div>
 
-                        <div className="p-8 pt-6">
-                            <div className="mb-6 bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+                        <div className="p-5 sm:p-8 pt-4 sm:pt-6">
+                            <div className="mb-4 sm:mb-6 bg-purple-50/50 p-3 sm:p-4 rounded-xl border border-purple-100">
                                 <p className="text-purple-900 font-medium text-center text-sm">
                                     נחבר אותך לקהילה שלנו ונקשר אותך עם סטודנטים שלומדים את התואר שמעניין אותך.
                                     <br />

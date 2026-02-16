@@ -67,6 +67,9 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                         <h1 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight leading-[1.15]">
                             אל תתלבט{' '}<span className="text-brand-purple-600">לבד.</span>
                         </h1>
+                        <p className="text-base md:text-lg font-semibold text-brand-purple-700 max-w-md mx-auto">
+                            גלה בדיוק לאן אתה מתקבל ומה צריך כדי לשפר — הכל במקום אחד
+                        </p>
                         <p className="text-sm md:text-base text-gray-600 leading-relaxed max-w-lg mx-auto">
                             מחשבים את ממוצע הבגרות שלך לפי הנוסחאות של <strong>כל אוניברסיטה</strong>,
                             מראים לך בדיוק לאיפה יש לך סיכוי להתקבל, ומחברים אותך לקהילה של אלפי תלמידים.
