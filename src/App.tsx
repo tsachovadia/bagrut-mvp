@@ -38,12 +38,8 @@ const ClientPortal = lazy(() => import('./pages/ClientPortal').then(m => ({ defa
 const CampaignMobileFirst = lazy(() => import('./pages/CampaignMobileFirst').then(m => ({ default: m.CampaignMobileFirst })));
 const ProgramsDatabaseViewer = lazy(() => import('./components/Debug/ProgramsDatabaseViewer').then(m => ({ default: m.ProgramsDatabaseViewer })));
 
-// Lazy loaded — admin pages (dev only)
+// Lazy loaded — admin (dev only, single page)
 const DashboardPage = lazy(() => import('./pages/Admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
-const PeoplePage = lazy(() => import('./pages/Admin/PeoplePage').then(m => ({ default: m.PeoplePage })));
-const AdminCommunityPage = lazy(() => import('./pages/Admin/CommunityPage').then(m => ({ default: m.CommunityPage })));
-const PartnersPage = lazy(() => import('./pages/Admin/PartnersPage').then(m => ({ default: m.PartnersPage })));
-const MetricsDashboard = lazy(() => import('./pages/Admin/MetricsDashboard').then(m => ({ default: m.MetricsDashboard })));
 
 
 function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
@@ -214,10 +210,7 @@ function App() {
         <Route path="/terms" element={<TermsOfUse onBack={() => window.location.href = '/'} />} />
         <Route path="/debug/db" element={<ProgramsDatabaseViewer />} />
         <Route path="/admin/shadow" element={!isProduction ? <DashboardPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/people" element={!isProduction ? <PeoplePage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/community" element={!isProduction ? <AdminCommunityPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/partners" element={!isProduction ? <PartnersPage /> : <Navigate to="/" />} />
-        <Route path="/admin/shadow/metrics" element={!isProduction ? <MetricsDashboard /> : <Navigate to="/" />} />
+        <Route path="/admin/shadow/*" element={<Navigate to="/admin/shadow" replace />} />
         <Route path="/client-portal" element={<ClientPortal />} />
         <Route path="/tracking" element={<TrackedDegreesPage />} />
         <Route path="/community" element={<Navigate to="/" replace />} />
