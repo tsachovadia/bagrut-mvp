@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useProgramFilters } from '../../hooks/useProgramFilters';
+import { trackConversion } from '../../utils/ads-tracking';
 import { Search, Filter, X, Sparkles, ArrowLeft, ChevronDown } from 'lucide-react';
 import { Button, Badge } from '../ui/shim';
 import { CompactProgramRow } from '../CompactProgramRow';
@@ -99,6 +100,19 @@ export const ProgramsExplorer = ({ userStats, trackedDegrees }: ProgramsExplorer
 
         return results;
     }, [programs, selectedFields, selectedInstIds, searchQuery]);
+
+    // Debounced search tracking for FB Pixel / Google Ads
+    useEffect(() => {
+        if (!searchQuery.trim() && selectedFields.length === 0) return;
+        const timer = setTimeout(() => {
+            trackConversion('search', {
+                content_name: searchQuery.trim() || selectedFields.join(', '),
+                content_category: 'programs_search',
+                source: 'programs_explorer',
+            });
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, [searchQuery, selectedFields]);
 
     const toggleGroup = (instName: string) => {
         setExpandedGroups(prev => {

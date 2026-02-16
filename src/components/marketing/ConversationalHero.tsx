@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { trackEvent } from '../../utils/gtm';
+import { trackConversion } from '../../utils/ads-tracking';
 import { useEffect } from 'react';
 import { useAnimatedCounter } from '../../hooks/useAnimatedCounter';
 
@@ -81,6 +82,7 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                         <button
                             onClick={() => {
                                 trackEvent('interaction_start', { method: 'ai', source: 'hero_primary' });
+                                trackConversion('start_calculation', { content_name: 'AI Scan', source: 'hero_primary' });
                                 onStartUpload();
                             }}
                             className="w-full flex items-center justify-center gap-2.5 py-4 px-6 bg-gradient-to-l from-brand-purple-600 to-brand-purple-700 hover:from-brand-purple-700 hover:to-brand-purple-800 text-white font-bold rounded-xl shadow-lg shadow-brand-purple-200 transition-all duration-200 active:scale-[0.98] text-base"
@@ -95,6 +97,7 @@ export function ConversationalHero({ onStartUpload, onManual }: ConversationalHe
                         <button
                             onClick={() => {
                                 trackEvent('interaction_start', { method: 'manual', source: 'hero_secondary' });
+                                trackConversion('start_calculation', { content_name: 'Manual Entry', source: 'hero_secondary' });
                                 onManual();
                             }}
                             className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-white border border-gray-200 hover:border-brand-purple-300 hover:bg-brand-purple-50/30 text-gray-700 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98] text-sm"

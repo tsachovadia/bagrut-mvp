@@ -8,4 +8,4 @@ Disallow: /admin/
 Disallow: /debug/
 Disallow: /backstage
 Disallow: /client-portal
-Disallow: /campaign/
+Disallow: /campaign/mobile-first

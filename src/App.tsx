@@ -11,6 +11,7 @@ import { HomePage } from './pages/HomePage';
 import { calculateAdmissionStats } from './utils/calculation-bridge';
 import { initializeGTM, trackEvent } from './utils/gtm';
 import { captureUtm } from './utils/utm';
+import { initGoogleAds, captureAttribution } from './utils/ads-tracking';
 import type { SubjectGrade, PsychometricScores } from './utils/calculator';
 import { loadUserData, saveUserData, type UserData } from './lib/userData';
 import { CookieConsent } from './components/CookieConsent';
@@ -42,6 +43,9 @@ const PsychometricDatesPage = lazy(() => import('./pages/PsychometricDatesPage')
 const SubjectGradeCalculatorPage = lazy(() => import('./pages/SubjectGradeCalculatorPage').then(m => ({ default: m.SubjectGradeCalculatorPage })));
 const ImproveSekemPage = lazy(() => import('./pages/ImproveSekemPage').then(m => ({ default: m.ImproveSekemPage })));
 const SimulatorPage = lazy(() => import('./pages/SimulatorPage').then(m => ({ default: m.SimulatorPage })));
+const BagrutLanding = lazy(() => import('./pages/landing/BagrutLanding').then(m => ({ default: m.BagrutLanding })));
+const SekemLanding = lazy(() => import('./pages/landing/SekemLanding').then(m => ({ default: m.SekemLanding })));
+const KabalaLanding = lazy(() => import('./pages/landing/KabalaLanding').then(m => ({ default: m.KabalaLanding })));
 
 
 function SidebarLayout({ children, userStats }: { children: React.ReactNode; userStats: any }) {
@@ -85,6 +89,8 @@ function App() {
       // Initialize tracking
       initializeGTM();
       captureUtm();
+      initGoogleAds();
+      captureAttribution();
 
       const data = await loadUserData();
       if (data) {
@@ -223,6 +229,9 @@ function App() {
         <Route path="/calculate-grade" element={<SubjectGradeCalculatorPage />} />
         <Route path="/calculate-grade/:subject" element={<SubjectGradeCalculatorPage />} />
         <Route path="/improve-sekem" element={<ImproveSekemPage />} />
+        <Route path="/l/bagrut" element={<BagrutLanding />} />
+        <Route path="/l/sekem" element={<SekemLanding />} />
+        <Route path="/l/kabala" element={<KabalaLanding />} />
       </Routes>
       </Suspense>
       <CookieConsent />

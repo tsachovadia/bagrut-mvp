@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { admissionEngine } from '../services/admission-engine';
 import { trackEvent } from '../utils/gtm';
+import { trackConversion } from '../utils/ads-tracking';
 import { Button, Badge } from '../components/ui/shim';
 import { checkReachable, type UserAdmissionStats } from '../utils/admission-evaluation';
 import { useTrackedDegrees } from '../context/TrackedDegreesContext';
@@ -114,6 +115,12 @@ export const ProgramPage = ({ userStats }: ProgramPageProps) => {
                         program_id: id,
                         program_name: mapped.program?.name,
                         institution: mapped.program?.institution?.name,
+                    });
+                    trackConversion('view_content', {
+                        content_name: mapped.program?.name,
+                        content_category: mapped.program?.faculty?.name || 'general',
+                        content_id: id,
+                        source: 'program_page',
                     });
                 } else {
                     setError(true);

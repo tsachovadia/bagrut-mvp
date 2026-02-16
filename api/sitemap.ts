@@ -30,6 +30,9 @@ const STATIC_PAGES = [
     { path: '/calculate-grade/literature', priority: '0.6', changefreq: 'monthly' },
     { path: '/calculate-grade/chemistry', priority: '0.6', changefreq: 'monthly' },
     { path: '/calculate-grade/biology', priority: '0.6', changefreq: 'monthly' },
+    { path: '/l/bagrut', priority: '0.9', changefreq: 'monthly' },
+    { path: '/l/sekem', priority: '0.9', changefreq: 'monthly' },
+    { path: '/l/kabala', priority: '0.9', changefreq: 'monthly' },
 ];
 
 // Known blog article slugs (mirrored from src/data/articles.ts to avoid importing frontend code)

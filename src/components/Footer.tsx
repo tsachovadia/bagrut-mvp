@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { trackEvent } from '../utils/gtm';
-import { trackFbEvent } from '../utils/fb-pixel';
-import { getUtmParams } from '../utils/utm';
+import { trackConversion, getAttributionData } from '../utils/ads-tracking';
 import { BugReportWidget } from './BugReportWidget';
 import { clearAllUserData } from '../lib/userData';
 import { isProduction } from '../utils/env';
@@ -27,9 +26,9 @@ export function Footer() {
     const handleLeadSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name || (!phone && !email)) return;
-        trackEvent('footer_lead_submit', { has_email: !!email, has_phone: !!phone, interest: interest || 'none' });
 
-        // Save to Supabase with UTM
+        const attribution = getAttributionData();
+
         const { error } = await supabase
             .from('soft_leads')
             .insert([{
@@ -38,11 +37,18 @@ export function Footer() {
                 email: email || null,
                 interest: interest || 'general',
                 source: 'footer_form',
-                ...getUtmParams(),
+                landing_page: attribution.landing_page,
+                referrer: attribution.referrer,
+                ...attribution,
             }]);
 
         if (error) console.error('Footer lead save error:', error);
-        trackFbEvent('Lead', { source: 'footer_form' });
+
+        trackConversion('lead_submitted', {
+            source: 'footer_form',
+            content_name: `Footer Form - ${interest || 'general'}`,
+            content_category: 'lead_capture',
+        });
 
         setSubmitted(true);
     };

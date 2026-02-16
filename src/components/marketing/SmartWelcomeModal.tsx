@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import { useAnalytics } from '../../hooks/useAnalytics';
-import { getUtmParams } from '../../utils/utm';
-import { trackFbEvent } from '../../utils/fb-pixel';
+import { trackConversion, getAttributionData } from '../../utils/ads-tracking';
 
 interface SmartWelcomeModalProps {
     isOpen: boolean;
@@ -11,7 +10,7 @@ interface SmartWelcomeModalProps {
 }
 
 export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
-    const { trackEvent } = useAnalytics();
+    const navigate = useNavigate();
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
@@ -25,17 +24,19 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
         setIsSubmitting(true);
 
         try {
-            const utmPayload = getUtmParams();
+            const attribution = getAttributionData();
 
             const { error } = await supabase
                 .from('soft_leads')
                 .insert([{
                     full_name: name,
                     phone: phone,
-                    email: email, // Optional
+                    email: email,
                     interest: 'onboarding_flow',
                     source: 'welcome_modal_v2',
-                    ...utmPayload
+                    landing_page: attribution.landing_page,
+                    referrer: attribution.referrer,
+                    ...attribution,
                 }]);
 
             if (error) {
@@ -45,43 +46,61 @@ export function SmartWelcomeModal({ isOpen, onClose }: SmartWelcomeModalProps) {
             localStorage.setItem('has_seen_welcome_v2', 'true');
             localStorage.setItem('lead_captured', 'true');
 
-            trackEvent('lead_generated', {
-                lead_type: 'soft',
+            trackConversion('lead_submitted', {
                 source: 'welcome_modal_v2',
-                ...utmPayload
+                content_name: 'Smart Welcome Modal',
+                content_category: 'lead_capture',
             });
-            trackFbEvent('Lead', { source: 'welcome_modal_v2' });
 
             setTimeout(() => {
                 setIsSubmitting(false);
                 onClose();
+                navigate('/calculator');
             }, 500);
 
         } catch (err) {
             console.error('Unexpected error:', err);
             setIsSubmitting(false);
-            onClose(); // Fallback
+            onClose();
+            navigate('/calculator');
         }
     };
 
     const handleSkip = () => {
-        trackEvent('lead_skipped', { source: 'welcome_modal_v2' });
+        trackConversion('engagement', { source: 'welcome_modal_v2', content_name: 'lead_skipped' });
         localStorage.setItem('has_seen_welcome_v2', 'true');
         localStorage.setItem('lead_captured', 'skipped');
         onClose();
     };
 
+    // Track funnel: modal opened
+    useEffect(() => {
+        if (isOpen) {
+            trackConversion('lead_form_open', { source: 'welcome_modal_v2' });
+        }
+    }, [isOpen]);
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md" onClick={handleSkip}>
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 40 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                         className="bg-white rounded-t-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto relative border border-gray-100"
+                        onClick={(e) => e.stopPropagation()}
                     >
+                        {/* Close button */}
+                        <button
+                            type="button"
+                            onClick={handleSkip}
+                            className="absolute top-3 left-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors shadow-sm"
+                            aria-label="סגור"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
                         {/* Decorative gradient header */}
                         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-5 sm:p-8 pb-4 sm:pb-6 border-b border-purple-100/50">
                             <div className="flex justify-center mb-3">
