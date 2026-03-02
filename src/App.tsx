@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 const Agentation = lazy(() => import('agentation').then(module => ({ default: module.Agentation })));
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { TrackedDegreesProvider } from './context/TrackedDegreesContext';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 // Eagerly loaded — landing page + global shell
 import { HomePage } from './pages/HomePage';
@@ -234,6 +235,7 @@ function App() {
         <Route path="/l/kabala" element={<KabalaLanding />} />
       </Routes>
       </Suspense>
+      <Analytics />
       <CookieConsent />
       <ReturnToBot />
       <AccessibilityWidget />
