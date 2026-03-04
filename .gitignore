@@ -29,6 +29,16 @@ dist-ssr
 .vercel
 repomix_exports/
 
+# AI agent artifacts
+CLAUDE.md
+.cursor/
+.roo/
+.roomodes/
+.windsurfrules
+memory_bank/
+cursor-memory-bank/
+.agent/
+
 # Archived old planning/research
 archive/
 

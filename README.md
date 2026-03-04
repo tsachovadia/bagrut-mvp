@@ -1,65 +1,90 @@
-# מחשבון בגרויות - Launch Pad MVP
+# BagrutCalc
 
-פלטפורמה מקיפה לחישוב ממוצעי בגרות, סימולציית קבלה לאוניברסיטאות, וניהול לידים (CRM).
-המערכת משלבת לוגיקות חישוב מדויקות (מבוססות האוניברסיטה העברית) עם ממשק משתמש מודרני וכלי ניהול מתקדמים.
+University admission calculator for Israeli students. Computes Bagrut grade averages with institution-specific bonuses, matches students to university programs, and simulates admission chances in real time.
 
-## 🚀 פיצ'רים מרכזיים
+**Live:** https://bagrut-mvp.vercel.app
 
-### 🎓 לסטודנטים (Public)
-*   **מחשבון בגרויות:** חישוב ממוצע בגרות (רגיל ומותאם/מיטבי) כולל בונוסים לפי מוסדות.
-*   **חיפוש תארים:** מאגר מידע של תוכניות לימוד.
-*   **הקוקפיט (Dashboard):** סימולטור קבלה בזמן אמת. מציג סיכויי קבלה לפי סכם, ומאפשר "משחק" עם הציונים כדי לראות איך שיפורים משפיעים על הקבלה.
+## Features
 
-### 🕵️‍♂️ למנהלים (ShadowNet Admin)
-*   **CRM מובנה:** מערכת לניהול משתמשים ולידים.
-*   **פיד סיגנלים:** מעקב אחרי פעולות משתמשים בזמן אמת.
-*   **ניהול קבוצות:** אינטגרציה לקבוצות WhatsApp.
-*   **שותפים (B2B):** ניהול קשרי עבודה עם מוסדות לימוד.
+- **Bagrut Grade Calculator** -- computes weighted averages with per-university bonus rules (5-unit bonuses, English bonuses, math bonuses, etc.)
+- **University Program Matching** -- searchable database of degree programs across 10 Israeli universities
+- **Admission Cockpit** -- real-time simulator that shows acceptance probability per program and lets students experiment with grade changes
+- **OCR Grade Extraction** -- upload a Bagrut certificate image and extract grades automatically (Google Gemini API)
+- **Built-in CRM** -- admin panel for managing users and leads with a real-time signal feed
+- **WhatsApp Integration** -- group management and outreach tools
+- **Telegram Bot** -- automated notifications and admin commands
+- **Email Campaigns** -- transactional email via Resend with webhook tracking
 
----
+## Tech Stack
 
-## 🛠️ סביבות ופיצ'רים (Environment Flags)
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript, Vite |
+| Styling | Tailwind CSS, Framer Motion |
+| Backend | Supabase (PostgreSQL + Row-Level Security) |
+| API | Vercel Serverless Functions (TypeScript) |
+| OCR | Google Gemini AI |
+| Email | Resend |
+| Deployment | Vercel |
 
-המערכת רצה בשתי קונפיגורציות עיקריות: **Development** ו-**Production**.
-אנו משתמשים ב-Utility פנימי (`src/utils/env.ts`) כדי לזהות את הסביבה.
+## Project Structure
 
-### ההבדלים בין הסביבות:
+```
+├── api/                  # Vercel serverless functions
+│   ├── cron/             # Scheduled jobs
+│   ├── ocr/              # Grade extraction endpoints
+│   ├── telegram-*.ts     # Telegram bot handlers
+│   ├── extract-grades.ts # OCR pipeline
+│   └── ...
+├── src/
+│   ├── components/       # React components
+│   ├── pages/            # Route pages
+│   ├── data/             # Static university & program data
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Shared utilities (Supabase client, etc.)
+│   ├── services/         # API service layer
+│   ├── types/            # TypeScript type definitions
+│   └── utils/            # Helper functions (grade calc, env, etc.)
+├── supabase/
+│   └── migrations/       # Database schema migrations
+├── data/                 # University admission rules (JSON)
+├── scripts/              # Data import & maintenance scripts
+└── public/               # Static assets
+```
 
-| פיצ'ר | Development | Production |
-| :--- | :--- | :--- |
-| **כפתור "מלא נתונים לדוגמה"** | ✅ מוצג (בטופס הבגרויות) | ❌ מוסתר |
-| **גישה ל-CRM** | ✅ פתוח (קישור בתפריט העליון) | ❌ חסום (אין קישור + הגנת Route) |
-| **נתיבי Admin (`/admin/shadow`)** | ✅ נגישים | 🚫 Redirect לדף הבית |
+## Getting Started
 
-> **הערה לפיתוח:** כדי לבדוק את התנהגות הפרודקשן בסביבה מקומית, ניתן לשנות זמנית את הערך ב-`src/utils/env.ts` או להריץ `npm run build` ו-`npm run preview`.
+### Prerequisites
 
----
+- Node.js 18+
+- A [Supabase](https://supabase.com) project
+- (Optional) Vercel CLI for deployment
 
-## 💻 Tech Stack
+### Setup
 
-*   **Framework:** React 18 + Vite
-*   **Language:** TypeScript
-*   **UI:** Tailwind CSS + Lucide React
-*   **Database & Auth:** Supabase
-*   **Deployment:** Vercel (Current configuration)
+```bash
+# Clone
+git clone https://github.com/tsachovadia/bagrut-mvp.git
+cd bagrut-mvp
 
-## 🏃‍♂️ הרצה מקומית
+# Install dependencies
+npm install
 
-1.  התקנת תלויות:
-    ```bash
-    npm install
-    ```
+# Configure environment
+cp .env.example .env.local
+# Fill in VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, and any API keys
 
-2.  הרצת שרת פיתוח:
-    ```bash
-    npm run dev
-    ```
-    המערכת תעלה בכתובת `http://localhost:5173`.
+# Run locally
+npm run dev
+```
 
-## 📁 מבנה הפרויקט (High Level)
+### Build
 
-*   `src/components/Wizard`: לוגיקת המחשבון (שלבים).
-*   `src/components/Dashboard`: הקוקפיט והסימולטור.
-*   `src/components/Admin`: רכיבי ה-ShadowNet CRM.
-*   `src/utils/calculation-bridge.ts`: הגשר בין ה-UI למנוע חישוב הציונים.
-*   `src/utils/env.ts`: ניהול משתני סביבה ודגלים.
+```bash
+npm run build
+npm run preview
+```
+
+## License
+
+[MIT](LICENSE)
